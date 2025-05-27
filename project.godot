@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="141Game"
-run/main_scene="uid://dev1r1jpyo8a4"
+run/main_scene="uid://cny6qsw5au8ur"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
