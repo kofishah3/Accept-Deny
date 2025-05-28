@@ -11,7 +11,9 @@ extends Area2D
 @export var skill = 6
 @export var luck = 4
 @export var max_health = 20
+@export var max_action_points = 5
 var current_health
+var current_action_points
 
 # Mode
 var current_mode = "move"  # Can be "move" or "attack"
@@ -26,7 +28,7 @@ var weapons = {
 		"hit": 85,
 		"crit": 10,
 		"range": 3,
-		"color": Color(0, 1, 0)  # Green
+		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	},
 	"plasma_cannon": {
 		"name": "Plasma Cannon",
@@ -35,7 +37,7 @@ var weapons = {
 		"hit": 70,
 		"crit": 15,
 		"range": 2,
-		"color": Color(1, 0.5, 0)  # Orange
+		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	},
 	"ion_blaster": {
 		"name": "Ion Blaster",
@@ -44,7 +46,7 @@ var weapons = {
 		"hit": 90,
 		"crit": 5,
 		"range": 1,
-		"color": Color(0, 0.5, 1)  # Blue
+		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	}
 }
 var current_weapon = "laser_rifle"
@@ -63,68 +65,12 @@ func _ready():
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
 	current_health = max_health
-	create_ui()
-
-func create_ui():
-	# Create health bar
-	var health_bar = ProgressBar.new()
-	health_bar.name = "HealthBar"
-	health_bar.position = Vector2(-30, -50)
-	health_bar.size = Vector2(60, 10)
-	health_bar.max_value = max_health
-	health_bar.value = current_health
-	add_child(health_bar)
+	current_action_points = max_action_points
 	
-	# Create weapon selection buttons
-	var button_container = VBoxContainer.new()
-	button_container.name = "WeaponButtons"
-	button_container.position = Vector2(-40, -80)
-	button_container.size = Vector2(80, 100)
-	add_child(button_container)
-	
-	for weapon_id in weapons:
-		var weapon = weapons[weapon_id]
-		var button = Button.new()
-		button.name = weapon_id
-		button.text = weapon.name
-		button.size = Vector2(80, 20)
-		button.mouse_entered.connect(_on_button_mouse_entered)
-		button.mouse_exited.connect(_on_button_mouse_exited)
-		button.pressed.connect(_on_weapon_selected.bind(weapon_id))
-		button_container.add_child(button)
-	
-	# Create End Turn button
-	var end_turn_button = Button.new()
-	end_turn_button.name = "EndTurnButton"
-	end_turn_button.text = "End Turn"
-	end_turn_button.size = Vector2(80, 20)
-	end_turn_button.position = Vector2(-40, 20)
-	end_turn_button.mouse_entered.connect(_on_button_mouse_entered)
-	end_turn_button.mouse_exited.connect(_on_button_mouse_exited)
-	end_turn_button.pressed.connect(_on_end_turn_pressed)
-	add_child(end_turn_button)
-	
-	# Create Mode Switch button
-	var mode_button = Button.new()
-	mode_button.name = "ModeButton"
-	mode_button.text = "Switch to Attack"
-	mode_button.size = Vector2(80, 20)
-	mode_button.position = Vector2(-40, 50)
-	mode_button.mouse_entered.connect(_on_button_mouse_entered)
-	mode_button.mouse_exited.connect(_on_button_mouse_exited)
-	mode_button.pressed.connect(_on_mode_switch_pressed)
-	add_child(mode_button)
-	
-	# Hide UI elements initially
-	$WeaponButtons.visible = false
-	$EndTurnButton.visible = false
-	$ModeButton.visible = false
-
-func _on_button_mouse_entered():
-	is_interacting_with_ui = true
-
-func _on_button_mouse_exited():
-	is_interacting_with_ui = false
+	# Connect to the battle UI
+	var battle_ui = get_node("/root/main/BattleUI")
+	if battle_ui:
+		battle_ui.set_player(self)
 
 func _process(delta):
 	if is_moving:
@@ -135,27 +81,11 @@ func _process(delta):
 			position = target_world_pos
 			grid_position = target_position
 			is_moving = false
-			has_moved = true
 			grid_manager.update_occupied_tiles()
-			# After moving, switch to attack mode
-			current_mode = "attack"
-			$ModeButton.text = "Switch to Move"
-			update_attack_range()
-
-func _on_mode_switch_pressed():
-	if current_mode == "move":
-		current_mode = "attack"
-		$ModeButton.text = "Switch to Move"
-		update_attack_range()
-		grid_manager.valid_moves = []
-	else:
-		current_mode = "move"
-		$ModeButton.text = "Switch to Attack"
-		update_movement_range()
-		grid_manager.valid_attacks = []
+			update_movement_range()  # Update movement range after moving
 
 func _input(event):
-	if grid_manager.current_turn != "player" or has_attacked or is_interacting_with_ui:
+	if grid_manager.current_turn != "player" or is_interacting_with_ui:
 		return
 		
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
@@ -168,22 +98,15 @@ func _input(event):
 				grid_manager.selected_unit = null
 				grid_manager.valid_moves = []
 				grid_manager.valid_attacks = []
-				$WeaponButtons.visible = false
-				$EndTurnButton.visible = false
-				$ModeButton.visible = false
 			else:
 				grid_manager.selected_unit = self
-				if not has_moved:
+				if current_action_points > 0:
 					current_mode = "move"
-					$ModeButton.text = "Switch to Attack"
 					update_movement_range()
-					$EndTurnButton.visible = true
-					$ModeButton.visible = true
-				else:
-					current_mode = "attack"
-					$ModeButton.text = "Switch to Move"
-					update_attack_range()
-				$WeaponButtons.visible = true
+					# Update UI mode button
+					var battle_ui = get_node("/root/main/BattleUI")
+					if battle_ui:
+						battle_ui.update_mode_button()
 			return
 		
 		# Only handle movement and attacks if we're selected
@@ -191,30 +114,48 @@ func _input(event):
 			return
 		
 		# Handle movement
-		if current_mode == "move" and not has_moved and target_grid_pos in grid_manager.valid_moves:
-			target_position = target_grid_pos
-			is_moving = true
-			grid_manager.valid_moves = []
+		if current_mode == "move" and target_grid_pos in grid_manager.valid_moves:
+			# Use Manhattan distance for AP cost
+			var distance = int(abs(grid_position.x - target_grid_pos.x) + abs(grid_position.y - target_grid_pos.y))
+			if current_action_points >= distance and distance > 0:
+				target_position = target_grid_pos
+				is_moving = true
+				grid_manager.valid_moves = []
+				current_action_points -= distance
+				update_ui()
 		
 		# Handle attacks
 		elif current_mode == "attack" and target_grid_pos in grid_manager.valid_attacks:
 			var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
 			if target_unit:
-				attack(target_unit)
+				var weapon = weapons[current_weapon]
+				var ap_cost = ceil(weapon.might / 2)  # AP cost is half the weapon's might, rounded up
+				if current_action_points >= ap_cost:
+					attack(target_unit)
+					current_action_points -= ap_cost
+					update_ui()
+					
+					# If we're out of AP, end turn
+					if current_action_points <= 0:
+						end_turn()
 
-func _on_weapon_selected(weapon_id):
-	current_weapon = weapon_id
-	weapon_type = weapons[weapon_id].type
-	update_attack_range()
-	# Update button colors to show selection
-	for button in $WeaponButtons.get_children():
-		if button.name == weapon_id:
-			button.modulate = Color(1, 1, 0)  # Yellow for selected
-		else:
-			button.modulate = Color(1, 1, 1)  # White for unselected
+func update_ui():
+	var battle_ui = get_node("/root/main/BattleUI")
+	if battle_ui:
+		battle_ui.update_ui()
 
 func update_movement_range():
-	grid_manager.valid_moves = grid_manager.calculate_movement_range(grid_position, movement_range)
+	# Calculate all possible moves within movement range (orthogonal only)
+	var all_moves = grid_manager.calculate_movement_range(grid_position, movement_range)
+	
+	# Filter moves based on available AP
+	var valid_moves = []
+	for move in all_moves:
+		var distance = int(abs(grid_position.x - move.x) + abs(grid_position.y - move.y))
+		if distance <= current_action_points and distance > 0:  # Only show moves we can afford
+			valid_moves.append(move)
+	
+	grid_manager.valid_moves = valid_moves
 	grid_manager.valid_attacks = []
 	print("Updated valid moves: ", grid_manager.valid_moves.size())
 
@@ -242,16 +183,6 @@ func attack(target):
 		print("Hit for ", damage, " damage with ", weapon.name, "!")
 	else:
 		print("Attack missed with ", weapon.name, "!")
-	
-	# End turn after attack is complete
-	has_attacked = true
-	grid_manager.selected_unit = null
-	grid_manager.valid_moves = []
-	grid_manager.valid_attacks = []
-	$WeaponButtons.visible = false
-	$EndTurnButton.visible = false
-	$ModeButton.visible = false
-	get_node("/root/main").end_player_turn()
 
 func calculate_hit_chance(target, weapon):
 	var base_hit = weapon.hit + (skill * 2) + (luck / 2)
@@ -281,26 +212,24 @@ func calculate_damage(target, weapon):
 
 func take_damage(amount):
 	current_health -= amount
-	$HealthBar.value = current_health
+	update_ui()
 	if current_health <= 0:
 		queue_free()
 
-func _on_end_turn_pressed():
-	has_attacked = true  # Mark as having attacked to prevent further actions
+func end_turn():
+	has_attacked = true
 	grid_manager.selected_unit = null
 	grid_manager.valid_moves = []
 	grid_manager.valid_attacks = []
-	$WeaponButtons.visible = false
-	$EndTurnButton.visible = false
-	$ModeButton.visible = false
 	get_node("/root/main").end_player_turn()
 
 func reset_turn():
-	has_moved = false
 	has_attacked = false
 	is_moving = false
+	current_action_points = max_action_points
 	current_mode = "move"
-	$ModeButton.text = "Switch to Attack"
-	$WeaponButtons.visible = false
-	$EndTurnButton.visible = false
-	$ModeButton.visible = false
+	# Don't auto-select the unit
+	grid_manager.selected_unit = null
+	grid_manager.valid_moves = []
+	grid_manager.valid_attacks = []
+	update_ui()
