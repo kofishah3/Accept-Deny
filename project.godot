@@ -15,12 +15,12 @@ run/main_scene="uid://d012j6euf4g6d"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
-[editor]
+[autoload]
 
-version_control/plugin_name="GitPlugin"
-version_control/autoload_on_startup=true
+SkillDatabase="*res://databases/skill_database.tscn"
+CombatantDatabase="*res://databases/combatant_database.tscn"
 
-[input]
+[display]
 
 move_up={
 "deadzone": 0.2,
@@ -35,4 +35,5 @@ move_down={
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
