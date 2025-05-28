@@ -16,7 +16,7 @@ var current_health
 var current_action_points
 
 # Mode
-var current_mode = "move"  # Can be "move" or "attack"
+var current_mode = "move"  # Can be "move", "attack", or "load_string"
 var is_interacting_with_ui = false
 
 # Weapons
@@ -24,27 +24,36 @@ var weapons = {
 	"laser_rifle": {
 		"name": "Laser Rifle",
 		"type": "energy",
-		"might": 6,
-		"hit": 85,
-		"crit": 10,
+		"loaded_string": "",
+		"constraints": {
+			"max_length": 3,
+			"allowed_chars": ["a", "b", "c"],
+			"pattern": "any"  # any, alternating, or repeating
+		},
 		"range": 3,
 		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	},
 	"plasma_cannon": {
 		"name": "Plasma Cannon",
 		"type": "plasma",
-		"might": 8,
-		"hit": 70,
-		"crit": 15,
+		"loaded_string": "",
+		"constraints": {
+			"max_length": 4,
+			"allowed_chars": ["a", "b"],
+			"pattern": "alternating"  # Must alternate between a and b
+		},
 		"range": 2,
 		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	},
 	"ion_blaster": {
 		"name": "Ion Blaster",
 		"type": "ion",
-		"might": 5,
-		"hit": 90,
-		"crit": 5,
+		"loaded_string": "",
+		"constraints": {
+			"max_length": 6,
+			"allowed_chars": ["a", "b", "c"],
+			"pattern": "repeating"  # Must have repeating patterns
+		},
 		"range": 1,
 		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	}
@@ -60,6 +69,11 @@ var target_position = Vector2.ZERO
 var is_moving = false
 var move_speed = 4.0  # Grid cells per second
 
+# UI elements
+var weapon_string_label
+var load_string_button
+var string_input
+
 func _ready():
 	grid_manager = get_node("/root/main/GridManager")
 	grid_position = grid_manager.world_to_grid(position)
@@ -71,6 +85,48 @@ func _ready():
 	var battle_ui = get_node("/root/main/BattleUI")
 	if battle_ui:
 		battle_ui.set_player(self)
+	
+	create_weapon_ui()
+
+func create_weapon_ui():
+	# Create weapon string display
+	weapon_string_label = Label.new()
+	weapon_string_label.name = "WeaponStringLabel"
+	weapon_string_label.position = Vector2(-40, -130)
+	weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
+	add_child(weapon_string_label)
+	
+	# Create load string button
+	load_string_button = Button.new()
+	load_string_button.name = "LoadStringButton"
+	load_string_button.position = Vector2(-40, -100)
+	load_string_button.text = "Load String (1 AP)"
+	load_string_button.connect("pressed", Callable(self, "_on_load_string_pressed"))
+	add_child(load_string_button)
+	
+	# Create string input
+	string_input = LineEdit.new()
+	string_input.name = "StringInput"
+	string_input.position = Vector2(-40, -70)
+	string_input.placeholder_text = "Enter string..."
+	string_input.max_length = 6  # Maximum length of any weapon's string
+	add_child(string_input)
+
+func _on_load_string_pressed():
+	if current_action_points < 1:
+		print("Not enough action points to load string")
+		return
+	
+	var new_string = string_input.text
+	if load_string_to_weapon(current_weapon, new_string):
+		current_action_points -= 1
+		update_ui()
+		string_input.text = ""  # Clear input after successful load
+
+func update_weapon_ui():
+	weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
+	load_string_button.text = "Load String (1 AP)"
+	load_string_button.disabled = current_action_points < 1
 
 func _process(delta):
 	if is_moving:
@@ -129,7 +185,7 @@ func _input(event):
 			var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
 			if target_unit:
 				var weapon = weapons[current_weapon]
-				var ap_cost = ceil(weapon.might / 2)  # AP cost is half the weapon's might, rounded up
+				var ap_cost = ceil(weapon.range / 2)  # AP cost is half the weapon's range, rounded up
 				if current_action_points >= ap_cost:
 					attack(target_unit)
 					current_action_points -= ap_cost
@@ -143,6 +199,7 @@ func update_ui():
 	var battle_ui = get_node("/root/main/BattleUI")
 	if battle_ui:
 		battle_ui.update_ui()
+	update_weapon_ui()
 
 func update_movement_range():
 	# Calculate all possible moves within movement range (orthogonal only)
@@ -166,49 +223,59 @@ func update_attack_range():
 	grid_manager.attack_color = weapon.color
 	print("Updated valid attacks: ", grid_manager.valid_attacks.size())
 
+func load_string_to_weapon(weapon_name, new_string):
+	var weapon = weapons[weapon_name]
+	var constraints = weapon.constraints
+	
+	# Check length constraint
+	if new_string.length() > constraints.max_length:
+		print("String too long for ", weapon.name)
+		return false
+	
+	# Check allowed characters
+	for char in new_string:
+		if not char in constraints.allowed_chars:
+			print("Invalid character '", char, "' for ", weapon.name)
+			return false
+	
+	# Check pattern constraints
+	match constraints.pattern:
+		"alternating":
+			for i in range(1, new_string.length()):
+				if new_string[i] == new_string[i-1]:
+					print("String must alternate characters for ", weapon.name)
+					return false
+		"repeating":
+			var has_pattern = false
+			for pattern_length in range(1, new_string.length() / 2 + 1):
+				var pattern = new_string.substr(0, pattern_length)
+				var is_repeating = true
+				for i in range(pattern_length, new_string.length(), pattern_length):
+					if new_string.substr(i, pattern_length) != pattern:
+						is_repeating = false
+						break
+				if is_repeating:
+					has_pattern = true
+					break
+			if not has_pattern:
+				print("String must have a repeating pattern for ", weapon.name)
+				return false
+	
+	# If all constraints are met, load the string
+	weapon.loaded_string = new_string
+	print("Successfully loaded string '", new_string, "' into ", weapon.name)
+	return true
+
 func attack(target):
 	var weapon = weapons[current_weapon]
-	var hit_chance = calculate_hit_chance(target, weapon)
-	var crit_chance = calculate_crit_chance(target, weapon)
-	var damage = calculate_damage(target, weapon)
+	if weapon.loaded_string == "":
+		print("No string loaded in ", weapon.name)
+		return
 	
-	# Roll for hit
-	if randf() * 100 <= hit_chance:
-		# Roll for crit
-		if randf() * 100 <= crit_chance:
-			damage *= 3
-			print("Critical hit with ", weapon.name, "!")
-		
-		target.take_damage(damage)
-		print("Hit for ", damage, " damage with ", weapon.name, "!")
-	else:
-		print("Attack missed with ", weapon.name, "!")
-
-func calculate_hit_chance(target, weapon):
-	var base_hit = weapon.hit + (skill * 2) + (luck / 2)
-	var avoid = target.speed * 2 + target.luck
-	return clamp(base_hit - avoid, 0, 100)
-
-func calculate_crit_chance(target, weapon):
-	var base_crit = weapon.crit + (skill / 2)
-	var crit_avoid = target.luck
-	return clamp(base_crit - crit_avoid, 0, 100)
-
-func calculate_damage(target, weapon):
-	var attack = strength + weapon.might
-	var defense = target.defense if weapon.type != "energy" else target.resistance
-	
-	# Apply weapon type effectiveness
-	var effectiveness = 1.0
-	match [weapon.type, target.weapon_type]:
-		["energy", "plasma"]: effectiveness = 1.5
-		["plasma", "ion"]: effectiveness = 1.5
-		["ion", "energy"]: effectiveness = 1.5
-		["energy", "ion"]: effectiveness = 0.75
-		["ion", "plasma"]: effectiveness = 0.75
-		["plasma", "energy"]: effectiveness = 0.75
-	
-	return max(1, (attack - defense) * effectiveness)
+	target.take_damage(weapon.loaded_string)
+	print("Attacked with ", weapon.name, " using string: ", weapon.loaded_string)
+	# Clear the loaded string after use
+	weapon.loaded_string = ""
 
 func take_damage(amount):
 	current_health -= amount

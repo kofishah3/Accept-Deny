@@ -10,9 +10,9 @@ extends Area2D
 @export var resistance = 2
 @export var skill = 4
 @export var luck = 3
-@export var max_health = 15
+@export var string_length = 5  # Length of the enemy's string
 @export var max_action_points = 4
-var current_health
+var current_string = ""
 var current_action_points
 
 # Mode
@@ -64,26 +64,23 @@ func _ready():
 	grid_manager = get_node("/root/main/GridManager")
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
-	current_health = max_health
+	generate_new_string()
 	current_action_points = max_action_points
 	create_ui()
 
+func generate_new_string():
+	var chars = ["a", "b", "c"]
+	current_string = ""
+	for i in range(string_length):
+		current_string += chars[randi() % chars.size()]
+
 func create_ui():
-	# Create health bar
-	var health_bar = ProgressBar.new()
-	health_bar.name = "HealthBar"
-	health_bar.position = Vector2(-40, -100)  # Moved up and wider
-	health_bar.size = Vector2(80, 15)  # Made larger
-	health_bar.max_value = max_health
-	health_bar.value = current_health
-	add_child(health_bar)
-	
-	# Create health label
-	var health_label = Label.new()
-	health_label.name = "HealthLabel"
-	health_label.position = Vector2(-40, -115)  # Above health bar
-	health_label.text = "HP: " + str(current_health) + "/" + str(max_health)
-	add_child(health_label)
+	# Create string display
+	var string_label = Label.new()
+	string_label.name = "StringLabel"
+	string_label.position = Vector2(-40, -115)  # Above health bar
+	string_label.text = "String: " + current_string
+	add_child(string_label)
 	
 	# Create action points bar
 	var ap_bar = ProgressBar.new()
@@ -214,11 +211,21 @@ func calculate_damage(target, weapon):
 	
 	return max(1, (attack - defense) * effectiveness)
 
-func take_damage(amount):
-	current_health -= amount
-	$HealthBar.value = current_health
-	$HealthLabel.text = "HP: " + str(current_health) + "/" + str(max_health)
-	if current_health <= 0:
+func take_damage(attack_string):
+	# For each character in the attack string, try to match and remove from current string
+	var new_string = current_string
+	var i = 0
+	while i < attack_string.length() and new_string.length() > 0:
+		var char_pos = new_string.find(attack_string[i])
+		if char_pos != -1:
+			# Remove the matched character
+			new_string = new_string.substr(0, char_pos) + new_string.substr(char_pos + 1)
+		i += 1
+	
+	current_string = new_string
+	$StringLabel.text = "String: " + current_string
+	
+	if current_string.length() == 0:
 		queue_free()
 
 func reset_turn():
