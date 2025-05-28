@@ -1,7 +1,7 @@
 extends Area2D
 
 @onready var anim = $AnimatedSprite2D
-@export var movement_range = 2
+@export var movement_range = 3
 
 # Combat stats
 @export var strength = 6
@@ -11,7 +11,13 @@ extends Area2D
 @export var skill = 4
 @export var luck = 3
 @export var max_health = 15
+@export var max_action_points = 4
 var current_health
+var current_action_points
+
+# Mode
+var current_mode = "move"  # Can be "move" or "attack"
+var is_interacting_with_ui = false
 
 # Weapons
 var weapons = {
@@ -22,7 +28,7 @@ var weapons = {
 		"hit": 85,
 		"crit": 10,
 		"range": 3,
-		"color": Color(0, 1, 0)  # Green
+		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	},
 	"plasma_cannon": {
 		"name": "Plasma Cannon",
@@ -31,7 +37,7 @@ var weapons = {
 		"hit": 70,
 		"crit": 15,
 		"range": 2,
-		"color": Color(1, 0.5, 0)  # Orange
+		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	},
 	"ion_blaster": {
 		"name": "Ion Blaster",
@@ -40,11 +46,11 @@ var weapons = {
 		"hit": 90,
 		"crit": 5,
 		"range": 1,
-		"color": Color(0, 0.5, 1)  # Blue
+		"color": Color(1, 0, 0, 0.3)  # Transparent red
 	}
 }
-var current_weapon = "plasma_cannon"
-var weapon_type = "plasma"
+var current_weapon = "laser_rifle"
+var weapon_type = "energy"
 
 var grid_manager
 var grid_position = Vector2.ZERO
@@ -59,17 +65,41 @@ func _ready():
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
 	current_health = max_health
+	current_action_points = max_action_points
 	create_ui()
 
 func create_ui():
 	# Create health bar
 	var health_bar = ProgressBar.new()
 	health_bar.name = "HealthBar"
-	health_bar.position = Vector2(-30, -50)
-	health_bar.size = Vector2(60, 10)
+	health_bar.position = Vector2(-40, -100)  # Moved up and wider
+	health_bar.size = Vector2(80, 15)  # Made larger
 	health_bar.max_value = max_health
 	health_bar.value = current_health
 	add_child(health_bar)
+	
+	# Create health label
+	var health_label = Label.new()
+	health_label.name = "HealthLabel"
+	health_label.position = Vector2(-40, -115)  # Above health bar
+	health_label.text = "HP: " + str(current_health) + "/" + str(max_health)
+	add_child(health_label)
+	
+	# Create action points bar
+	var ap_bar = ProgressBar.new()
+	ap_bar.name = "ActionPointsBar"
+	ap_bar.position = Vector2(-40, -70)  # Moved up and wider
+	ap_bar.size = Vector2(80, 15)  # Made larger
+	ap_bar.max_value = max_action_points
+	ap_bar.value = current_action_points
+	add_child(ap_bar)
+	
+	# Create action points label
+	var ap_label = Label.new()
+	ap_label.name = "ActionPointsLabel"
+	ap_label.position = Vector2(-40, -85)  # Above AP bar
+	ap_label.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
+	add_child(ap_label)
 
 func _process(delta):
 	if is_moving:
@@ -87,15 +117,15 @@ func _process(delta):
 
 func take_turn():
 	print("Enemy taking turn")
-	if has_moved and has_attacked:
+	if current_action_points <= 0:
 		return
 		
 	var player = get_node("/root/main/Player")
 	if not player or not is_instance_valid(player):
 		return
 		
-	# If we haven't moved, try to move towards the player
-	if not has_moved:
+	# If we haven't moved and have enough AP, try to move towards the player
+	if not has_moved and current_action_points >= 1:
 		var valid_moves = grid_manager.calculate_movement_range(grid_position, movement_range)
 		var best_move = find_best_move_towards_player(valid_moves, player.grid_position)
 		
@@ -103,6 +133,9 @@ func take_turn():
 			print("Enemy moving to: ", best_move)
 			target_position = best_move
 			is_moving = true
+			current_action_points -= 1
+			$ActionPointsBar.value = current_action_points
+			$ActionPointsLabel.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
 		else:
 			has_moved = true
 			check_and_attack()
@@ -114,18 +147,23 @@ func check_and_attack():
 		
 	# Check if player is in attack range
 	var attack_range = weapons[current_weapon].range
-	if grid_position.distance_to(player.grid_position) <= attack_range:
-		print("Enemy attacking player")
-		attack(player)
-	else:
-		has_attacked = true
+	var distance = int(abs(grid_position.x - player.grid_position.x) + abs(grid_position.y - player.grid_position.y))
+	if distance <= attack_range:
+		var weapon = weapons[current_weapon]
+		var ap_cost = ceil(weapon.might / 2)  # AP cost is half the weapon's might, rounded up
+		if current_action_points >= ap_cost:
+			print("Enemy attacking player")
+			attack(player)
+			current_action_points -= ap_cost
+			$ActionPointsBar.value = current_action_points
+			$ActionPointsLabel.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
 
 func find_best_move_towards_player(valid_moves, player_pos):
 	var best_move = null
 	var shortest_distance = INF
 	
 	for move in valid_moves:
-		var distance = move.distance_to(player_pos)
+		var distance = int(abs(move.x - player_pos.x) + abs(move.y - player_pos.y))
 		if distance < shortest_distance:
 			shortest_distance = distance
 			best_move = move
@@ -149,8 +187,6 @@ func attack(target):
 		print("Hit for ", damage, " damage with ", weapon.name, "!")
 	else:
 		print("Attack missed with ", weapon.name, "!")
-	
-	has_attacked = true
 
 func calculate_hit_chance(target, weapon):
 	var base_hit = weapon.hit + (skill * 2) + (luck / 2)
@@ -181,6 +217,7 @@ func calculate_damage(target, weapon):
 func take_damage(amount):
 	current_health -= amount
 	$HealthBar.value = current_health
+	$HealthLabel.text = "HP: " + str(current_health) + "/" + str(max_health)
 	if current_health <= 0:
 		queue_free()
 
@@ -188,3 +225,6 @@ func reset_turn():
 	has_moved = false
 	has_attacked = false
 	is_moving = false
+	current_action_points = max_action_points
+	$ActionPointsBar.value = current_action_points
+	$ActionPointsLabel.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)

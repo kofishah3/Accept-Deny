@@ -10,6 +10,7 @@ var valid_moves = []
 var valid_attacks = []
 var attack_color = Color(1, 0, 0, 0.3)  # Semi-transparent red for all attacks
 var occupied_tiles = {}  # Dictionary to track occupied tiles
+var move_ap_costs = {}  # Dictionary to store AP cost for each valid move
 
 func _ready():
 	# Initialize the grid
@@ -26,6 +27,11 @@ func _draw():
 	for move in valid_moves:
 		var rect = Rect2(move * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
 		draw_rect(rect, Color(0, 1, 0, 0.3))  # Semi-transparent green
+		# Draw AP cost as text
+		if move_ap_costs.has(move):
+			var ap_cost = move_ap_costs[move]
+			var text_pos = move * GRID_SIZE + Vector2(GRID_SIZE/2, GRID_SIZE/2)
+			draw_string(ThemeDB.fallback_font, text_pos, str(ap_cost), HORIZONTAL_ALIGNMENT_CENTER, -1, 16, Color.WHITE)
 	
 	# Draw valid attacks
 	for attack in valid_attacks:
@@ -65,15 +71,18 @@ func grid_to_world(grid_pos: Vector2) -> Vector2:
 func is_valid_grid_position(pos: Vector2) -> bool:
 	return pos.x >= 0 and pos.x < grid_width and pos.y >= 0 and pos.y < grid_height
 
+# Only allow orthogonal movement (no diagonal)
 func calculate_movement_range(unit_pos: Vector2, movement_range: int) -> Array:
 	var valid_positions = []
+	move_ap_costs.clear()
 	for x in range(-movement_range, movement_range + 1):
 		for y in range(-movement_range, movement_range + 1):
 			var new_pos = unit_pos + Vector2(x, y)
 			if is_valid_grid_position(new_pos) and not is_tile_occupied(new_pos):
-				# Manhattan distance for grid-based movement
-				if abs(x) + abs(y) <= movement_range:
+				# Manhattan distance for grid-based movement, only orthogonal
+				if (abs(x) == 0 or abs(y) == 0) and abs(x) + abs(y) > 0 and abs(x) + abs(y) <= movement_range:
 					valid_positions.append(new_pos)
+					move_ap_costs[new_pos] = abs(x) + abs(y)
 	return valid_positions
 
 func update_attack_range(unit_pos: Vector2, attack_range: int) -> Array:
