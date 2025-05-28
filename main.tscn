@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=4 uid="uid://dagm104qf1258"]
 
 [ext_resource type="Script" uid="uid://baf34domhu0ih" path="res://main.gd" id="1_2yge"]
-[ext_resource type="PackedScene" path="res://ui/battle_ui.tscn" id="2_3k4m3"]
+[ext_resource type="PackedScene" uid="uid://b6x8v0j6y5n3q" path="res://ui/battle_ui.tscn" id="2_3k4m3"]
 [ext_resource type="Script" uid="uid://ddqndv57cu6hd" path="res://grid_manager.gd" id="2_h2yge"]
 [ext_resource type="Texture2D" uid="uid://c4as60k7sshcp" path="res://assets/tileset/TileSet001_scaled_2x_pngcrushed_scaled_2x_pngcrushed.png" id="2_lquwl"]
 [ext_resource type="PackedScene" uid="uid://dev1r1jpyo8a4" path="res://player.tscn" id="3_1bvp3"]
