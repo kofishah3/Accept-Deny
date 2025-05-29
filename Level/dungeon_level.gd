@@ -1,17 +1,18 @@
 extends Node2D
 
 @export var _dimensions : Vector2i = Vector2i(10,3) #max number of dungeon rooms
-@export var _start : Vector2i = Vector2i(-1,-1)
-@export var _critical_path_length : int = 6
-@export var _branches : int = 2
-@export var _branch_length : Vector2i = Vector2i(1,2)
+@export var _start : Vector2i = Vector2i(0,0) #-1, -1 for completely random start point
+@export var _critical_path_length : int = 5 #number of rooms to get to final room
+@export var _branches : int = 2 #number of extra rooms 
+@export var _branch_length : Vector2i = Vector2i(1,1) 
 
-@onready var t_room = preload("res://Level/rooms/dungeon_room1.tscn")
-@onready var l_room = preload("res://Level/rooms/dungeon_room2.tscn")
-@onready var box_room = preload("res://Level/rooms/dungeon_room3.tscn")
+@onready var t_room = preload("res://Level/rooms/troom.tscn")
+@onready var l_room = preload("res://Level/rooms/lroom.tscn")
+@onready var box_room = preload("res://Level/rooms/boxroom.tscn")
+@onready var start_room = preload("res://Level/rooms/startroom.tscn")
 
 var _branch_candidates : Array[Vector2i] #list of rooms that can have branches
-var dungeon : Array
+var dungeon : Array #the array should be a dictionary of the level data
 
 func _ready() -> void:
 	_initalize_dungeon()
@@ -32,7 +33,10 @@ func _place_entrance() -> void:
 		_start.x = randi_range(0, _dimensions.x - 1)
 	if _start.y < 0 or _start.y >= _dimensions.y:
 		_start.y = randi_range(0, _dimensions.y - 1)
-	dungeon[_start.x][_start.y] = "S"
+	dungeon[_start.x][_start.y] = {
+		"type": "S",
+		"connections": []
+	}
 
 func _generate_branches() -> void:
 	var branches_created : int = 0
@@ -63,10 +67,19 @@ func _generate_critical_path(from: Vector2i, length: int, marker: String, prev_d
 		if next.x >= 0 and next.x < _dimensions.x and next.y >= 0 and next.y < _dimensions.y and not dungeon[next.x][next.y]:
 			current = next
 
-			if length == 1 and marker == "C":
-				dungeon[current.x][current.y] = "L"
+			#checks if this is the last room (the exit room)
+			if length == 1 and marker == "C": 
+				dungeon[current.x][current.y] =	{
+						"type" : "L",
+						"connections" : []			
+				}
 			else:
-				dungeon[current.x][current.y] = marker
+				if typeof(dungeon[current.x][current.y]) != TYPE_DICTIONARY: 
+					dungeon[current.x][current.y] =	{
+						"type" : marker,
+						"connections" : []			
+					}
+			dungeon[current.x][current.y]["connections"].append(-direction) 
 
 			if length > 1:
 				_branch_candidates.append(current)
@@ -80,36 +93,82 @@ func _generate_critical_path(from: Vector2i, length: int, marker: String, prev_d
 
 	return false
 
-
 #console only
 func _print_dungeon() -> void:
 	var dungeon_as_string : String = ""
 	for y in range(_dimensions.y - 1, -1, -1):
 		for x in _dimensions.x:
-			if dungeon[x][y]:
-				dungeon_as_string += "[" + str(dungeon[x][y]) + "]"
+			var cell = dungeon[x][y]
+			if cell:
+				if typeof(cell) == TYPE_DICTIONARY:
+					dungeon_as_string += "[" + str(cell["type"]) + "]"
+				else:
+					dungeon_as_string += "[" + str(cell) + "]"
 			else:
 				dungeon_as_string += "   "
 		dungeon_as_string += "\n"
 	print(dungeon_as_string)
 
+
 func _spawn_rooms() -> void: 
 	var cell_size = 16 * 10
 	
 	for x in _dimensions.x:
-		for y in _dimensions.y:
+		for y in range(_dimensions.y - 1, -1, -1):
 			var marker = dungeon[x][y]
 			if marker:
+				var variants = [l_room, box_room]
 				var scene: PackedScene
-				match marker:
+				var room_type = marker["type"] if typeof(marker) == TYPE_DICTIONARY else marker
+				match room_type:
 					"S":
-						scene = box_room
-					"C":
-						scene = box_room
+						scene = start_room
 					"L":
 						scene = t_room
 					_:
-						scene = l_room
+						scene = variants.pick_random()
+						
 				var room = scene.instantiate()
-				room.position = Vector2(x, y) * cell_size
+				room.position = Vector2(x, _dimensions.y - 1 - y) * cell_size
 				add_child(room)
+				
+				#handle door visibility based on stored connections
+				if typeof(marker) == TYPE_DICTIONARY:
+					var connections = marker["connections"]
+					
+					#check current room's connections (where it came from)
+					for dir in connections:
+						if dir == Vector2i.UP:
+							if room.has_node("south_door"):
+								room.get_node("south_door").visible = true
+						elif dir == Vector2i.DOWN:
+							if room.has_node("north_door"):
+								room.get_node("north_door").visible = true
+						elif dir == Vector2i.LEFT:
+							if room.has_node("east_door"):
+								room.get_node("east_door").visible = true
+						elif dir == Vector2i.RIGHT:
+							if room.has_node("west_door"):
+								room.get_node("west_door").visible = true
+					
+					#check for next room's connections (where it's leading to)
+					# right
+					if x < _dimensions.x - 1 and typeof(dungeon[x+1][y]) == TYPE_DICTIONARY:
+						if Vector2i.LEFT in dungeon[x+1][y]["connections"]:
+							if room.has_node("west_door"):
+								room.get_node("west_door").visible = true
+					# left
+					if x > 0 and typeof(dungeon[x-1][y]) == TYPE_DICTIONARY:
+						if Vector2i.RIGHT in dungeon[x-1][y]["connections"]:
+							if room.has_node("east_door"):
+								room.get_node("east_door").visible = true
+					# up
+					if y > 0 and typeof(dungeon[x][y-1]) == TYPE_DICTIONARY:
+						if Vector2i.DOWN in dungeon[x][y-1]["connections"]:
+							if room.has_node("south_door"):
+								room.get_node("south_door").visible = true
+					# down
+					if y < _dimensions.y - 1 and typeof(dungeon[x][y+1]) == TYPE_DICTIONARY:
+						if Vector2i.UP in dungeon[x][y+1]["connections"]:
+							if room.has_node("north_door"):
+								room.get_node("north_door").visible = true
