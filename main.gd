@@ -3,6 +3,10 @@ extends Node2D
 @onready var grid_manager = $GridManager
 @onready var player = $Player
 @onready var enemies = $Enemies
+@onready var dungeon_container = $DungeonContainer
+
+var dungeon_scene = preload("res://Level/dungeon_level.tscn")
+var dungeon_instance 
 
 var current_turn = "player"
 var processing_enemy_turns = false
@@ -10,6 +14,8 @@ var processing_enemy_turns = false
 func _ready():
 	# Initialize the game
 	$GridManager.current_turn = current_turn
+	dungeon_instance = dungeon_scene.instantiate()
+	dungeon_container.add_child(dungeon_instance)
 
 func _process(_delta):
 	# Handle turn management

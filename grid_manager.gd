@@ -1,8 +1,8 @@
 extends Node2D
 
-const GRID_SIZE = 64.0  # Size of each grid cell in pixels
-var grid_width = 18   # Number of cells horizontally
-var grid_height = 12  # Number of cells vertically
+const GRID_SIZE = 16.0  # Size of each grid cell in pixels
+var grid_width = 60  
+var grid_height = 30 
 
 var current_turn = "player"  # Can be "player" or "enemy"
 var selected_unit = null
