@@ -1,0 +1,80 @@
+[gd_scene load_steps=9 format=3 uid="uid://c1jtjkob3pjgb"]
+
+[ext_resource type="Texture2D" uid="uid://bgpbt4bejlw0y" path="res://ui_elements/on-game/Border/inventoryBorder.png" id="1_k3or5"]
+[ext_resource type="FontFile" uid="uid://8rxtgy12pkqv" path="res://themes/dnf-paste-8x12.ttf" id="2_p4vil"]
+[ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="3_ahs3n"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cywpn"]
+
+[sub_resource type="Theme" id="Theme_hfjtw"]
+LineEdit/styles/focus = SubResource("StyleBoxEmpty_cywpn")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cywpn"]
+content_margin_left = 4.0
+content_margin_right = 4.0
+bg_color = Color(0.8718, 0.885987, 0.925971, 1)
+border_width_bottom = 2
+border_color = Color(0.576471, 0.607843, 0.709804, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_size = 2
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4k1ms"]
+
+[sub_resource type="Theme" id="Theme_4k1ms"]
+Button/font_sizes/font_size = 12
+Button/styles/normal = ExtResource("3_ahs3n")
+Button/styles/pressed = SubResource("StyleBoxEmpty_4k1ms")
+
+[node name="Regex-Load-Panel" type="TextureRect"]
+offset_left = 145.0
+offset_top = 55.0
+offset_right = 255.0
+offset_bottom = 145.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("1_k3or5")
+
+[node name="LineEdit" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 54.0
+offset_top = 33.0
+offset_right = 113.0
+offset_bottom = 58.0
+scale = Vector2(0.722026, 0.722026)
+theme = SubResource("Theme_hfjtw")
+theme_override_colors/selection_color = Color(1, 1, 1, 1)
+theme_override_colors/font_selected_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 12
+theme_override_styles/normal = SubResource("StyleBoxFlat_cywpn")
+caret_blink = true
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 34.0
+offset_top = 12.0
+offset_right = 140.0
+offset_bottom = 29.0
+scale = Vector2(0.440393, 0.443667)
+theme_override_fonts/font = ExtResource("2_p4vil")
+text = "Weapon Regex"
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 0
+offset_left = 61.0
+offset_top = 56.0
+offset_right = 110.0
+offset_bottom = 79.0
+scale = Vector2(0.562093, 0.562093)
+theme = SubResource("Theme_4k1ms")
+text = "Save"
+
+[node name="Weapon Icon" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 13.0
+offset_top = 32.0
+offset_right = 48.0
+offset_bottom = 67.0

@@ -1,0 +1,329 @@
+[gd_scene load_steps=20 format=3 uid="uid://dx6nymuqu0fyi"]
+
+[ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="1_ylauv"]
+[ext_resource type="PackedScene" uid="uid://dev1r1jpyo8a4" path="res://player.tscn" id="2_jfg53"]
+[ext_resource type="PackedScene" uid="uid://cny6qsw5au8ur" path="res://enemy.tscn" id="3_rwd6p"]
+[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/red-diamond.png" id="4_tdaem"]
+[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="5_yix3w"]
+[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/green-triangle.png" id="6_krqp1"]
+[ext_resource type="Texture2D" uid="uid://d2uc8ebmomdtn" path="res://ui_elements/on-game/Border/playerBorder.png" id="7_xbyut"]
+[ext_resource type="Texture2D" uid="uid://b4bft84tp32hx" path="res://ui_elements/on-game/Health/healthUnder.png" id="8_op8jk"]
+[ext_resource type="Texture2D" uid="uid://dcaqowbgs16w3" path="res://ui_elements/on-game/Health/healthProgress.png" id="9_xqqyk"]
+[ext_resource type="Texture2D" uid="uid://bmtplm1q0aymg" path="res://ui_elements/on-game/Mana/manaUnder.png" id="10_51rf7"]
+[ext_resource type="Texture2D" uid="uid://cqax21gqkme33" path="res://ui_elements/on-game/Mana/manaProgress.png" id="11_d6gw6"]
+[ext_resource type="PackedScene" uid="uid://ch4hi6xj6yvba" path="res://ui/on-game screen/inventory-slot.tscn" id="12_lsr1k"]
+[ext_resource type="Texture2D" uid="uid://qan412vxahu7" path="res://ui_elements/on-game/Border/stringBorder.png" id="13_8mgfu"]
+[ext_resource type="Texture2D" uid="uid://dh15dc6h5ar8e" path="res://ui_elements/regex-shapes/grey-loading.png" id="14_uvf25"]
+[ext_resource type="Texture2D" uid="uid://m3so316sw6rv" path="res://ui_elements/on-game/Border/buttonBorder.png" id="15_fn08l"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dix6n"]
+
+[sub_resource type="Theme" id="Theme_dix6n"]
+Button/font_sizes/font_size = 16
+Button/styles/focus = SubResource("StyleBoxEmpty_dix6n")
+Button/styles/normal = ExtResource("1_ylauv")
+
+[sub_resource type="GDScript" id="GDScript_tvqor"]
+script/source = "extends ProgressBar
+
+
+	
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ylauv"]
+bg_color = Color(0, 0.97414, 0.293411, 0.419608)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[node name="UI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.00014, 1.00095)
+pivot_offset = Vector2(220, 554)
+size_flags_horizontal = 4
+theme = SubResource("Theme_dix6n")
+
+[node name="Player" parent="." instance=ExtResource("2_jfg53")]
+position = Vector2(150.01, 68.4613)
+scale = Vector2(0.392099, 0.387833)
+
+[node name="Enemy" parent="." instance=ExtResource("3_rwd6p")]
+position = Vector2(311.987, 70.4594)
+scale = Vector2(0.415029, 0.405812)
+
+[node name="GonnaUse4" type="Sprite2D" parent="Enemy"]
+position = Vector2(-24.0001, -59)
+scale = Vector2(5, 5)
+texture = ExtResource("4_tdaem")
+
+[node name="GonnaUse5" type="Sprite2D" parent="Enemy"]
+z_index = -2
+position = Vector2(-10, -59)
+scale = Vector2(4.97501, 4.97501)
+texture = ExtResource("5_yix3w")
+
+[node name="GonnaUse3" type="Sprite2D" parent="Enemy"]
+z_index = -3
+position = Vector2(6, -59)
+scale = Vector2(5.02498, 5.02498)
+texture = ExtResource("6_krqp1")
+
+[node name="PlayerDisplay" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 7.0
+offset_top = -59.0
+offset_right = 56.0
+offset_bottom = -10.0
+grow_vertical = 0
+pivot_offset = Vector2(237.997, -93.5349)
+texture = ExtResource("7_xbyut")
+region_rect = Rect2(0, 0, 66, 63)
+
+[node name="Char" type="TextureRect" parent="PlayerDisplay"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HealthProgressBar" type="ProgressBar" parent="PlayerDisplay"]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 136.011
+offset_top = -87.9952
+offset_right = 266.011
+offset_bottom = -60.9952
+grow_vertical = 0
+value = 100.0
+script = SubResource("GDScript_tvqor")
+
+[node name="HealthTextureProgressBar" type="TextureProgressBar" parent="PlayerDisplay"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 44.0237
+offset_top = -35.6346
+offset_right = 92.0237
+offset_bottom = -19.6346
+grow_vertical = 0
+scale = Vector2(1.5, 1.5)
+texture_under = ExtResource("8_op8jk")
+texture_progress = ExtResource("9_xqqyk")
+
+[node name="ManaProgressBar" type="ProgressBar" parent="PlayerDisplay"]
+visible = false
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 136.011
+offset_top = -87.9952
+offset_right = 266.011
+offset_bottom = -60.9952
+grow_vertical = 0
+value = 100.0
+script = SubResource("GDScript_tvqor")
+
+[node name="ManaTextureProgressBar" type="TextureProgressBar" parent="PlayerDisplay"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 39.0244
+offset_top = 27.3521
+offset_right = 39.0244
+offset_bottom = 43.3521
+texture_under = ExtResource("10_51rf7")
+texture_progress = ExtResource("11_d6gw6")
+
+[node name="Inventory" type="GridContainer" parent="."]
+layout_mode = 2
+anchor_left = 0.330763
+anchor_top = 0.835733
+anchor_right = 0.333367
+anchor_bottom = 0.840341
+offset_right = 130.0
+offset_bottom = 31.0
+grow_vertical = 2
+rotation = -0.000385932
+scale = Vector2(0.630406, 0.623601)
+theme_override_constants/h_separation = 1
+theme_override_constants/v_separation = 0
+columns = 4
+metadata/_edit_use_anchors_ = true
+
+[node name="Slot" parent="Inventory" instance=ExtResource("12_lsr1k")]
+clip_contents = true
+custom_minimum_size = Vector2(15, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Slot2" parent="Inventory" instance=ExtResource("12_lsr1k")]
+clip_contents = true
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Slot3" parent="Inventory" instance=ExtResource("12_lsr1k")]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Slot4" parent="Inventory" instance=ExtResource("12_lsr1k")]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Phase Display" type="CanvasLayer" parent="."]
+
+[node name="Player-Green" type="Panel" parent="Phase Display"]
+offset_left = 322.0
+offset_top = 6.0
+offset_right = 371.0
+offset_bottom = 20.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
+
+[node name="Who-Phase" type="Label" parent="Phase Display"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -57.0
+offset_top = 9.0
+offset_right = 16.0
+offset_bottom = 26.0
+grow_horizontal = 0
+scale = Vector2(0.557079, 0.557079)
+theme_override_font_sizes/font_size = 11
+text = "Who? Phase"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Enemy-Red" type="Panel" parent="Phase Display"]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -62.0
+offset_top = 6.0
+offset_right = -13.0
+offset_bottom = 20.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
+
+[node name="Accumulated String View" type="NinePatchRect" parent="."]
+layout_mode = 0
+offset_left = 171.0
+offset_top = 8.0
+offset_right = 222.0
+offset_bottom = 19.0
+texture = ExtResource("13_8mgfu")
+
+[node name="AccumulatedString" type="HBoxContainer" parent="Accumulated String View"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -19.5
+offset_top = -2.0
+offset_right = 9.5
+offset_bottom = 7.0
+grow_horizontal = 2
+scale = Vector2(1.21328, 1.21328)
+
+[node name="Green-triangle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+position = Vector2(11.9772, 6.22084)
+scale = Vector2(1.08944, 1.08944)
+texture = ExtResource("6_krqp1")
+
+[node name="Grey-loading" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+position = Vector2(25.9751, 6.22084)
+scale = Vector2(1.08944, 1.08944)
+texture = ExtResource("14_uvf25")
+
+[node name="Red-diamond" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+position = Vector2(4.97801, 6.22084)
+scale = Vector2(1.08944, 1.08944)
+texture = ExtResource("4_tdaem")
+
+[node name="Yellow-circle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+position = Vector2(18.976, 6.22084)
+scale = Vector2(1.08944, 1.08944)
+texture = ExtResource("5_yix3w")
+
+[node name="Attack_Move Button" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -159.0
+offset_top = -39.0
+offset_right = 26.0
+offset_bottom = 26.0
+grow_horizontal = 0
+grow_vertical = 0
+rotation = -0.00224055
+scale = Vector2(0.373605, 0.373605)
+texture = ExtResource("15_fn08l")
+region_rect = Rect2(0, 0, 64, 65)
+
+[node name="Button" type="Button" parent="Attack_Move Button"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.727
+offset_left = 21.0
+offset_top = -5.0
+offset_right = -15.0
+offset_bottom = 0.744999
+scale = Vector2(0.975791, 0.974642)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "MOVE"
+
+[node name="End Turn Button" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -82.0115
+offset_top = -38.6431
+offset_right = 102.989
+offset_bottom = 26.3569
+grow_horizontal = 0
+grow_vertical = 0
+rotation = -0.00224055
+scale = Vector2(0.373605, 0.373605)
+texture = ExtResource("15_fn08l")
+region_rect = Rect2(0, 0, 64, 65)
+
+[node name="Button" type="Button" parent="End Turn Button"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.727
+offset_left = 21.4219
+offset_top = -5.30027
+offset_right = -14.5781
+offset_bottom = 0.717728
+scale = Vector2(0.975791, 0.974642)
+theme_override_font_sizes/font_size = 22
+text = "END TURN"

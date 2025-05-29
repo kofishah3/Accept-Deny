@@ -15,10 +15,20 @@ run/main_scene="uid://cny6qsw5au8ur"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
+[display]
+
+window/size/viewport_width=384
+window/size/viewport_height=216
+window/stretch/mode="canvas_items"
+
 [editor]
 
 version_control/plugin_name="GitPlugin"
 version_control/autoload_on_startup=true
+
+[gui]
+
+theme/custom_font="uid://8rxtgy12pkqv"
 
 [input]
 

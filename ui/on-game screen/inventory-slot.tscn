@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3 uid="uid://ch4hi6xj6yvba"]
+
+[ext_resource type="Texture2D" uid="uid://bgpbt4bejlw0y" path="res://ui_elements/on-game/Border/inventoryBorder.png" id="1_mityc"]
+
+[node name="Slot" type="PanelContainer"]
+offset_right = 32.0
+offset_bottom = 32.0
+
+[node name="BG" type="TextureRect" parent="."]
+layout_mode = 2
+texture = ExtResource("1_mityc")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="."]
+layout_mode = 2
