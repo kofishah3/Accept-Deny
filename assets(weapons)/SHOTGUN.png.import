@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wxkh5qyiy8c1"
-path="res://.godot/imported/basic_magic.png-46327b96f2c721befb57bc70ee701ad6.ctex"
+uid="uid://bokwc7oeasr4a"
+path="res://.godot/imported/SHOTGUN.png-c871c062f10603fa083dda0877165476.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://imagese/icon/basic_magic.png"
-dest_files=["res://.godot/imported/basic_magic.png-46327b96f2c721befb57bc70ee701ad6.ctex"]
+source_file="res://assets(weapons)/SHOTGUN.png"
+dest_files=["res://.godot/imported/SHOTGUN.png-c871c062f10603fa083dda0877165476.ctex"]
 
 [params]
 

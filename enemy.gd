@@ -61,7 +61,7 @@ var is_moving = false
 var move_speed = 4.0  # Grid cells per second
 
 func _ready():
-	grid_manager = get_node("/root/main/GridManager")
+	grid_manager = get_node("../../GridManager")
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
 	generate_new_string()

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xkkeet22l731"
-path="res://.godot/imported/grid.png-bd8e29ea91e5fcb5a03bf4e06890eff0.ctex"
+uid="uid://c8kmq8t2x5sos"
+path="res://.godot/imported/BOW AND ARROW.png-ccc57f167b56120ed974832a31876308.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://imagese/grid.png"
-dest_files=["res://.godot/imported/grid.png-bd8e29ea91e5fcb5a03bf4e06890eff0.ctex"]
+source_file="res://assets(weapons)/BOW AND ARROW.png"
+dest_files=["res://.godot/imported/BOW AND ARROW.png-ccc57f167b56120ed974832a31876308.ctex"]
 
 [params]
 

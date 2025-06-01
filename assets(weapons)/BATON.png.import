@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b5bhqfskef7lb"
-path="res://.godot/imported/melee_attack.png-c9f3b1c2302ceca2431f505837e55021.ctex"
+uid="uid://clr5kpueb3s74"
+path="res://.godot/imported/BATON.png-6977683c57a00d067a873a0e3cdf5ef4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://imagese/icon/melee_attack.png"
-dest_files=["res://.godot/imported/melee_attack.png-c9f3b1c2302ceca2431f505837e55021.ctex"]
+source_file="res://assets(weapons)/BATON.png"
+dest_files=["res://.godot/imported/BATON.png-6977683c57a00d067a873a0e3cdf5ef4.ctex"]
 
 [params]
 
