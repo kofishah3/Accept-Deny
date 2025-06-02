@@ -104,12 +104,12 @@ func create_ui():
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	container.add_child(end_turn_button)
 	
-	# Create Mode Switch button
+	# Create Move Mode button (instead of toggle)
 	mode_button = Button.new()
 	mode_button.name = "ModeButton"
-	mode_button.text = "Switch to Attack"
+	mode_button.text = "Move Mode"
 	mode_button.size = Vector2(180, 30)
-	mode_button.pressed.connect(_on_mode_switch_pressed)
+	mode_button.pressed.connect(_on_move_mode_pressed)
 	container.add_child(mode_button)
 	
 	ui_initialized = true
@@ -143,32 +143,12 @@ func update_ui():
 			button.modulate = Color(1, 1, 1)  # White for unselected
 	
 	# Update mode button text
-	update_mode_button()
-
-	# Show AP cost for attack in attack mode
-	if player.current_mode == "attack":
-		var weapon = weapons[player.current_weapon]
-		var ap_cost = ceil(weapon.might / 2)
-		mode_button.text = "Attack (AP: " + str(ap_cost) + ")"
-	else:
-		mode_button.text = "Switch to Attack"
-
-func update_mode_button():
-	if not ui_initialized or not player or not is_instance_valid(player):
-		return
-		
-	if player.current_mode == "move":
-		mode_button.text = "Switch to Attack"
-	else:
-		mode_button.text = "Switch to Move"
+	mode_button.text = "Move Mode"
 
 func _on_weapon_selected(weapon_id: String):
 	if not ui_initialized or not player or not is_instance_valid(player):
 		return
-		
-	player.current_weapon = weapon_id
-	player.weapon_type = weapons[weapon_id].type
-	player.update_attack_range()
+	player.set_weapon_and_attack_mode(weapon_id)
 	update_ui()
 
 func _on_end_turn_pressed():
@@ -177,15 +157,9 @@ func _on_end_turn_pressed():
 		
 	player.end_turn()
 
-func _on_mode_switch_pressed():
+func _on_move_mode_pressed():
 	if not ui_initialized or not player or not is_instance_valid(player):
 		return
-		
-	if player.current_mode == "move":
-		player.current_mode = "attack"
-		player.update_attack_range()
-	else:
-		player.current_mode = "move"
-		player.update_movement_range()
-	
-	update_mode_button() 
+	player.current_mode = "move"
+	player.update_movement_range()
+	update_ui() 

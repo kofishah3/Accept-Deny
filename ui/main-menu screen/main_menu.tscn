@@ -1,0 +1,118 @@
+[gd_scene load_steps=15 format=3 uid="uid://logicqr578aj"]
+
+[ext_resource type="Shader" uid="uid://bye70dy2vgg10" path="res://ui/main-menu screen/bg-scroll.gdshader" id="1_ur3co"]
+[ext_resource type="Texture2D" uid="uid://hdagme0ys34l" path="res://ui_elements/main-menu/background-starry.png" id="2_pjqei"]
+[ext_resource type="Texture2D" uid="uid://j35ev0cavrcj" path="res://ui_elements/main-menu/main-button-2.png" id="3_2mssu"]
+[ext_resource type="Texture2D" uid="uid://jh8s5n8eokfu" path="res://ui_elements/main-menu/main-button-2-pressed.png" id="4_t01hl"]
+[ext_resource type="Texture2D" uid="uid://r5ed0s2q2xls" path="res://ui_elements/main-menu/main-button-1.png" id="5_u8u27"]
+[ext_resource type="Texture2D" uid="uid://bprry40n6e56t" path="res://ui_elements/main-menu/main-button-1-pressed.png" id="6_qadfv"]
+[ext_resource type="Texture2D" uid="uid://htar048q5meg" path="res://ui_elements/main-menu/main-button-3.png" id="7_o1whf"]
+[ext_resource type="Texture2D" uid="uid://bkuxng1dlta2g" path="res://ui_elements/main-menu/main-border.png" id="8_15c5s"]
+[ext_resource type="Texture2D" uid="uid://dhi7p5wy0sq21" path="res://ui_elements/main-menu/main-button-3-pressed.png" id="8_pjqei"]
+[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/green-triangle.png" id="9_ni65f"]
+[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/red-diamond.png" id="10_e0m0q"]
+[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="11_bxm30"]
+
+[sub_resource type="GDScript" id="GDScript_eetwo"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_cmhnm"]
+shader = ExtResource("1_ur3co")
+
+[node name="Main Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.00119, 0.994708)
+script = SubResource("GDScript_eetwo")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+texture_repeat = 2
+material = SubResource("ShaderMaterial_cmhnm")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_pjqei")
+expand_mode = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1, 0.991831)
+theme_override_constants/separation = 80
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Info Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("3_2mssu")
+texture_pressed = ExtResource("4_t01hl")
+
+[node name="Play Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("5_u8u27")
+texture_pressed = ExtResource("6_qadfv")
+
+[node name="Mechanics Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("7_o1whf")
+texture_pressed = ExtResource("8_pjqei")
+
+[node name="Main-border" type="Sprite2D" parent="VBoxContainer"]
+position = Vector2(193.769, 76.02)
+scale = Vector2(0.856912, 0.852151)
+texture = ExtResource("8_15c5s")
+
+[node name="Label" type="Label" parent="VBoxContainer/Main-border"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -44.5
+offset_right = 64.0
+offset_bottom = -19.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_shadow_color = Color(0.400698, 0.400698, 0.400698, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "ACCEPT / DENY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Green-triangle" type="Sprite2D" parent="VBoxContainer"]
+position = Vector2(210.749, 45.612)
+scale = Vector2(2.79667, 2.79667)
+texture = ExtResource("9_ni65f")
+
+[node name="Yellow-circle" type="Sprite2D" parent="VBoxContainer"]
+position = Vector2(192.771, 45.612)
+scale = Vector2(2.77743, 2.77743)
+texture = ExtResource("11_bxm30")
+
+[node name="Red-diamond" type="Sprite2D" parent="VBoxContainer"]
+position = Vector2(174.792, 45.612)
+scale = Vector2(2.77827, 2.79281)
+texture = ExtResource("10_e0m0q")
