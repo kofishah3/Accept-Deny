@@ -11,11 +11,33 @@ var dungeon_instance
 var current_turn = "player"
 var processing_enemy_turns = false
 
+var room_and_wall_data : Dictionary = {}
+
 func _ready():
 	# Initialize the game
 	$GridManager.current_turn = current_turn
 	dungeon_instance = dungeon_scene.instantiate()
 	dungeon_container.add_child(dungeon_instance)
+	
+	#get the room world positions and their wall data
+	if dungeon_instance.has_method("get_room_pos_data"):
+		room_and_wall_data = dungeon_instance.get_room_pos_data()
+			
+	for room_pos in room_and_wall_data.keys():
+		#print(str(room_pos) + " " + str(room_and_wall_data[room_pos])) #printing the rooms data
+		var wall_local_positions = room_and_wall_data[room_pos] #the positiosn relative to the room itself
+		var wall_global_positions: Array[Vector2i] = []
+		
+		var room_pos_vec2 = room_pos as Vector2i
+		
+		for local_pos in wall_local_positions: 
+			wall_global_positions.append(room_pos_vec2 + local_pos) #overall positions
+
+		if grid_manager.has_method("mark_unwalkable_tiles"):
+			grid_manager.mark_unwalkable_tiles(wall_global_positions)
+			
+		#var wall_positions = room_and_wall_data
+		pass
 
 func _process(_delta):
 	# Handle turn management

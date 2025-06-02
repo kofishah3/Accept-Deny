@@ -5,15 +5,17 @@ extends Node2D
 @export var _critical_path_length : int = 5 #number of rooms to get to final room
 @export var _branches : int = 2 #number of extra rooms 
 @export var _branch_length : Vector2i = Vector2i(1,1) 
-@export var floor_theme : int = 3
+@export var floor_theme : int = 1
 
 @onready var t_room = preload("res://Level/rooms/troom.tscn")
 @onready var l_room = preload("res://Level/rooms/lroom.tscn")
-@onready var box_room = preload("res://Level/rooms/boxroom.tscn")
+@onready var box_room = preload("res://Level/rooms/boxroom.tscn" )
 @onready var start_room = preload("res://Level/rooms/startroom.tscn")
 
 var _branch_candidates : Array[Vector2i] #list of rooms that can have branches
 var dungeon : Array #the array should be a dictionary of the level data
+
+var room_pos_data: Dictionary = {} #Position (Vector2) => Array[Vector2] of non-floor tiles
 
 func _ready() -> void:
 	_initalize_dungeon()
@@ -97,7 +99,7 @@ func _generate_critical_path(from: Vector2i, length: int, marker: String, prev_d
 #console only
 func _print_dungeon() -> void:
 	var dungeon_as_string : String = ""
-	for y in range(_dimensions.y - 1, -1, -1):
+	for y in _dimensions.y:
 		for x in _dimensions.x:
 			var cell = dungeon[x][y]
 			if cell:
@@ -114,7 +116,7 @@ func _spawn_rooms() -> void:
 	var cell_size = 16 * 15
 	
 	for x in _dimensions.x:
-		for y in range(_dimensions.y - 1, -1, -1):
+		for y in _dimensions.y:
 			var marker = dungeon[x][y]
 			if marker:
 				var variants = [t_room, box_room]
@@ -129,13 +131,18 @@ func _spawn_rooms() -> void:
 						scene = variants.pick_random()
 						
 				var room = scene.instantiate()
-				room.position = Vector2(x, _dimensions.y - 1 - y) * cell_size
+				room.position = Vector2(x, y) * cell_size
 				room.add_to_group("rooms")  # Add room to the rooms group
 				add_child(room)
 				
 				if room.has_method("set_theme"):
 					room.set_theme(floor_theme)
 				
+				var world_pos = room.position/16
+				if room.has_method("get_non_floor_tiles"):
+					var non_floor_tiles = room.get_non_floor_tiles()
+					room_pos_data[world_pos] = non_floor_tiles #populate dictionary with current room data
+		
 				#handle door visibility based on stored connections
 				if typeof(marker) == TYPE_DICTIONARY:
 					var connections = marker["connections"]
@@ -176,3 +183,6 @@ func _spawn_rooms() -> void:
 						if Vector2i.UP in dungeon[x][y+1]["connections"]:
 							if room.has_node("north_door"):
 								room.get_node("north_door").visible = true
+								
+func get_room_pos_data() -> Dictionary:
+	return room_pos_data
