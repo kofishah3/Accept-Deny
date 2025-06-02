@@ -195,9 +195,9 @@ size_flags_vertical = 4
 [node name="Phase Display" type="CanvasLayer" parent="."]
 
 [node name="Player-Green" type="Panel" parent="Phase Display"]
-offset_left = 1040.0
+offset_left = 1036.0
 offset_top = 32.0
-offset_right = 1097.0
+offset_right = 1095.0
 offset_bottom = 47.0
 scale = Vector2(3.70233, 3.70233)
 theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
@@ -207,12 +207,12 @@ anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -208.0
-offset_top = 48.0
+offset_top = 42.0
 offset_right = -135.0
-offset_bottom = 65.0
+offset_bottom = 59.0
 grow_horizontal = 0
 scale = Vector2(2.06249, 2.06249)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 12
 text = "Who? Phase"
 horizontal_alignment = 1
 vertical_alignment = 1

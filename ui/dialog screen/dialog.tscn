@@ -1,0 +1,81 @@
+[gd_scene load_steps=3 format=3 uid="uid://cux5nlpfbhhaj"]
+
+[ext_resource type="Texture2D" uid="uid://dy1e3alkbq8c0" path="res://ui_elements/dialog/border-player.png" id="1_6f4ia"]
+[ext_resource type="Texture2D" uid="uid://xlvlfod4qcyg" path="res://ui_elements/dialog/border-enemy.png" id="2_ed70h"]
+
+[node name="Dialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Player Dialog" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -576.0
+offset_top = -216.0
+offset_right = -300.0
+offset_bottom = -147.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(2.20335, 2.20335)
+texture = ExtResource("1_6f4ia")
+
+[node name="Message" type="RichTextLabel" parent="Player Dialog"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 33.0
+offset_right = 254.0
+offset_bottom = 58.0
+theme_override_font_sizes/normal_font_size = 10
+text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+
+[node name="Name" type="RichTextLabel" parent="Player Dialog"]
+layout_mode = 0
+offset_left = 22.2389
+offset_top = 13.6156
+offset_right = 254.239
+offset_bottom = 28.6156
+theme_override_font_sizes/normal_font_size = 12
+text = "Dr. Ty"
+
+[node name="Enemy" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -32.0
+offset_top = -216.0
+offset_right = 244.0
+offset_bottom = -147.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(2.20335, 2.20335)
+texture = ExtResource("2_ed70h")
+
+[node name="Message" type="RichTextLabel" parent="Enemy"]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 33.0
+offset_right = 254.0
+offset_bottom = 58.0
+theme_override_font_sizes/normal_font_size = 10
+text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+
+[node name="Name" type="RichTextLabel" parent="Enemy"]
+layout_mode = 0
+offset_left = 22.2389
+offset_top = 13.6156
+offset_right = 254.239
+offset_bottom = 28.6156
+theme_override_colors/default_color = Color(0.658824, 0.231373, 0.231373, 1)
+theme_override_font_sizes/normal_font_size = 12
+text = "Dr. Ty"

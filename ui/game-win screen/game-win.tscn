@@ -287,7 +287,7 @@ offset_bottom = 8.5
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(94, 25.5)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 text = "Continue"
 horizontal_alignment = 1
 
@@ -311,7 +311,7 @@ offset_bottom = 8.5
 grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(94, 25.5)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 text = "Restart"
 horizontal_alignment = 1
 
