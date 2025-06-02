@@ -5,6 +5,7 @@ extends Node2D
 @export var _critical_path_length : int = 5 #number of rooms to get to final room
 @export var _branches : int = 2 #number of extra rooms 
 @export var _branch_length : Vector2i = Vector2i(1,1) 
+@export var floor_theme : int = 3
 
 @onready var t_room = preload("res://Level/rooms/troom.tscn")
 @onready var l_room = preload("res://Level/rooms/lroom.tscn")
@@ -109,28 +110,30 @@ func _print_dungeon() -> void:
 		dungeon_as_string += "\n"
 	print(dungeon_as_string)
 
-
 func _spawn_rooms() -> void: 
-	var cell_size = 16 * 10
+	var cell_size = 16 * 15
 	
 	for x in _dimensions.x:
 		for y in range(_dimensions.y - 1, -1, -1):
 			var marker = dungeon[x][y]
 			if marker:
-				var variants = [l_room, box_room]
+				var variants = [t_room, box_room]
 				var scene: PackedScene
 				var room_type = marker["type"] if typeof(marker) == TYPE_DICTIONARY else marker
 				match room_type:
 					"S":
 						scene = start_room
 					"L":
-						scene = t_room
+						scene = l_room
 					_:
 						scene = variants.pick_random()
 						
 				var room = scene.instantiate()
 				room.position = Vector2(x, _dimensions.y - 1 - y) * cell_size
 				add_child(room)
+				
+				if room.has_method("set_theme"):
+					room.set_theme(floor_theme)
 				
 				#handle door visibility based on stored connections
 				if typeof(marker) == TYPE_DICTIONARY:
