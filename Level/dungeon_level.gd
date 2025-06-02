@@ -18,6 +18,9 @@ var dungeon : Array #the array should be a dictionary of the level data
 var room_pos_data: Dictionary = {} #Position (Vector2) => Array[Vector2] of non-floor tiles
 
 func _ready() -> void:
+	#initialize random floor theme
+	floor_theme = randi_range(1,3)
+	
 	_initalize_dungeon()
 	_place_entrance()
 	_generate_critical_path(_start, _critical_path_length, "C", Vector2i.ZERO)
@@ -146,39 +149,39 @@ func _spawn_rooms() -> void:
 					#check current room's connections (where it came from)
 					for dir in connections:
 						if dir == Vector2i.UP:
-							if room.has_node("south_door"):
-								room.get_node("south_door").visible = true
-						elif dir == Vector2i.DOWN:
 							if room.has_node("north_door"):
 								room.get_node("north_door").visible = true
+						elif dir == Vector2i.DOWN:
+							if room.has_node("south_door"):
+								room.get_node("south_door").visible = true
 						elif dir == Vector2i.LEFT:
-							if room.has_node("east_door"):
-								room.get_node("east_door").visible = true
-						elif dir == Vector2i.RIGHT:
 							if room.has_node("west_door"):
 								room.get_node("west_door").visible = true
+						elif dir == Vector2i.RIGHT:
+							if room.has_node("east_door"):
+								room.get_node("east_door").visible = true
 					
 					#check for next room's connections (where it's leading to)
 					# right
 					if x < _dimensions.x - 1 and typeof(dungeon[x+1][y]) == TYPE_DICTIONARY:
 						if Vector2i.LEFT in dungeon[x+1][y]["connections"]:
-							if room.has_node("west_door"):
-								room.get_node("west_door").visible = true
+							if room.has_node("east_door"):
+								room.get_node("east_door").visible = true
 					# left
 					if x > 0 and typeof(dungeon[x-1][y]) == TYPE_DICTIONARY:
 						if Vector2i.RIGHT in dungeon[x-1][y]["connections"]:
-							if room.has_node("east_door"):
-								room.get_node("east_door").visible = true
+							if room.has_node("west_door"):
+								room.get_node("west_door").visible = true
 					# up
 					if y > 0 and typeof(dungeon[x][y-1]) == TYPE_DICTIONARY:
 						if Vector2i.DOWN in dungeon[x][y-1]["connections"]:
-							if room.has_node("south_door"):
-								room.get_node("south_door").visible = true
+							if room.has_node("north_door"):
+								room.get_node("north_door").visible = true
 					# down
 					if y < _dimensions.y - 1 and typeof(dungeon[x][y+1]) == TYPE_DICTIONARY:
 						if Vector2i.UP in dungeon[x][y+1]["connections"]:
-							if room.has_node("north_door"):
-								room.get_node("north_door").visible = true
+							if room.has_node("south_door"):
+								room.get_node("south_door").visible = true
 								
 func get_room_pos_data() -> Dictionary:
 	return room_pos_data

@@ -22,9 +22,9 @@ func _ready():
 func _draw():
 	# Draw grid lines
 	for x in range(grid_width + 1):
-		draw_line(Vector2(x * GRID_SIZE, 0), Vector2(x * GRID_SIZE, grid_height * GRID_SIZE), Color.WHITE, 1.0)
+		draw_line(Vector2(x * GRID_SIZE, 0), Vector2(x * GRID_SIZE, grid_height * GRID_SIZE), Color.TRANSPARENT, 1.0)
 	for y in range(grid_height + 1):
-		draw_line(Vector2(0, y * GRID_SIZE), Vector2(grid_width * GRID_SIZE, y * GRID_SIZE), Color.WHITE, 1.0)
+		draw_line(Vector2(0, y * GRID_SIZE), Vector2(grid_width * GRID_SIZE, y * GRID_SIZE), Color.TRANSPARENT, 1.0)
 	
 	# Draw valid moves
 	for move in valid_moves:
@@ -39,7 +39,7 @@ func _draw():
 	# Draw disabled (unwalkable) tiles
 	for tile in disabled_tiles.keys():
 		var rect = Rect2(tile * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
-		draw_rect(rect, Color(1, 0, 0, 0.2))  # Semi-transparent red
+		draw_rect(rect, Color(1, 0, 0, 0.0))  # Semi-transparent red -- set to 0.0 for transparent
 
 func _process(_delta):
 	queue_redraw()  # Redraw every frame to update highlights

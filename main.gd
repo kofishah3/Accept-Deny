@@ -39,7 +39,7 @@ func _ready():
 			
 		#var wall_positions = room_and_wall_data
 		pass
-    
+	
 	# Wait for dungeon to be ready
 	await get_tree().create_timer(0.1).timeout
 	
