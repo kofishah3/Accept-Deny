@@ -6,16 +6,10 @@ var floor_tile_theme3: Array[Vector2i] = [Vector2i(15,8), Vector2i(15,9), Vector
 var valid_floor_tiles : Array[Vector2i] = floor_tile_theme1 + floor_tile_theme2 + floor_tile_theme3 
 var current_theme : int = 1
 
-# Store coordinates of non-floor tiles
-var non_floor_tile_coords: Array[Vector2i] = []
-
 #load the room variants - using null initialization instead of @onready
 var floor_sprite_0 = null
-var floor_sprite_90 = null
 var floor_sprite_180 = null
-var floor_sprite_270 = null
 
-	
 func set_theme(theme_chosen : int) -> void:
 	current_theme = theme_chosen
 	
@@ -31,21 +25,6 @@ func set_theme(theme_chosen : int) -> void:
 	# Update non-floor tile record when theme changes
 	_collect_non_floor_tiles(floor_sprite)
 	
-# Collect all non-floor tile coordinates
-func _collect_non_floor_tiles(room_layer: TileMapLayer) -> void:
-	non_floor_tile_coords.clear()
-	var used_cells = room_layer.get_used_cells()
-	
-	for cell_coords in used_cells:
-		var atlas_coords = room_layer.get_cell_atlas_coords(cell_coords)
-		
-		if not _is_floor_tile(atlas_coords):
-			non_floor_tile_coords.append(cell_coords)
-
-# Getter method for non-floor tile coordinates
-func get_non_floor_tiles() -> Array[Vector2i]:
-	return non_floor_tile_coords.duplicate()
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass

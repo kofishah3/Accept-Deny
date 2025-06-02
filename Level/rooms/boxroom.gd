@@ -1,4 +1,4 @@
-extends Node2D
+extends "res://Level/rooms/base_room.gd"
 
 @onready var floor_sprite = $RoomSprite
 @onready var details_layer = $DetailsLayer
@@ -10,7 +10,7 @@ var valid_floor_tiles : Array[Vector2i] = floor_tile_theme1 + floor_tile_theme2 
 var current_theme : int = 1
 
 # Store coordinates of non-floor tiles
-var non_floor_tile_coords: Array[Vector2i] = []
+
 var floor_tile_coords: Array[Vector2i] = []
 #load the tilset list script
 var DecorTileData := preload("res://Level/DecorTileData.gd").new()
@@ -20,10 +20,9 @@ func set_theme(theme_chosen : int) -> void:
 	current_theme = theme_chosen
 	set_floor_theme(floor_sprite, current_theme)
 	# Update non-floor tile record when theme changes
-	_collect_non_floor_tiles(floor_sprite)
 	# Add random decorations
 	#_add_random_decor(details_layer, 3) #looks ugly, will add last
-	
+			
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
@@ -36,21 +35,6 @@ func set_doors(neighbors: Dictionary) -> void:
 	
 func _is_floor_tile(atlas_coords : Vector2i) -> bool:
 	return atlas_coords in valid_floor_tiles
-
-# Collect all non-floor tile coordinates
-func _collect_non_floor_tiles(room_layer: TileMapLayer) -> void:
-	non_floor_tile_coords.clear()
-	var used_cells = room_layer.get_used_cells()
-	
-	for cell_coords in used_cells:
-		var atlas_coords = room_layer.get_cell_atlas_coords(cell_coords)
-		
-		if not _is_floor_tile(atlas_coords):
-			non_floor_tile_coords.append(cell_coords)
-
-# Getter method for non-floor tile coordinates
-func get_non_floor_tiles() -> Array[Vector2i]:
-	return non_floor_tile_coords.duplicate()
 
 func set_floor_theme(room_layer: TileMapLayer, theme_id: int) -> void:
 	var used_cells = room_layer.get_used_cells()

@@ -89,23 +89,37 @@ func calculate_movement_range(unit_pos: Vector2, max_ap: int) -> Array:
 	var visited = {}
 	var queue = [ {"pos": unit_pos, "cost": 0} ]
 	visited[unit_pos] = true
+	
 	while queue.size() > 0:
 		var current = queue.pop_front()
 		var pos = current["pos"]
 		var cost = current["cost"]
+		
+		# Add position to valid moves if it's not the starting position
 		if cost > 0:
 			valid_positions.append(pos)
 			move_ap_costs[pos] = cost
+		
+		# Stop if we've reached max AP
 		if cost >= max_ap:
 			continue
+		
+		# Check all adjacent tiles
 		for dir in [Vector2(1,0), Vector2(-1,0), Vector2(0,1), Vector2(0,-1)]:
 			var next = pos + dir
-			if not _is_walkable(next):
+			
+			# Skip if not walkable or already visited
+			if not _is_walkable(next) or visited.has(next):
 				continue
-			if visited.has(next):
-				continue
-			visited[next] = true
-			queue.append({"pos": next, "cost": cost + 1})
+			
+			# Calculate cost to move to this tile
+			var next_cost = cost + 1
+			
+			# Add to queue if within AP range
+			if next_cost <= max_ap:
+				visited[next] = true
+				queue.append({"pos": next, "cost": next_cost})
+	
 	return valid_positions
 
 func update_attack_range(unit_pos: Vector2, attack_range: int) -> Array:
