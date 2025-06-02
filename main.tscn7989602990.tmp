@@ -13,8 +13,7 @@ script = ExtResource("1_2yge")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(500, 288)
-zoom = Vector2(2, 2)
-
+zoom = Vector2(4.5, 4.5)
 process_callback = 0
 script = ExtResource("2_7mycd")
 
@@ -23,11 +22,13 @@ script = ExtResource("2_7mycd")
 [node name="Enemies" type="Node2D" parent="."]
 
 [node name="Enemy1" parent="Enemies" instance=ExtResource("4_lquwl")]
-position = Vector2(175.224, 586.284)
+position = Vector2(152.12, 587.229)
+
+[node name="Enemy2" parent="Enemies" instance=ExtResource("4_lquwl")]
+position = Vector2(151.349, 561.398)
 
 [node name="Player" parent="." instance=ExtResource("3_1bvp3")]
 position = Vector2(41.6627, 565.451)
-
 
 [node name="GridManager" type="Node2D" parent="."]
 script = ExtResource("2_h2yge")
@@ -50,11 +51,3 @@ layout_mode = 2
 
 [node name="ActionPointsLabel" type="Label" parent="CanvasLayer/BattleUI/VBoxContainer"]
 layout_mode = 2
-
-[node name="Enemies" type="Node2D" parent="."]
-
-[node name="Enemy1" parent="Enemies" instance=ExtResource("4_lquwl")]
-position = Vector2(295, 73)
-
-[node name="Player" parent="." instance=ExtResource("3_1bvp3")]
-position = Vector2(53, 70)

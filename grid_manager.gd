@@ -1,8 +1,9 @@
 extends Node2D
 
 const GRID_SIZE = 16.0  # Size of each grid cell in pixels
-var grid_width = 60  
-var grid_height = 43
+
+var grid_width = 80  
+var grid_height = 50 
 
 var current_turn = "player"  # Can be "player" or "enemy"
 var selected_unit = null
@@ -125,3 +126,77 @@ func get_unit_at_position(grid_pos: Vector2) -> Node:
 	
 func clear_disabled_tiles() -> void:
 	disabled_tiles.clear()
+
+func update_line_attack_range(unit_pos: Vector2, attack_range: int, diagonal_allowed: bool) -> Array:
+	var valid_positions = []
+	var directions = [Vector2(1,0), Vector2(-1,0), Vector2(0,1), Vector2(0,-1)]
+	if diagonal_allowed:
+		directions.append_array([Vector2(1,1), Vector2(-1,1), Vector2(1,-1), Vector2(-1,-1)])
+	
+	for dir in directions:
+		for i in range(1, attack_range + 1):
+			var new_pos = unit_pos + (dir * i)
+			if is_valid_grid_position(new_pos):
+				valid_positions.append(new_pos)
+			else:
+				break  # Stop checking in this direction if we hit a wall
+	return valid_positions
+
+func update_aoe_attack_range(unit_pos: Vector2, attack_range: int, aoe_size: Vector2) -> Array:
+	var valid_positions = []
+	for x in range(-attack_range, attack_range + 1):
+		for y in range(-attack_range, attack_range + 1):
+			var new_pos = unit_pos + Vector2(x, y)
+			if is_valid_grid_position(new_pos):
+				# Manhattan distance for attack range
+				if abs(x) + abs(y) <= attack_range:
+					valid_positions.append(new_pos)
+	return valid_positions
+
+func update_piercing_attack_range(unit_pos: Vector2, diagonal_allowed: bool) -> Array:
+	var valid_positions = []
+	var directions = [Vector2(1,0), Vector2(-1,0), Vector2(0,1), Vector2(0,-1)]
+	if diagonal_allowed:
+		directions.append_array([Vector2(1,1), Vector2(-1,1), Vector2(1,-1), Vector2(-1,-1)])
+	
+	for dir in directions:
+		var current_pos = unit_pos
+		while true:
+			current_pos += dir
+			if not is_valid_grid_position(current_pos):
+				break
+			valid_positions.append(current_pos)
+	return valid_positions
+
+func get_units_in_line(start_pos: Vector2, end_pos: Vector2) -> Array:
+	var units = []
+	var dir = (end_pos - start_pos).normalized()
+	var current_pos = start_pos + dir
+	
+	while current_pos != end_pos:
+		if is_valid_grid_position(current_pos):
+			var unit = get_unit_at_position(current_pos)
+			if unit:
+				units.append(unit)
+		current_pos += dir
+	
+	# Add the target unit at the end position
+	var end_unit = get_unit_at_position(end_pos)
+	if end_unit:
+		units.append(end_unit)
+	
+	return units
+
+func get_units_in_aoe(center_pos: Vector2, aoe_size: Vector2) -> Array:
+	var units = []
+	var half_size = aoe_size / 2
+	
+	for x in range(-half_size.x, half_size.x + 1):
+		for y in range(-half_size.y, half_size.y + 1):
+			var check_pos = center_pos + Vector2(x, y)
+			if is_valid_grid_position(check_pos):
+				var unit = get_unit_at_position(check_pos)
+				if unit and not unit.is_in_group("player"):  # Exclude player from AOE
+					units.append(unit)
+	
+	return units 

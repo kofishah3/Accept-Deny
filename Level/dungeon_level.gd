@@ -1,7 +1,7 @@
 extends Node2D
 
 @export var _dimensions : Vector2i = Vector2i(10,3) #max number of dungeon rooms
-@export var _start : Vector2i = Vector2i(0,0) #-1, -1 for completely random start point
+@export var _start : Vector2i = Vector2i(0,0) #Starting room is always at (0,0)
 @export var _critical_path_length : int = 5 #number of rooms to get to final room
 @export var _branches : int = 2 #number of extra rooms 
 @export var _branch_length : Vector2i = Vector2i(1,1) 
@@ -32,10 +32,6 @@ func _initalize_dungeon() -> void:
 			dungeon[x].append(0)
 			
 func _place_entrance() -> void:
-	if _start.x < 0 or _start.x >= _dimensions.x:
-		_start.x = randi_range(0, _dimensions.x - 1)
-	if _start.y < 0 or _start.y >= _dimensions.y:
-		_start.y = randi_range(0, _dimensions.y - 1)
 	dungeon[_start.x][_start.y] = {
 		"type": "S",
 		"connections": []

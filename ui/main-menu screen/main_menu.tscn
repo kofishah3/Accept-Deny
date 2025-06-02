@@ -28,20 +28,29 @@ grow_vertical = 2
 scale = Vector2(1.00119, 0.994708)
 script = SubResource("GDScript_eetwo")
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_cmhnm")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 1.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_pjqei")
 expand_mode = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="Transparency" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0.784314)
+layout_mode = 0
+offset_left = 274.0
+offset_top = 140.0
+offset_right = 1003.0
+offset_bottom = 307.0
+color = Color(0, 0, 0, 1)
+
+[node name="Title Border" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,37 +61,17 @@ scale = Vector2(1, 0.991831)
 theme_override_constants/separation = 80
 alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+[node name="TextureRect" type="TextureRect" parent="Title Border"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="Info Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-texture_normal = ExtResource("3_2mssu")
-texture_pressed = ExtResource("4_t01hl")
-
-[node name="Play Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-texture_normal = ExtResource("5_u8u27")
-texture_pressed = ExtResource("6_qadfv")
-
-[node name="Mechanics Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-texture_normal = ExtResource("7_o1whf")
-texture_pressed = ExtResource("8_pjqei")
-
-[node name="Main-border" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(193.769, 76.02)
-scale = Vector2(0.856912, 0.852151)
+[node name="Main-border" type="Sprite2D" parent="Title Border"]
+position = Vector2(641.099, 225.699)
+scale = Vector2(2.94854, 2.93216)
 texture = ExtResource("8_15c5s")
 
-[node name="Label" type="Label" parent="VBoxContainer/Main-border"]
+[node name="Label" type="Label" parent="Title Border/Main-border"]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -94,25 +83,56 @@ offset_right = 64.0
 offset_bottom = -19.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_shadow_color = Color(0.400698, 0.400698, 0.400698, 1)
+theme_override_colors/font_shadow_color = Color(0.172833, 0.172833, 0.172833, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 24
-text = "ACCEPT / DENY"
+text = "ACCEPT/DENY"
 horizontal_alignment = 1
 vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
 
-[node name="Green-triangle" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(210.749, 45.612)
-scale = Vector2(2.79667, 2.79667)
+[node name="Green-triangle" type="Sprite2D" parent="Title Border"]
+position = Vector2(703.163, 121.632)
+scale = Vector2(9.62303, 9.62303)
 texture = ExtResource("9_ni65f")
 
-[node name="Yellow-circle" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(192.771, 45.612)
-scale = Vector2(2.77743, 2.77743)
+[node name="Yellow-circle" type="Sprite2D" parent="Title Border"]
+position = Vector2(639.239, 121.632)
+scale = Vector2(9.55683, 9.55683)
 texture = ExtResource("11_bxm30")
 
-[node name="Red-diamond" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(174.792, 45.612)
-scale = Vector2(2.77827, 2.79281)
+[node name="Red-diamond" type="Sprite2D" parent="Title Border"]
+position = Vector2(575.315, 121.632)
+scale = Vector2(9.55972, 9.60975)
 texture = ExtResource("10_e0m0q")
+
+[node name="Main Buttons" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -184.542
+offset_top = 426.256
+offset_right = -64.542
+offset_bottom = 458.256
+grow_horizontal = 2
+scale = Vector2(3.13651, 3.13651)
+size_flags_horizontal = 4
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Info Button" type="TextureButton" parent="Main Buttons"]
+layout_mode = 2
+texture_normal = ExtResource("3_2mssu")
+texture_pressed = ExtResource("4_t01hl")
+
+[node name="Play Button" type="TextureButton" parent="Main Buttons"]
+layout_mode = 2
+texture_normal = ExtResource("5_u8u27")
+texture_pressed = ExtResource("6_qadfv")
+
+[node name="Mechanics Button" type="TextureButton" parent="Main Buttons"]
+layout_mode = 2
+texture_normal = ExtResource("7_o1whf")
+texture_pressed = ExtResource("8_pjqei")
