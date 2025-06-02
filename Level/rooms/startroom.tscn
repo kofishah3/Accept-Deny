@@ -419,9 +419,11 @@ tile_set = SubResource("TileSet_cpeod")
 [node name="south_door" type="Marker2D" parent="."]
 visible = false
 position = Vector2(96, 176)
+scale = Vector2(2, 2)
 
 [node name="SouthDoor" type="Sprite2D" parent="south_door"]
-position = Vector2(8, -8)
+position = Vector2(4, -4)
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_cpeod")
 region_enabled = true
 region_rect = Rect2(16, 176, 16, 16)
