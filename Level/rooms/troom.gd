@@ -6,6 +6,9 @@ var floor_tile_theme3: Array[Vector2i] = [Vector2i(15,8), Vector2i(15,9), Vector
 var valid_floor_tiles : Array[Vector2i] = floor_tile_theme1 + floor_tile_theme2 + floor_tile_theme3 
 var current_theme : int = 1
 
+# Store coordinates of non-floor tiles
+var non_floor_tile_coords: Array[Vector2i] = []
+
 #load the room variants - using null initialization instead of @onready
 var floor_sprite_0 = null
 var floor_sprite_90 = null
@@ -22,10 +25,12 @@ func set_theme(theme_chosen : int) -> void:
 	floor_sprite_270 = get_node("RoomSprite270") if has_node("RoomSprite270") else null
 	
 	var floor_rotation = randi_range(0, 3)
-	var current_room_rotationVar = _get_rotated_room(floor_rotation)
-	if current_room_rotationVar:
-		set_floor_theme(current_room_rotationVar, current_theme)
-		
+	var floor_sprite = _get_rotated_room(floor_rotation)
+	if floor_sprite:
+		set_floor_theme(floor_sprite, current_theme)
+	# Update non-floor tile record when theme changes
+	_collect_non_floor_tiles(floor_sprite)
+	
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
@@ -42,17 +47,32 @@ func set_doors(neighbors: Dictionary) -> void:
 	
 func _is_floor_tile(atlas_coords : Vector2i) -> bool:
 	return atlas_coords in valid_floor_tiles
-
-func set_floor_theme(tile_layer: TileMapLayer, theme_id: int) -> void:
-	var used_cells = tile_layer.get_used_cells()
+	
+# Collect all non-floor tile coordinates
+func _collect_non_floor_tiles(room_layer: TileMapLayer) -> void:
+	non_floor_tile_coords.clear()
+	var used_cells = room_layer.get_used_cells()
 	
 	for cell_coords in used_cells:
-		var atlas_coords = tile_layer.get_cell_atlas_coords(cell_coords)
+		var atlas_coords = room_layer.get_cell_atlas_coords(cell_coords)
+		
+		if not _is_floor_tile(atlas_coords):
+			non_floor_tile_coords.append(cell_coords)
+
+# Getter method for non-floor tile coordinates
+func get_non_floor_tiles() -> Array[Vector2i]:
+	return non_floor_tile_coords.duplicate()
+	
+func set_floor_theme(room_layer: TileMapLayer, theme_id: int) -> void:
+	var used_cells = room_layer.get_used_cells()
+	
+	for cell_coords in used_cells:
+		var atlas_coords = room_layer.get_cell_atlas_coords(cell_coords)
 
 		if _is_floor_tile(atlas_coords):
 			var new_atlas_coords = _get_random_floor_variant(theme_id)
-			var source_id = tile_layer.get_cell_source_id(cell_coords)
-			tile_layer.set_cell(cell_coords, source_id, new_atlas_coords)
+			var source_id = room_layer.get_cell_source_id(cell_coords)
+			room_layer.set_cell(cell_coords, source_id, new_atlas_coords)
 			
 func _get_random_floor_variant(theme_id: int) -> Vector2i:
 	match theme_id:

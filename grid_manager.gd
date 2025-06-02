@@ -1,6 +1,7 @@
 extends Node2D
 
 const GRID_SIZE = 16.0  # Size of each grid cell in pixels
+
 var grid_width = 80  
 var grid_height = 50 
 
@@ -8,9 +9,11 @@ var current_turn = "player"  # Can be "player" or "enemy"
 var selected_unit = null
 var valid_moves = []
 var valid_attacks = []
-var attack_color = Color(1, 0, 0, 0.3)  # Semi-transparent red for all attacks
-var occupied_tiles = {}  # Dictionary to track occupied tiles
-var move_ap_costs = {}  # Dictionary to store AP cost for each valid move
+var attack_color = Color(1, 0, 0, 0.3) # Semi-transparent red for all attacks
+var occupied_tiles = {} # Dictionary to track occupied tiles
+var move_ap_costs = {} # Dictionary to store AP cost for each valid move
+var disabled_tiles = {}
+var wall_global_positions: Array[Vector2i] = []
 
 func _ready():
 	# Initialize the grid
@@ -19,9 +22,9 @@ func _ready():
 func _draw():
 	# Draw grid lines
 	for x in range(grid_width + 1):
-		draw_line(Vector2(x * GRID_SIZE, 0), Vector2(x * GRID_SIZE, grid_height * GRID_SIZE), Color.TRANSPARENT, 1.0)
+		draw_line(Vector2(x * GRID_SIZE, 0), Vector2(x * GRID_SIZE, grid_height * GRID_SIZE), Color.WHITE, 1.0)
 	for y in range(grid_height + 1):
-		draw_line(Vector2(0, y * GRID_SIZE), Vector2(grid_width * GRID_SIZE, y * GRID_SIZE), Color.TRANSPARENT, 1.0)
+		draw_line(Vector2(0, y * GRID_SIZE), Vector2(grid_width * GRID_SIZE, y * GRID_SIZE), Color.WHITE, 1.0)
 	
 	# Draw valid moves
 	for move in valid_moves:
@@ -32,9 +35,22 @@ func _draw():
 	for attack in valid_attacks:
 		var rect = Rect2(attack * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
 		draw_rect(rect, attack_color)  # Use consistent semi-transparent red
+	
+	# Draw disabled (unwalkable) tiles
+	for tile in disabled_tiles.keys():
+		var rect = Rect2(tile * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
+		draw_rect(rect, Color(1, 0, 0, 0.2))  # Semi-transparent red
 
 func _process(_delta):
 	queue_redraw()  # Redraw every frame to update highlights
+
+func mark_unwalkable_tiles(tile_list: Array[Vector2i]) -> void:
+	for pos in tile_list:
+		disabled_tiles[pos] = true
+
+func _is_walkable(grid_pos: Vector2) -> bool:
+	var grid_pos_i = Vector2i(grid_pos)  # Convert to Vector2i for comparison
+	return is_valid_grid_position(grid_pos) and not is_tile_occupied(grid_pos) and not disabled_tiles.has(grid_pos_i)
 
 func update_occupied_tiles():
 	occupied_tiles.clear()
@@ -49,7 +65,7 @@ func update_occupied_tiles():
 		occupied_tiles[enemy.grid_position] = enemy
 
 func is_tile_occupied(grid_pos: Vector2) -> bool:
-	return occupied_tiles.has(grid_pos)
+	return occupied_tiles.has(Vector2i(grid_pos))
 
 func world_to_grid(world_pos: Vector2) -> Vector2:
 	return Vector2(
@@ -84,9 +100,7 @@ func calculate_movement_range(unit_pos: Vector2, max_ap: int) -> Array:
 			continue
 		for dir in [Vector2(1,0), Vector2(-1,0), Vector2(0,1), Vector2(0,-1)]:
 			var next = pos + dir
-			if not is_valid_grid_position(next):
-				continue
-			if is_tile_occupied(next):
+			if not _is_walkable(next):
 				continue
 			if visited.has(next):
 				continue
@@ -109,6 +123,9 @@ func update_attack_range(unit_pos: Vector2, attack_range: int) -> Array:
 
 func get_unit_at_position(grid_pos: Vector2) -> Node:
 	return occupied_tiles.get(grid_pos) 
+	
+func clear_disabled_tiles() -> void:
+	disabled_tiles.clear()
 
 func update_line_attack_range(unit_pos: Vector2, attack_range: int, diagonal_allowed: bool) -> Array:
 	var valid_positions = []
