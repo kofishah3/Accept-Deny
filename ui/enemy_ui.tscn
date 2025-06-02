@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://bqnv8j8y5g6vx"]
+
+[ext_resource type="Script" path="res://ui/enemy_ui.gd" id="1_2k4m3"]
+
+[node name="EnemyUI" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_2k4m3")
+
+[node name="StringLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 200.0
+offset_bottom = 20.0
+text = "String: "
+
+[node name="ActionPointsBar" type="ProgressBar" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 25.0
+offset_right = 200.0
+offset_bottom = 45.0
+value = 50.0
+
+[node name="ActionPointsLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 50.0
+offset_right = 200.0
+offset_bottom = 70.0
+text = "AP: 0/0" 

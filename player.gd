@@ -228,27 +228,91 @@ func _input(event):
 			return
 		
 		# Only handle movement if we're selected and in move mode
-		if current_mode == "move" and grid_manager.selected_unit == self and target_grid_pos in grid_manager.valid_moves:
-			var distance = int(abs(grid_position.x - target_grid_pos.x) + abs(grid_position.y - target_grid_pos.y))
-			if current_action_points >= distance and distance > 0:
-				previous_grid_position = grid_position
-				# Build move_path: vertical then horizontal
-				move_path.clear()
-				var cur = grid_position
-				var vert_dir = sign(target_grid_pos.y - cur.y)
-				for i in range(abs(target_grid_pos.y - cur.y)):
-					cur = Vector2(cur.x, cur.y + vert_dir)
-					move_path.append(cur)
-				var horiz_dir = sign(target_grid_pos.x - cur.x)
-				for i in range(abs(target_grid_pos.x - cur.x)):
-					cur = Vector2(cur.x + horiz_dir, cur.y)
-					move_path.append(cur)
-				is_moving = true
-				grid_manager.valid_moves = []
-				current_action_points -= distance
-				update_ui()
-				play_move_animation() # Play the first animation immediately
-				# Animation for subsequent steps is handled in _process
+		if grid_manager.selected_unit == self and current_mode == "move":
+			# Check if target position is walkable and not occupied
+			if not grid_manager._is_walkable(target_grid_pos) or is_position_occupied(target_grid_pos):
+				return
+				
+			previous_grid_position = grid_position
+			# Build move_path using A* pathfinding to avoid non-walkable tiles
+			move_path.clear()
+			var path = find_path_to_target(target_grid_pos)
+			if path.size() > 0:
+				# Calculate movement cost based on actual path length
+				var movement_cost = path.size() - 1  # Subtract 1 because path includes start position
+				if movement_cost <= current_action_points:
+					move_path = path
+					is_moving = true
+					grid_manager.valid_moves = []
+					current_action_points -= movement_cost
+					update_ui()
+					play_move_animation() # Play the first animation immediately
+					# Animation for subsequent steps is handled in _process
+
+func find_path_to_target(target_pos: Vector2) -> Array:
+	var open_set = []
+	var closed_set = {}
+	var came_from = {}
+	var g_score = {}
+	var f_score = {}
+	
+	# Initialize start node
+	open_set.append(grid_position)
+	g_score[grid_position] = 0
+	f_score[grid_position] = heuristic(grid_position, target_pos)
+	
+	while open_set.size() > 0:
+		# Find node with lowest f_score
+		var current = open_set[0]
+		var current_index = 0
+		for i in range(open_set.size()):
+			if f_score[open_set[i]] < f_score[current]:
+				current = open_set[i]
+				current_index = i
+		
+		# Remove current from open set and add to closed set
+		open_set.remove_at(current_index)
+		closed_set[current] = true
+		
+		# If we reached the target, reconstruct and return the path
+		if current == target_pos:
+			return reconstruct_path(came_from, current)
+		
+		# Check all neighbors
+		for dir in [Vector2(1,0), Vector2(-1,0), Vector2(0,1), Vector2(0,-1)]:
+			var neighbor = current + dir
+			
+			# Skip if neighbor is not walkable, is occupied by an enemy, or in closed set
+			if not grid_manager._is_walkable(neighbor) or is_position_occupied(neighbor) or closed_set.has(neighbor):
+				continue
+			
+			var tentative_g_score = g_score[current] + 1
+			
+			# If neighbor is not in open set, add it
+			if not open_set.has(neighbor):
+				open_set.append(neighbor)
+			# If this path to neighbor is worse than previous, skip
+			elif tentative_g_score >= g_score.get(neighbor, INF):
+				continue
+			
+			# This path is the best so far, record it
+			came_from[neighbor] = current
+			g_score[neighbor] = tentative_g_score
+			f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, target_pos)
+	
+	# If we get here, no path was found
+	return []
+
+func heuristic(a: Vector2, b: Vector2) -> float:
+	# Manhattan distance
+	return abs(a.x - b.x) + abs(a.y - b.y)
+
+func reconstruct_path(came_from: Dictionary, current: Vector2) -> Array:
+	var path = [current]
+	while came_from.has(current):
+		current = came_from[current]
+		path.push_front(current)
+	return path
 
 func update_ui():
 	var battle_ui = get_node("/root/main/CanvasLayer/BattleUI")
@@ -259,14 +323,20 @@ func update_movement_range():
 	# Use current_action_points as the movement range
 	var all_moves = grid_manager.calculate_movement_range(grid_position, current_action_points)
 	
-	# Filter moves based on available AP (Manhattan distance)
+	# Filter moves based on available AP and path validity
 	var valid_moves = []
 	for move in all_moves:
-		var dx = abs(grid_position.x - move.x)
-		var dy = abs(grid_position.y - move.y)
-		var distance = int(dx + dy)
-		if distance <= current_action_points and distance > 0:
-			valid_moves.append(move)
+		# Skip if position is occupied
+		if is_position_occupied(move):
+			continue
+			
+		# Find path to this position
+		var path = find_path_to_target(move)
+		if path.size() > 0:
+			# Calculate movement cost based on actual path length
+			var movement_cost = path.size() - 1  # Subtract 1 because path includes start position
+			if movement_cost <= current_action_points:
+				valid_moves.append(move)
 	
 	grid_manager.valid_moves = valid_moves
 	grid_manager.valid_attacks = []
@@ -409,3 +479,11 @@ func enter_hack_mode(hack_type: String):
 	# Always select this player for hack mode
 	if grid_manager:
 		grid_manager.selected_unit = self
+
+func is_position_occupied(pos: Vector2) -> bool:
+	# Check if position is occupied by any enemy
+	var main = get_node("/root/main")
+	for enemy in main.enemies.get_children():
+		if enemy.grid_position == pos:
+			return true
+	return false
