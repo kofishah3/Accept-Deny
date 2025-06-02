@@ -21,6 +21,7 @@ var current_mode = "move"  # Can be "move" or "attack"
 var is_interacting_with_ui = false
 
 var previous_grid_position = Vector2.ZERO
+var move_path = []
 
 # Weapons
 var weapons = {
@@ -128,61 +129,74 @@ func update_enemy_ui_position():
 		enemy_ui_container.position = screen_pos + enemy_ui_offset
 
 func _process(delta):
-	if is_moving:
-		var target_world_pos = grid_manager.grid_to_world(target_position)
+	if is_moving and move_path.size() > 0:
+		var next_grid = move_path[0]
+		var target_world_pos = grid_manager.grid_to_world(next_grid)
 		position = position.move_toward(target_world_pos, move_speed * grid_manager.GRID_SIZE * delta)
-		
 		if position.distance_to(target_world_pos) < 1:
 			position = target_world_pos
-			grid_position = target_position
-			is_moving = false
-			has_moved = true
-			grid_manager.update_occupied_tiles()
-			# After moving, check if we can attack
-			check_and_attack()
-	
+			grid_position = next_grid
+			move_path.pop_front()
+			if move_path.size() > 0:
+				play_move_animation()
+			else:
+				is_moving = false
+				has_moved = true
+				grid_manager.update_occupied_tiles()
+				update_enemy_ui()
+				check_and_attack()
+	elif is_moving:
+		# Fallback for non-path movement (shouldn't happen)
+		is_moving = false
+		grid_manager.update_occupied_tiles()
+		update_enemy_ui()
 	# Update enemy UI position to follow enemy
 	update_enemy_ui_position()
 
 func play_move_animation():
-	var direction = target_position - previous_grid_position
-	
+	if move_path.size() == 0:
+		return
+	var direction = move_path[0] - grid_position
 	if direction.x > 0:
 		anim.play("walk_right")
 	elif direction.x < 0:
 		anim.play("walk_left")
 	elif direction.y > 0:
 		anim.play("walk_down")
-	elif direction.y < 0: 
+	elif direction.y < 0:
 		anim.play("walk_up")
 
 func take_turn():
 	print("Enemy taking turn")
 	if current_action_points <= 0:
 		return
-		
+	
 	var player = get_node("/root/main/Player")
 	if not player or not is_instance_valid(player):
 		return
-		
+	
 	# If we haven't moved and have enough AP, try to move towards the player
 	if not has_moved and current_action_points >= 1:
-		var valid_moves = grid_manager.calculate_movement_range(grid_position, movement_range)
+		var valid_moves = grid_manager.calculate_movement_range(grid_position, current_action_points)
 		var best_move = find_best_move_towards_player(valid_moves, player.grid_position)
 		
 		if best_move:
 			print("Enemy moving to: ", best_move)
-			
-			#get position before moving
-			previous_grid_position = grid_position
-			
-			target_position = best_move
-			
-			play_move_animation()
-			
+			# Build move_path: vertical then horizontal
+			move_path.clear()
+			var cur = grid_position
+			var vert_dir = sign(best_move.y - cur.y)
+			for i in range(abs(best_move.y - cur.y)):
+				cur = Vector2(cur.x, cur.y + vert_dir)
+				move_path.append(cur)
+			var horiz_dir = sign(best_move.x - cur.x)
+			for i in range(abs(best_move.x - cur.x)):
+				cur = Vector2(cur.x + horiz_dir, cur.y)
+				move_path.append(cur)
 			is_moving = true
-			current_action_points -= 1
-			update_enemy_ui()
+			current_action_points -= int(abs(grid_position.x - best_move.x) + abs(grid_position.y - best_move.y))
+			play_move_animation()
+			# UI update and AP deduction handled after movement
 		else:
 			has_moved = true
 			check_and_attack()
@@ -222,17 +236,14 @@ func attack(target):
 	var crit_chance = calculate_crit_chance(target, weapon)
 	var damage = calculate_damage(target, weapon)
 	
-	# Roll for hit
-	if randf() * 100 <= hit_chance:
-		# Roll for crit
-		if randf() * 100 <= crit_chance:
-			damage *= 3
-			print("Critical hit with ", weapon.name, "!")
-		
-		target.take_damage(damage)
-		print("Hit for ", damage, " damage with ", weapon.name, "!")
-	else:
-		print("Attack missed with ", weapon.name, "!")
+	# Always hit (remove hit chance check)
+	# Roll for crit
+	if randf() * 100 <= crit_chance:
+		damage *= 3
+		print("Critical hit with ", weapon.name, "!")
+	
+	target.take_damage(damage)
+	print("Hit for ", damage, " damage with ", weapon.name, "!")
 
 func calculate_hit_chance(target, weapon):
 	var base_hit = weapon.hit + (skill * 2) + (luck / 2)

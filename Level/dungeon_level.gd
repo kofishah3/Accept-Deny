@@ -130,6 +130,7 @@ func _spawn_rooms() -> void:
 						
 				var room = scene.instantiate()
 				room.position = Vector2(x, _dimensions.y - 1 - y) * cell_size
+				room.add_to_group("rooms")  # Add room to the rooms group
 				add_child(room)
 				
 				#handle door visibility based on stored connections
