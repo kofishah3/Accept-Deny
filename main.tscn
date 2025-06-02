@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://dagm104qf1258"]
+[gd_scene load_steps=9 format=3 uid="uid://dagm104qf1258"]
 
 [ext_resource type="Script" uid="uid://baf34domhu0ih" path="res://main.gd" id="1_2yge"]
 [ext_resource type="PackedScene" uid="uid://b6x8v0j6y5n3q" path="res://ui/battle_ui.tscn" id="2_3k4m3"]
@@ -6,13 +6,15 @@
 [ext_resource type="Script" uid="uid://ddqndv57cu6hd" path="res://grid_manager.gd" id="2_h2yge"]
 [ext_resource type="PackedScene" uid="uid://dev1r1jpyo8a4" path="res://player.tscn" id="3_1bvp3"]
 [ext_resource type="PackedScene" uid="uid://cny6qsw5au8ur" path="res://enemy.tscn" id="4_lquwl"]
+[ext_resource type="Script" uid="uid://hfhg66s2qnch" path="res://player_weapon_ui.gd" id="7_272bh"]
+[ext_resource type="Script" uid="uid://cajpl7lgvuate" path="res://v_box_container.gd" id="8_5vw27"]
 
 [node name="main" type="Node2D"]
 script = ExtResource("1_2yge")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(200, 288)
-zoom = Vector2(3, 3)
+position = Vector2(500, 288)
+zoom = Vector2(2, 2)
 process_callback = 0
 script = ExtResource("2_7mycd")
 
@@ -32,3 +34,33 @@ script = ExtResource("2_h2yge")
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="BattleUI" parent="CanvasLayer" instance=ExtResource("2_3k4m3")]
+
+[node name="PlayerWeaponUI" type="VBoxContainer" parent="CanvasLayer/BattleUI"]
+layout_mode = 0
+offset_right = 60.0
+offset_bottom = 58.0
+script = ExtResource("7_272bh")
+
+[node name="WeaponStringLabel" type="Label" parent="CanvasLayer/BattleUI/PlayerWeaponUI"]
+layout_mode = 2
+
+[node name="LoadStringButton" type="Button" parent="CanvasLayer/BattleUI/PlayerWeaponUI"]
+layout_mode = 2
+
+[node name="StringInput" type="LineEdit" parent="CanvasLayer/BattleUI/PlayerWeaponUI"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/BattleUI"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("8_5vw27")
+
+[node name="StringLabel" type="Label" parent="CanvasLayer/BattleUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="ActionPointsBar" type="ProgressBar" parent="CanvasLayer/BattleUI/VBoxContainer"]
+layout_mode = 2
+
+[node name="ActionPointsLabel" type="Label" parent="CanvasLayer/BattleUI/VBoxContainer"]
+layout_mode = 2

@@ -12,6 +12,7 @@ extends Area2D
 @export var luck = 4
 @export var max_health = 20
 @export var max_action_points = 5
+@export var weapon_ui_offset := Vector2(10, -100)
 var current_health
 var current_action_points
 
@@ -66,13 +67,15 @@ var grid_position = Vector2.ZERO
 var has_moved = false
 var has_attacked = false
 var target_position = Vector2.ZERO
+var previous_grid_position = Vector2.ZERO
 var is_moving = false
 var move_speed = 4.0  # Grid cells per second
 
 # UI elements
+var player_weapon_ui_container
 var weapon_string_label
-var load_string_button
 var string_input
+var load_string_button
 
 func _ready():
 	grid_manager = get_node("/root/main/GridManager")
@@ -82,37 +85,59 @@ func _ready():
 	current_action_points = max_action_points
 	
 	# Connect to the battle UI
-	var battle_ui = get_node("/root/main/BattleUI")
+	var battle_ui = get_node("/root/main/CanvasLayer/BattleUI")
 	if battle_ui:
 		battle_ui.set_player(self)
 	
-	create_weapon_ui()
+	# COnnect to the Player Weapon UI
+	var player_weapon_ui = get_node("/root/main/CanvasLayer/BattleUI/PlayerWeaponUI")
+	print("PlayerWeaponUI found: ", player_weapon_ui != null)
 
-func create_weapon_ui():
-	# Create weapon string display
-	weapon_string_label = Label.new()
-	weapon_string_label.name = "WeaponStringLabel"
-	weapon_string_label.position = Vector2(-40, -130)
-	weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
-	add_child(weapon_string_label)
+	if player_weapon_ui:
+		player_weapon_ui_container = player_weapon_ui
+		weapon_string_label = player_weapon_ui.get_node("WeaponStringLabel")
+		load_string_button = player_weapon_ui.get_node("LoadStringButton")
+		string_input = player_weapon_ui.get_node("StringInput")
+		
+		print("WeaponStringLabel found: ", weapon_string_label != null)
+		print("LoadStringButton found: ", load_string_button != null)
+		print("StringInput found: ", string_input != null)
+		
+		if load_string_button:
+			var connection_result = load_string_button.connect("pressed", Callable(self, "_on_load_string_pressed"))
+			print("Button connection result: ", connection_result)
 	
-	# Create load string button
-	load_string_button = Button.new()
-	load_string_button.name = "LoadStringButton"
-	load_string_button.position = Vector2(-40, -100)
-	load_string_button.text = "Load String (1 AP)"
-	load_string_button.connect("pressed", Callable(self, "_on_load_string_pressed"))
-	add_child(load_string_button)
+	update_weapon_ui()
 	
-	# Create string input
-	string_input = LineEdit.new()
-	string_input.name = "StringInput"
-	string_input.position = Vector2(-40, -70)
-	string_input.placeholder_text = "Enter string..."
-	string_input.max_length = 6  # Maximum length of any weapon's string
-	add_child(string_input)
+	#create_weapon_ui()
+
+#DEPRACATED -- moved to canvas layer and made automatically 
+#func create_weapon_ui():
+	## Create weapon string display
+	#weapon_string_label = Label.new()
+	#weapon_string_label.name = "WeaponStringLabel"
+	#weapon_string_label.position = Vector2(-40, -130)
+	#weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
+	#add_child(weapon_string_label)
+	#
+	## Create load string button
+	#load_string_button = Button.new()
+	#load_string_button.name = "LoadStringButton"
+	#load_string_button.position = Vector2(-40, -100)
+	#load_string_button.text = "Load String (1 AP)"
+	#load_string_button.connect("pressed", Callable(self, "_on_load_string_pressed"))
+	#add_child(load_string_button)
+	#
+	## Create string input
+	#string_input = LineEdit.new()
+	#string_input.name = "StringInput"
+	#string_input.position = Vector2(-40, -70)
+	#string_input.placeholder_text = "Enter string..."
+	#string_input.max_length = 6  # Maximum length of any weapon's string
+	#add_child(string_input)
 
 func _on_load_string_pressed():
+	print("Load string button was pressed!")
 	if current_action_points < 1:
 		print("Not enough action points to load string")
 		return
@@ -124,12 +149,25 @@ func _on_load_string_pressed():
 		string_input.text = ""  # Clear input after successful load
 
 func update_weapon_ui():
-	weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
-	load_string_button.text = "Load String (1 AP)"
-	load_string_button.disabled = current_action_points < 1
+	if weapon_string_label:
+		weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
+	
+	if load_string_button:
+		load_string_button.text = "Load String (1 AP)"
+		load_string_button.disabled	= current_action_points < 1 
+	
+	# Update UI position relative to player
+	update_weapon_ui_position()
+
+func update_weapon_ui_position():
+	if player_weapon_ui_container and get_viewport():
+		# Get the player's position in screen coordinates
+		var screen_pos = get_global_transform_with_canvas().origin
+		# Apply the offset and set the UI position
+		player_weapon_ui_container.position = screen_pos + weapon_ui_offset
 
 func _process(delta):
-	if is_moving:
+	if is_moving:		
 		var target_world_pos = grid_manager.grid_to_world(target_position)
 		position = position.move_toward(target_world_pos, move_speed * grid_manager.GRID_SIZE * delta)
 		
@@ -138,7 +176,22 @@ func _process(delta):
 			grid_position = target_position
 			is_moving = false
 			grid_manager.update_occupied_tiles()
-			update_movement_range()  # Update movement range after moving
+			update_movement_range()  # Update movement range after moving	
+	
+	# Update weapon UI position to follow player
+	update_weapon_ui_position()
+
+func play_move_animation():
+	var direction = target_position - previous_grid_position
+	
+	if direction.x > 0:
+		anim.play("walk_right")
+	elif direction.x < 0:
+		anim.play("walk_left")
+	elif direction.y > 0:
+		anim.play("walk_down")
+	elif direction.y < 0: 
+		anim.play("walk_up")
 
 func _input(event):
 	if grid_manager.current_turn != "player" or is_interacting_with_ui:
@@ -160,7 +213,7 @@ func _input(event):
 					current_mode = "move"
 					update_movement_range()
 					# Update UI mode button
-					var battle_ui = get_node("/root/main/BattleUI")
+					var battle_ui = get_node("/root/main/CanvasLayer/BattleUI")
 					if battle_ui:
 						battle_ui.update_mode_button()
 			return
@@ -174,11 +227,16 @@ func _input(event):
 			# Use Manhattan distance for AP cost
 			var distance = int(abs(grid_position.x - target_grid_pos.x) + abs(grid_position.y - target_grid_pos.y))
 			if current_action_points >= distance and distance > 0:
+				#get position before moving
+				previous_grid_position = grid_position
+				
 				target_position = target_grid_pos
 				is_moving = true
 				grid_manager.valid_moves = []
 				current_action_points -= distance
 				update_ui()
+			
+				play_move_animation()
 		
 		# Handle attacks
 		elif current_mode == "attack" and target_grid_pos in grid_manager.valid_attacks:
@@ -196,9 +254,10 @@ func _input(event):
 						end_turn()
 
 func update_ui():
-	var battle_ui = get_node("/root/main/BattleUI")
+	var battle_ui = get_node("/root/main/CanvasLayer/BattleUI")
 	if battle_ui:
 		battle_ui.update_ui()
+	
 	update_weapon_ui()
 
 func update_movement_range():

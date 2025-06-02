@@ -12,12 +12,15 @@ extends Area2D
 @export var luck = 3
 @export var string_length = 5  # Length of the enemy's string
 @export var max_action_points = 4
+@export var enemy_ui_offset := Vector2(10, -100)
 var current_string = ""
 var current_action_points
 
 # Mode
 var current_mode = "move"  # Can be "move" or "attack"
 var is_interacting_with_ui = false
+
+var previous_grid_position = Vector2.ZERO
 
 # Weapons
 var weapons = {
@@ -60,13 +63,43 @@ var target_position = Vector2.ZERO
 var is_moving = false
 var move_speed = 4.0  # Grid cells per second
 
+# UI elements
+var enemy_ui_container
+var string_label
+var action_points_bar
+var action_points_label
+
 func _ready():
 	grid_manager = get_node("../../GridManager")
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
+	
+	# Ensure string_length has a valid value
+	if string_length == null or string_length <= 0:
+		string_length = 5  # Default value
+	
+	# Ensure max_action_points has a valid value
+	if max_action_points == null or max_action_points <= 0:
+		max_action_points = 4  # Default value
+	
 	generate_new_string()
 	current_action_points = max_action_points
-	create_ui()
+	
+	# Connect to the Enemy UI (now called VBoxContainer)
+	var enemy_ui = get_node("/root/main/CanvasLayer/BattleUI/VBoxContainer")
+	print("EnemyUI found: ", enemy_ui != null)
+
+	if enemy_ui:
+		enemy_ui_container = enemy_ui
+		string_label = enemy_ui.get_node("StringLabel")
+		action_points_bar = enemy_ui.get_node("ActionPointsBar")
+		action_points_label = enemy_ui.get_node("ActionPointsLabel")
+		
+		print("StringLabel found: ", string_label != null)
+		print("ActionPointsBar found: ", action_points_bar != null)
+		print("ActionPointsLabel found: ", action_points_label != null)
+	
+	update_enemy_ui()
 
 func generate_new_string():
 	var chars = ["a", "b", "c"]
@@ -74,29 +107,25 @@ func generate_new_string():
 	for i in range(string_length):
 		current_string += chars[randi() % chars.size()]
 
-func create_ui():
-	# Create string display
-	var string_label = Label.new()
-	string_label.name = "StringLabel"
-	string_label.position = Vector2(-40, -115)  # Above health bar
-	string_label.text = "String: " + current_string
-	add_child(string_label)
+func update_enemy_ui():
+	if string_label:
+		string_label.text = "String: " + current_string
 	
-	# Create action points bar
-	var ap_bar = ProgressBar.new()
-	ap_bar.name = "ActionPointsBar"
-	ap_bar.position = Vector2(-40, -70)  # Moved up and wider
-	ap_bar.size = Vector2(80, 15)  # Made larger
-	ap_bar.max_value = max_action_points
-	ap_bar.value = current_action_points
-	add_child(ap_bar)
+	if action_points_bar:
+		action_points_bar.max_value = max_action_points
+		action_points_bar.value = current_action_points
 	
-	# Create action points label
-	var ap_label = Label.new()
-	ap_label.name = "ActionPointsLabel"
-	ap_label.position = Vector2(-40, -85)  # Above AP bar
-	ap_label.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
-	add_child(ap_label)
+	if action_points_label:
+		action_points_label.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
+	
+	# Update UI position relative to enemy
+	update_enemy_ui_position()
+
+func update_enemy_ui_position():
+	if enemy_ui_container and get_viewport():
+		var screen_pos = get_global_transform_with_canvas().origin
+		#apply offset and set the UI position
+		enemy_ui_container.position = screen_pos + enemy_ui_offset
 
 func _process(delta):
 	if is_moving:
@@ -111,6 +140,21 @@ func _process(delta):
 			grid_manager.update_occupied_tiles()
 			# After moving, check if we can attack
 			check_and_attack()
+	
+	# Update enemy UI position to follow enemy
+	update_enemy_ui_position()
+
+func play_move_animation():
+	var direction = target_position - previous_grid_position
+	
+	if direction.x > 0:
+		anim.play("walk_right")
+	elif direction.x < 0:
+		anim.play("walk_left")
+	elif direction.y > 0:
+		anim.play("walk_down")
+	elif direction.y < 0: 
+		anim.play("walk_up")
 
 func take_turn():
 	print("Enemy taking turn")
@@ -128,11 +172,17 @@ func take_turn():
 		
 		if best_move:
 			print("Enemy moving to: ", best_move)
+			
+			#get position before moving
+			previous_grid_position = grid_position
+			
 			target_position = best_move
+			
+			play_move_animation()
+			
 			is_moving = true
 			current_action_points -= 1
-			$ActionPointsBar.value = current_action_points
-			$ActionPointsLabel.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
+			update_enemy_ui()
 		else:
 			has_moved = true
 			check_and_attack()
@@ -152,8 +202,7 @@ func check_and_attack():
 			print("Enemy attacking player")
 			attack(player)
 			current_action_points -= ap_cost
-			$ActionPointsBar.value = current_action_points
-			$ActionPointsLabel.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
+			update_enemy_ui()
 
 func find_best_move_towards_player(valid_moves, player_pos):
 	var best_move = null
@@ -223,7 +272,7 @@ func take_damage(attack_string):
 		i += 1
 	
 	current_string = new_string
-	$StringLabel.text = "String: " + current_string
+	update_enemy_ui()
 	
 	if current_string.length() == 0:
 		queue_free()
@@ -233,5 +282,4 @@ func reset_turn():
 	has_attacked = false
 	is_moving = false
 	current_action_points = max_action_points
-	$ActionPointsBar.value = current_action_points
-	$ActionPointsLabel.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
+	update_enemy_ui()

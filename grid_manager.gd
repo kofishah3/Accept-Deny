@@ -19,9 +19,9 @@ func _ready():
 func _draw():
 	# Draw grid lines
 	for x in range(grid_width + 1):
-		draw_line(Vector2(x * GRID_SIZE, 0), Vector2(x * GRID_SIZE, grid_height * GRID_SIZE), Color.WHITE, 1.0)
+		draw_line(Vector2(x * GRID_SIZE, 0), Vector2(x * GRID_SIZE, grid_height * GRID_SIZE), Color.TRANSPARENT, 1.0)
 	for y in range(grid_height + 1):
-		draw_line(Vector2(0, y * GRID_SIZE), Vector2(grid_width * GRID_SIZE, y * GRID_SIZE), Color.WHITE, 1.0)
+		draw_line(Vector2(0, y * GRID_SIZE), Vector2(grid_width * GRID_SIZE, y * GRID_SIZE), Color.TRANSPARENT, 1.0)
 	
 	# Draw valid moves
 	for move in valid_moves:
