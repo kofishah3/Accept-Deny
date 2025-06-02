@@ -1,110 +1,13 @@
 [gd_scene load_steps=18 format=3 uid="uid://cuc1rajr1uyay"]
 
 [ext_resource type="Texture2D" uid="uid://2ix7w80ie2a5" path="res://ui_elements/game-win-&-over/border.png" id="1_2qsmu"]
-[ext_resource type="Texture2D" uid="uid://r5ed0s2q2xls" path="res://ui_elements/main-menu/main-button-1.png" id="2_jnh8r"]
 [ext_resource type="Texture2D" uid="uid://c8fsl3owyipa1" path="res://ui_elements/game-win-&-over/red-diamond.png" id="2_odp4d"]
-[ext_resource type="Texture2D" uid="uid://bprry40n6e56t" path="res://ui_elements/main-menu/main-button-1-pressed.png" id="3_jnh8r"]
 [ext_resource type="Texture2D" uid="uid://b6idmbjafvcb4" path="res://ui_elements/game-win-&-over/yellow-circle.png" id="3_v1pfc"]
 [ext_resource type="Texture2D" uid="uid://cbrvbgl6iwmbp" path="res://ui_elements/game-win-&-over/green-triangle.png" id="4_1tsyl"]
-[ext_resource type="Texture2D" uid="uid://jh8s5n8eokfu" path="res://ui_elements/main-menu/main-button-2-pressed.png" id="4_y6dvj"]
-[ext_resource type="Texture2D" uid="uid://j35ev0cavrcj" path="res://ui_elements/main-menu/main-button-2.png" id="7_v1pfc"]
-
-[sub_resource type="Animation" id="Animation_odp4d"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [1]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:frame")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [1]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Sprite2D3:frame")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [1]
-}
-
-[sub_resource type="Animation" id="Animation_c6sx4"]
-resource_name = "Regex"
-length = 3.0
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(),
-"transitions": PackedFloat32Array(),
-"update": 1,
-"values": []
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Sprite2D:frame")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.233333),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [1, 0]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Sprite2D3:frame")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0.7, 0.933333),
-"transitions": PackedFloat32Array(1, 1),
-"update": 1,
-"values": [1, 0]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Sprite2D2:frame")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(1.43333, 1.73333),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [1, 0]
-}
-
-[sub_resource type="AnimationLibrary" id="AnimationLibrary_v1pfc"]
-_data = {
-&"RESET": SubResource("Animation_odp4d"),
-&"Regex": SubResource("Animation_c6sx4")
-}
+[ext_resource type="Texture2D" uid="uid://c0eixtxqy0r7u" path="res://ui_elements/game-win-&-over/win-button-1.png" id="5_v1pfc"]
+[ext_resource type="Texture2D" uid="uid://cb31mex1t00t3" path="res://ui_elements/game-win-&-over/win-button-1-pressed.png" id="6_1tsyl"]
+[ext_resource type="Texture2D" uid="uid://hfixxgce50vs" path="res://ui_elements/game-win-&-over/win-button-2.png" id="7_2ywwe"]
+[ext_resource type="Texture2D" uid="uid://bqd1atmy7bnci" path="res://ui_elements/game-win-&-over/win-button-2-pressed.png" id="8_4pee7"]
 
 [sub_resource type="Animation" id="Animation_pxquw"]
 length = 0.001
@@ -204,6 +107,103 @@ _data = {
 &"buttons": SubResource("Animation_v1pfc")
 }
 
+[sub_resource type="Animation" id="Animation_odp4d"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D3:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [1]
+}
+
+[sub_resource type="Animation" id="Animation_c6sx4"]
+resource_name = "Regex"
+length = 3.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"update": 1,
+"values": []
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.233333),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [1, 0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Sprite2D3:frame")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.7, 0.933333),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [1, 0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Sprite2D2:frame")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(1.43333, 1.73333),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [1, 0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_v1pfc"]
+_data = {
+&"RESET": SubResource("Animation_odp4d"),
+&"Regex": SubResource("Animation_c6sx4")
+}
+
 [node name="Game Win Screen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -219,52 +219,24 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="Border" type="Sprite2D" parent="TextureRect"]
-position = Vector2(193, 108)
-scale = Vector2(3, 3.375)
 texture = ExtResource("1_2qsmu")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -120.0
+offset_right = -149.0
+offset_bottom = -31.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(1.00471, 1)
+scale = Vector2(3.73665, 3.71913)
 theme_override_constants/separation = 24
 alignment = 1
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="Sprite2D" type="Sprite2D" parent="VBoxContainer/HBoxContainer2"]
-position = Vector2(159.249, -1)
-texture = ExtResource("2_odp4d")
-hframes = 2
-frame = 1
-
-[node name="Sprite2D3" type="Sprite2D" parent="VBoxContainer/HBoxContainer2"]
-position = Vector2(191.099, -1)
-texture = ExtResource("3_v1pfc")
-hframes = 2
-frame = 1
-
-[node name="Sprite2D2" type="Sprite2D" parent="VBoxContainer/HBoxContainer2"]
-position = Vector2(221.954, -2)
-texture = ExtResource("4_1tsyl")
-hframes = 2
-
-[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer/HBoxContainer2"]
-libraries = {
-&"": SubResource("AnimationLibrary_v1pfc")
-}
-autoplay = "Regex"
-
-[node name="Node2D" type="Node2D" parent="VBoxContainer"]
 
 [node name="Label" type="Label" parent="VBoxContainer"]
 layout_mode = 2
@@ -298,8 +270,8 @@ autoplay = "buttons"
 [node name="TextureButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
-texture_normal = ExtResource("2_jnh8r")
-texture_pressed = ExtResource("3_jnh8r")
+texture_normal = ExtResource("5_v1pfc")
+texture_pressed = ExtResource("6_1tsyl")
 
 [node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/TextureButton"]
 layout_mode = 1
@@ -322,8 +294,8 @@ horizontal_alignment = 1
 [node name="TextureButton2" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
-texture_normal = ExtResource("7_v1pfc")
-texture_pressed = ExtResource("4_y6dvj")
+texture_normal = ExtResource("7_2ywwe")
+texture_pressed = ExtResource("8_4pee7")
 
 [node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/TextureButton2"]
 layout_mode = 1
@@ -342,3 +314,45 @@ pivot_offset = Vector2(94, 25.5)
 theme_override_font_sizes/font_size = 12
 text = "Restart"
 horizontal_alignment = 1
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -616.0
+offset_top = -192.0
+offset_right = -242.0
+offset_bottom = -171.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(3.21171, 3.21171)
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="HBoxContainer2"]
+position = Vector2(159.249, -1)
+texture = ExtResource("2_odp4d")
+hframes = 2
+frame = 1
+
+[node name="Sprite2D3" type="Sprite2D" parent="HBoxContainer2"]
+position = Vector2(191.099, -1)
+texture = ExtResource("3_v1pfc")
+hframes = 2
+frame = 1
+
+[node name="Sprite2D2" type="Sprite2D" parent="HBoxContainer2"]
+position = Vector2(221.954, -2)
+texture = ExtResource("4_1tsyl")
+hframes = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer2"]
+libraries = {
+&"": SubResource("AnimationLibrary_v1pfc")
+}
+autoplay = "Regex"

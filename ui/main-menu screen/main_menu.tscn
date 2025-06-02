@@ -35,7 +35,6 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_pjqei")
@@ -57,29 +56,9 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
-
-[node name="Info Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-texture_normal = ExtResource("3_2mssu")
-texture_pressed = ExtResource("4_t01hl")
-
-[node name="Play Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-texture_normal = ExtResource("5_u8u27")
-texture_pressed = ExtResource("6_qadfv")
-
-[node name="Mechanics Button" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
-layout_mode = 2
-texture_normal = ExtResource("7_o1whf")
-texture_pressed = ExtResource("8_pjqei")
-
 [node name="Main-border" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(193.769, 76.02)
-scale = Vector2(0.856912, 0.852151)
+position = Vector2(641.099, 225.699)
+scale = Vector2(2.94854, 2.93216)
 texture = ExtResource("8_15c5s")
 
 [node name="Label" type="Label" parent="VBoxContainer/Main-border"]
@@ -101,18 +80,49 @@ theme_override_font_sizes/font_size = 24
 text = "ACCEPT / DENY"
 horizontal_alignment = 1
 vertical_alignment = 1
+metadata/_edit_use_anchors_ = true
 
 [node name="Green-triangle" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(210.749, 45.612)
-scale = Vector2(2.79667, 2.79667)
+position = Vector2(703.163, 121.632)
+scale = Vector2(9.62303, 9.62303)
 texture = ExtResource("9_ni65f")
 
 [node name="Yellow-circle" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(192.771, 45.612)
-scale = Vector2(2.77743, 2.77743)
+position = Vector2(639.239, 121.632)
+scale = Vector2(9.55683, 9.55683)
 texture = ExtResource("11_bxm30")
 
 [node name="Red-diamond" type="Sprite2D" parent="VBoxContainer"]
-position = Vector2(174.792, 45.612)
-scale = Vector2(2.77827, 2.79281)
+position = Vector2(575.315, 121.632)
+scale = Vector2(9.55972, 9.60975)
 texture = ExtResource("10_e0m0q")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -184.542
+offset_top = 426.256
+offset_right = -64.542
+offset_bottom = 458.256
+grow_horizontal = 2
+scale = Vector2(3.13651, 3.13651)
+size_flags_horizontal = 4
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Info Button" type="TextureButton" parent="HBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("3_2mssu")
+texture_pressed = ExtResource("4_t01hl")
+
+[node name="Play Button" type="TextureButton" parent="HBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("5_u8u27")
+texture_pressed = ExtResource("6_qadfv")
+
+[node name="Mechanics Button" type="TextureButton" parent="HBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("7_o1whf")
+texture_pressed = ExtResource("8_pjqei")
