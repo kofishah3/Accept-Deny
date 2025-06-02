@@ -11,8 +11,7 @@ extends Area2D
 @export var skill = 6
 @export var luck = 4
 @export var max_health = 20
-@export var max_action_points = 8
-@export var weapon_ui_offset := Vector2(10, -100)
+@export var max_action_points = 6
 var current_health
 var current_action_points
 
@@ -22,44 +21,82 @@ var is_interacting_with_ui = false
 
 # Weapons
 var weapons = {
-	"laser_rifle": {
-		"name": "Laser Rifle",
-		"type": "energy",
+	"baton": {
+		"name": "Baton",
+		"type": "melee",
 		"loaded_string": "",
 		"constraints": {
 			"max_length": 3,
 			"allowed_chars": ["a", "b", "c"],
-			"pattern": "any"  # any, alternating, or repeating
-		},
-		"range": 3,
-		"color": Color(1, 0, 0, 0.3)  # Transparent red
-	},
-	"plasma_cannon": {
-		"name": "Plasma Cannon",
-		"type": "plasma",
-		"loaded_string": "",
-		"constraints": {
-			"max_length": 4,
-			"allowed_chars": ["a", "b"],
-			"pattern": "alternating"  # Must alternate between a and b
-		},
-		"range": 2,
-		"color": Color(1, 0, 0, 0.3)  # Transparent red
-	},
-	"ion_blaster": {
-		"name": "Ion Blaster",
-		"type": "ion",
-		"loaded_string": "",
-		"constraints": {
-			"max_length": 6,
-			"allowed_chars": ["a", "b", "c"],
-			"pattern": "repeating"  # Must have repeating patterns
+			"pattern": "any"
 		},
 		"range": 1,
-		"color": Color(1, 0, 0, 0.3)  # Transparent red
+		"color": Color(1, 0, 0, 0.3),  # Transparent red
+		"ap_cost": 1,
+		"attack_type": "single"
+	},
+	"bow": {
+		"name": "Bow",
+		"type": "ranged",
+		"loaded_string": "",
+		"constraints": {
+			"max_length": 3,
+			"allowed_chars": ["a", "b", "c"],
+			"pattern": "any"
+		},
+		"range": 6,
+		"color": Color(1, 0, 0, 0.3),
+		"ap_cost": 3,
+		"attack_type": "line",
+		"diagonal_allowed": false
+	},
+	"shotgun": {
+		"name": "Shotgun",
+		"type": "aoe",
+		"loaded_string": "",
+		"constraints": {
+			"max_length": 3,
+			"allowed_chars": ["a", "b", "c"],
+			"pattern": "any"
+		},
+		"range": 1,
+		"color": Color(1, 0, 0, 0.3),
+		"ap_cost": 2,
+		"attack_type": "aoe",
+		"aoe_size": Vector2(2, 3)
+	},
+	"sniper": {
+		"name": "Sniper",
+		"type": "piercing",
+		"loaded_string": "",
+		"constraints": {
+			"max_length": 5,
+			"allowed_chars": ["a", "b", "c"],
+			"pattern": "any"
+		},
+		"range": -1,  # -1 indicates unlimited range
+		"color": Color(1, 0, 0, 0.3),
+		"ap_cost": 6,
+		"attack_type": "piercing",
+		"diagonal_allowed": false
+	},
+	"emp_grenade": {
+		"name": "EMP Grenade",
+		"type": "aoe",
+		"loaded_string": "",
+		"constraints": {
+			"max_length": 2,
+			"allowed_chars": ["a", "b", "c"],
+			"pattern": "any"
+		},
+		"range": 5,
+		"color": Color(1, 0, 0, 0.3),
+		"ap_cost": 4,
+		"attack_type": "aoe",
+		"aoe_size": Vector2(2, 2)
 	}
 }
-var current_weapon = "laser_rifle"
+var current_weapon = "baton"  # Changed default weapon to baton
 var weapon_type = "energy"
 
 var grid_manager
@@ -71,12 +108,6 @@ var previous_grid_position = Vector2.ZERO
 var is_moving = false
 var move_speed = 4.0  # Grid cells per second
 var move_path = []
-
-# UI elements
-var player_weapon_ui_container
-var weapon_string_label
-var string_input
-var load_string_button
 
 func _ready():
 	add_to_group("player")
@@ -90,83 +121,30 @@ func _ready():
 	var battle_ui = get_node("/root/main/CanvasLayer/BattleUI")
 	if battle_ui:
 		battle_ui.set_player(self)
-	
-	# COnnect to the Player Weapon UI
-	var player_weapon_ui = get_node("/root/main/CanvasLayer/BattleUI/PlayerWeaponUI")
-	print("PlayerWeaponUI found: ", player_weapon_ui != null)
 
-	if player_weapon_ui:
-		player_weapon_ui_container = player_weapon_ui
-		weapon_string_label = player_weapon_ui.get_node("WeaponStringLabel")
-		load_string_button = player_weapon_ui.get_node("LoadStringButton")
-		string_input = player_weapon_ui.get_node("StringInput")
-		
-		print("WeaponStringLabel found: ", weapon_string_label != null)
-		print("LoadStringButton found: ", load_string_button != null)
-		print("StringInput found: ", string_input != null)
-		
-		if load_string_button:
-			var connection_result = load_string_button.connect("pressed", Callable(self, "_on_load_string_pressed"))
-			print("Button connection result: ", connection_result)
+func load_string_to_weapon(weapon_id: String, new_string: String) -> bool:
+	if not weapons.has(weapon_id):
+		return false
 	
-	update_weapon_ui()
+	var weapon = weapons[weapon_id]
+	var constraints = weapon.constraints
 	
-	#create_weapon_ui()
-
-#DEPRACATED -- moved to canvas layer and made automatically 
-#func create_weapon_ui():
-	## Create weapon string display
-	#weapon_string_label = Label.new()
-	#weapon_string_label.name = "WeaponStringLabel"
-	#weapon_string_label.position = Vector2(-40, -130)
-	#weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
-	#add_child(weapon_string_label)
-	#
-	## Create load string button
-	#load_string_button = Button.new()
-	#load_string_button.name = "LoadStringButton"
-	#load_string_button.position = Vector2(-40, -100)
-	#load_string_button.text = "Load String (1 AP)"
-	#load_string_button.connect("pressed", Callable(self, "_on_load_string_pressed"))
-	#add_child(load_string_button)
-	#
-	## Create string input
-	#string_input = LineEdit.new()
-	#string_input.name = "StringInput"
-	#string_input.position = Vector2(-40, -70)
-	#string_input.placeholder_text = "Enter string..."
-	#string_input.max_length = 6  # Maximum length of any weapon's string
-	#add_child(string_input)
-
-func _on_load_string_pressed():
-	print("Load string button was pressed!")
-	if current_action_points < 1:
-		print("Not enough action points to load string")
-		return
+	# Check string length
+	if new_string.length() > constraints.max_length:
+		return false
 	
-	var new_string = string_input.text
-	if load_string_to_weapon(current_weapon, new_string):
-		current_action_points -= 1
-		string_input.text = ""  # Clear input after successful load
-	update_ui() # Always update UI after loading
-
-func update_weapon_ui():
-	if weapon_string_label:
-		weapon_string_label.text = "Weapon String: " + weapons[current_weapon].loaded_string
+	# Check allowed characters
+	for char in new_string:
+		if not constraints.allowed_chars.has(char):
+			return false
 	
-	if load_string_button:
-		load_string_button.text = "Load String (1 AP)"
-		load_string_button.disabled	= current_action_points < 1 
+	# Check pattern if specified
+	if constraints.pattern != "any":
+		# Add pattern validation here if needed
+		pass
 	
-	# Update UI position relative to player
-	update_weapon_ui_position()
-
-func update_weapon_ui_position():
-	if player_weapon_ui_container and get_viewport():
-		# Get the player's position in screen coordinates
-		var screen_pos = get_global_transform_with_canvas().origin
-		# Apply the offset and set the UI position
-		player_weapon_ui_container.position = screen_pos + weapon_ui_offset
+	weapon.loaded_string = new_string
+	return true
 
 func _process(delta):
 	if is_moving and move_path.size() > 0:
@@ -183,27 +161,11 @@ func _process(delta):
 				is_moving = false
 				grid_manager.update_occupied_tiles()
 				update_movement_range()  # Update movement range after moving
-				# Optionally, play idle animation here
 	elif is_moving:
 		# Fallback for non-path movement (shouldn't happen)
 		is_moving = false
 		grid_manager.update_occupied_tiles()
 		update_movement_range()
-	# Update weapon UI position to follow player
-	update_weapon_ui_position()
-
-func play_move_animation():
-	if move_path.size() == 0:
-		return
-	var direction = move_path[0] - grid_position
-	if direction.x > 0:
-		anim.play("walk_right")
-	elif direction.x < 0:
-		anim.play("walk_left")
-	elif direction.y > 0:
-		anim.play("walk_down")
-	elif direction.y < 0:
-		anim.play("walk_up")
 
 func _input(event):
 	if grid_manager.current_turn != "player" or is_interacting_with_ui:
@@ -224,6 +186,22 @@ func _input(event):
 				if current_action_points > 0:
 					current_mode = "move"
 					update_movement_range()
+			return
+		
+		# Handle attacks first (allow even if not previously selected)
+		if current_mode == "attack" and target_grid_pos in grid_manager.valid_attacks:
+			var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
+			if target_unit:
+				var weapon = weapons[current_weapon]
+				var ap_cost = get_attack_ap_cost()
+				if current_action_points >= ap_cost:
+					attack(target_unit)
+					current_action_points -= ap_cost
+					update_ui()
+					current_mode = "move"
+					update_movement_range()
+					if current_action_points <= 0:
+						end_turn()
 			return
 		
 		# Only handle movement if we're selected and in move mode
@@ -248,28 +226,11 @@ func _input(event):
 				update_ui()
 				play_move_animation() # Play the first animation immediately
 				# Animation for subsequent steps is handled in _process
-		
-		# Handle attacks (allow even if not previously selected)
-		elif current_mode == "attack" and target_grid_pos in grid_manager.valid_attacks:
-			var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
-			if target_unit:
-				var weapon = weapons[current_weapon]
-				var ap_cost = get_attack_ap_cost()
-				if current_action_points >= ap_cost:
-					attack(target_unit)
-					current_action_points -= ap_cost
-					update_ui()
-					current_mode = "move"
-					update_movement_range()
-					if current_action_points <= 0:
-						end_turn()
 
 func update_ui():
 	var battle_ui = get_node("/root/main/CanvasLayer/BattleUI")
 	if battle_ui:
 		battle_ui.update_ui()
-	
-	update_weapon_ui()
 
 func update_movement_range():
 	# Use current_action_points as the movement range
@@ -291,53 +252,19 @@ func update_movement_range():
 func update_attack_range():
 	grid_manager.valid_moves = []
 	var weapon = weapons[current_weapon]
-	grid_manager.valid_attacks = grid_manager.update_attack_range(grid_position, weapon.range)
+	
+	match weapon.attack_type:
+		"single":
+			grid_manager.valid_attacks = grid_manager.update_attack_range(grid_position, weapon.range)
+		"line":
+			grid_manager.valid_attacks = grid_manager.update_line_attack_range(grid_position, weapon.range, weapon.diagonal_allowed)
+		"aoe":
+			grid_manager.valid_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, weapon.aoe_size)
+		"piercing":
+			grid_manager.valid_attacks = grid_manager.update_piercing_attack_range(grid_position, weapon.diagonal_allowed)
+	
 	grid_manager.attack_color = weapon.color
 	print("Updated valid attacks: ", grid_manager.valid_attacks.size())
-
-func load_string_to_weapon(weapon_name, new_string):
-	var weapon = weapons[weapon_name]
-	var constraints = weapon.constraints
-	
-	# Check length constraint
-	if new_string.length() > constraints.max_length:
-		print("String too long for ", weapon.name)
-		return false
-	
-	# Check allowed characters
-	for char in new_string:
-		if not char in constraints.allowed_chars:
-			print("Invalid character '", char, "' for ", weapon.name)
-			return false
-	
-	# Check pattern constraints
-	match constraints.pattern:
-		"alternating":
-			for i in range(1, new_string.length()):
-				if new_string[i] == new_string[i-1]:
-					print("String must alternate characters for ", weapon.name)
-					return false
-		"repeating":
-			var has_pattern = false
-			for pattern_length in range(1, new_string.length() / 2 + 1):
-				var pattern = new_string.substr(0, pattern_length)
-				var is_repeating = true
-				for i in range(pattern_length, new_string.length(), pattern_length):
-					if new_string.substr(i, pattern_length) != pattern:
-						is_repeating = false
-						break
-				if is_repeating:
-					has_pattern = true
-					break
-			if not has_pattern:
-				print("String must have a repeating pattern for ", weapon.name)
-				return false
-	
-	# If all constraints are met, load the string
-	weapon.loaded_string = new_string
-	print("Successfully loaded string '", new_string, "' into ", weapon.name)
-	update_ui() # Always update UI after loading
-	return true
 
 func attack(target):
 	var weapon = weapons[current_weapon]
@@ -345,11 +272,29 @@ func attack(target):
 		print("No string loaded in ", weapon.name)
 		return
 	
-	target.take_damage(weapon.loaded_string)
+	match weapon.attack_type:
+		"single":
+			target.take_damage(weapon.loaded_string)
+		"line":
+			# Attack all units in a line
+			var line_targets = grid_manager.get_units_in_line(grid_position, target.grid_position)
+			for line_target in line_targets:
+				line_target.take_damage(weapon.loaded_string)
+		"aoe":
+			# Attack all units in AOE
+			var aoe_targets = grid_manager.get_units_in_aoe(target.grid_position, weapon.aoe_size)
+			for aoe_target in aoe_targets:
+				aoe_target.take_damage(weapon.loaded_string)
+		"piercing":
+			# Attack all units in line of sight
+			var piercing_targets = grid_manager.get_units_in_line(grid_position, target.grid_position)
+			for piercing_target in piercing_targets:
+				piercing_target.take_damage(weapon.loaded_string)
+	
 	print("Attacked with ", weapon.name, " using string: ", weapon.loaded_string)
 	# Clear the loaded string after use
 	weapon.loaded_string = ""
-	update_ui() # Always update UI after attacking
+	update_ui()
 
 func take_damage(amount):
 	current_health -= amount
@@ -378,7 +323,7 @@ func reset_turn():
 # Add a helper to get AP cost for attack
 func get_attack_ap_cost():
 	var weapon = weapons[current_weapon]
-	return ceil(weapon.range / 2)
+	return weapon.ap_cost
 
 # When a weapon is selected, enter attack mode
 func set_weapon_and_attack_mode(weapon_id):
@@ -390,3 +335,16 @@ func set_weapon_and_attack_mode(weapon_id):
 	# Always select this player for attack mode
 	if grid_manager:
 		grid_manager.selected_unit = self
+
+func play_move_animation():
+	if move_path.size() == 0:
+		return
+	var direction = move_path[0] - grid_position
+	if direction.x > 0:
+		anim.play("walk_right")
+	elif direction.x < 0:
+		anim.play("walk_left")
+	elif direction.y > 0:
+		anim.play("walk_down")
+	elif direction.y < 0:
+		anim.play("walk_up")

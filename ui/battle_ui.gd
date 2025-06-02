@@ -1,34 +1,42 @@
 extends Control
 
 var player: Node2D
-var current_weapon: String = "laser_rifle"
+var current_weapon: String = "baton"
 var weapons: Dictionary = {
-	"laser_rifle": {
-		"name": "Laser Rifle",
-		"type": "energy",
-		"might": 6,
-		"hit": 85,
-		"crit": 10,
-		"range": 3,
-		"color": Color(1, 0, 0, 0.3)  # Transparent red
-	},
-	"plasma_cannon": {
-		"name": "Plasma Cannon",
-		"type": "plasma",
-		"might": 8,
-		"hit": 70,
-		"crit": 15,
-		"range": 2,
-		"color": Color(1, 0, 0, 0.3)  # Transparent red
-	},
-	"ion_blaster": {
-		"name": "Ion Blaster",
-		"type": "ion",
-		"might": 5,
-		"hit": 90,
-		"crit": 5,
+	"baton": {
+		"name": "Baton",
+		"type": "melee",
 		"range": 1,
-		"color": Color(1, 0, 0, 0.3)  # Transparent red
+		"ap_cost": 1,
+		"color": Color(1, 0, 0, 0.3)
+	},
+	"bow": {
+		"name": "Bow",
+		"type": "ranged",
+		"range": 6,
+		"ap_cost": 3,
+		"color": Color(1, 0, 0, 0.3)
+	},
+	"shotgun": {
+		"name": "Shotgun",
+		"type": "aoe",
+		"range": 1,
+		"ap_cost": 2,
+		"color": Color(1, 0, 0, 0.3)
+	},
+	"sniper": {
+		"name": "Sniper",
+		"type": "piercing",
+		"range": -1,
+		"ap_cost": 6,
+		"color": Color(1, 0, 0, 0.3)
+	},
+	"emp_grenade": {
+		"name": "EMP Grenade",
+		"type": "aoe",
+		"range": 5,
+		"ap_cost": 4,
+		"color": Color(1, 0, 0, 0.3)
 	}
 }
 
@@ -40,6 +48,9 @@ var ap_label: Label
 var weapon_container: VBoxContainer
 var end_turn_button: Button
 var mode_button: Button
+var weapon_string_label: Label
+var load_string_button: Button
+var string_input: LineEdit
 var ui_initialized: bool = false
 
 func _ready():
@@ -71,30 +82,51 @@ func create_ui():
 	ap_bar = ProgressBar.new()
 	ap_bar.name = "ActionPointsBar"
 	ap_bar.size = Vector2(180, 20)
-	ap_bar.max_value = 5  # Will be updated when player is set
-	ap_bar.value = 5
+	ap_bar.max_value = 6  # Updated to match new max AP
+	ap_bar.value = 6
 	container.add_child(ap_bar)
 	
 	# Create action points label
 	ap_label = Label.new()
 	ap_label.name = "ActionPointsLabel"
-	ap_label.text = "AP: 5/5"  # Will be updated when player is set
+	ap_label.text = "AP: 6/6"  # Updated to match new max AP
 	container.add_child(ap_label)
 	
 	# Create weapon selection buttons
 	weapon_container = VBoxContainer.new()
 	weapon_container.name = "WeaponButtons"
-	weapon_container.size = Vector2(180, 120)
+	weapon_container.size = Vector2(180, 200)  # Increased size for more weapons
 	container.add_child(weapon_container)
 	
 	for weapon_id in weapons:
 		var weapon = weapons[weapon_id]
 		var button = Button.new()
 		button.name = weapon_id
-		button.text = weapon.name
+		button.text = weapon.name + " (" + str(weapon.ap_cost) + " AP)"
 		button.size = Vector2(180, 30)
 		button.pressed.connect(_on_weapon_selected.bind(weapon_id))
 		weapon_container.add_child(button)
+	
+	# Create weapon string UI elements
+	weapon_string_label = Label.new()
+	weapon_string_label.name = "WeaponStringLabel"
+	weapon_string_label.size = Vector2(180, 20)
+	weapon_string_label.text = "Weapon String: "
+	container.add_child(weapon_string_label)
+	
+	load_string_button = Button.new()
+	load_string_button.name = "LoadStringButton"
+	load_string_button.size = Vector2(180, 30)
+	load_string_button.text = "Load String (1 AP)"
+	load_string_button.pressed.connect(_on_load_string_pressed)
+	container.add_child(load_string_button)
+	
+	string_input = LineEdit.new()
+	string_input.name = "StringInput"
+	string_input.size = Vector2(180, 30)
+	string_input.placeholder_text = "Enter string..."
+	string_input.max_length = 6  # Maximum length of any weapon's string
+	container.add_child(string_input)
 	
 	# Create End Turn button
 	end_turn_button = Button.new()
@@ -104,7 +136,7 @@ func create_ui():
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	container.add_child(end_turn_button)
 	
-	# Create Move Mode button (instead of toggle)
+	# Create Move Mode button
 	mode_button = Button.new()
 	mode_button.name = "ModeButton"
 	mode_button.text = "Move Mode"
@@ -135,12 +167,20 @@ func update_ui():
 	ap_bar.value = player.current_action_points
 	ap_label.text = "AP: " + str(player.current_action_points) + "/" + str(player.max_action_points)
 	
-	# Update weapon button colors
+	# Update weapon button colors and states
 	for button in weapon_container.get_children():
+		var weapon = weapons[button.name]
 		if button.name == player.current_weapon:
 			button.modulate = Color(1, 1, 0)  # Yellow for selected
 		else:
 			button.modulate = Color(1, 1, 1)  # White for unselected
+		
+		# Disable buttons if not enough AP
+		button.disabled = player.current_action_points < weapon.ap_cost
+	
+	# Update weapon string UI
+	weapon_string_label.text = "Weapon String: " + player.weapons[player.current_weapon].loaded_string
+	load_string_button.disabled = player.current_action_points < 1
 	
 	# Update mode button text
 	mode_button.text = "Move Mode"
@@ -151,10 +191,22 @@ func _on_weapon_selected(weapon_id: String):
 	player.set_weapon_and_attack_mode(weapon_id)
 	update_ui()
 
+func _on_load_string_pressed():
+	if not ui_initialized or not player or not is_instance_valid(player):
+		return
+	
+	if player.current_action_points < 1:
+		return
+	
+	var new_string = string_input.text
+	if player.load_string_to_weapon(player.current_weapon, new_string):
+		player.current_action_points -= 1
+		string_input.text = ""  # Clear input after successful load
+		update_ui()
+
 func _on_end_turn_pressed():
 	if not ui_initialized or not player or not is_instance_valid(player):
 		return
-		
 	player.end_turn()
 
 func _on_move_mode_pressed():
