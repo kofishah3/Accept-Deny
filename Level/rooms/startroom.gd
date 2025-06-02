@@ -1,6 +1,6 @@
 extends Node2D
 
-@onready var floor_sprite = $RoomSprite
+@onready var floor_sprite = $FloorSprite
 
 var floor_tile_theme1: Array[Vector2i] = [Vector2i(15,6), Vector2i(15,7), Vector2i(16,6), Vector2i(16,7)]
 var floor_tile_theme2: Array[Vector2i] = [Vector2i(17,6), Vector2i(17,7), Vector2i(17,6), Vector2i(18,7)]
@@ -12,7 +12,7 @@ var current_theme : int = 1
 func set_theme(theme_chosen : int) -> void:
 	current_theme = theme_chosen
 	set_floor_theme(current_theme)
-	
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
@@ -27,7 +27,7 @@ func _is_floor_tile(atlas_coords : Vector2i) -> bool:
 	return atlas_coords in valid_floor_tiles
 
 func set_floor_theme(theme_id: int) -> void:
-	var floor_layer = $RoomSprite
+	var floor_layer = $FloorSprite
 	var used_cells = floor_layer.get_used_cells()
 	
 	for cell_coords in used_cells:
