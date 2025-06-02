@@ -11,7 +11,7 @@ extends Area2D
 @export var skill = 6
 @export var luck = 4
 @export var max_health = 20
-@export var max_action_points = 5
+@export var max_action_points = 8
 @export var weapon_ui_offset := Vector2(10, -100)
 var current_health
 var current_action_points
@@ -70,6 +70,7 @@ var target_position = Vector2.ZERO
 var previous_grid_position = Vector2.ZERO
 var is_moving = false
 var move_speed = 4.0  # Grid cells per second
+var move_path = []
 
 # UI elements
 var player_weapon_ui_container
@@ -78,6 +79,7 @@ var string_input
 var load_string_button
 
 func _ready():
+	add_to_group("player")
 	grid_manager = get_node("/root/main/GridManager")
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
@@ -145,8 +147,8 @@ func _on_load_string_pressed():
 	var new_string = string_input.text
 	if load_string_to_weapon(current_weapon, new_string):
 		current_action_points -= 1
-		update_ui()
 		string_input.text = ""  # Clear input after successful load
+	update_ui() # Always update UI after loading
 
 func update_weapon_ui():
 	if weapon_string_label:
@@ -167,42 +169,52 @@ func update_weapon_ui_position():
 		player_weapon_ui_container.position = screen_pos + weapon_ui_offset
 
 func _process(delta):
-	if is_moving:		
-		var target_world_pos = grid_manager.grid_to_world(target_position)
+	if is_moving and move_path.size() > 0:
+		var next_grid = move_path[0]
+		var target_world_pos = grid_manager.grid_to_world(next_grid)
 		position = position.move_toward(target_world_pos, move_speed * grid_manager.GRID_SIZE * delta)
-		
 		if position.distance_to(target_world_pos) < 1:
 			position = target_world_pos
-			grid_position = target_position
-			is_moving = false
-			grid_manager.update_occupied_tiles()
-			update_movement_range()  # Update movement range after moving	
-	
+			grid_position = next_grid
+			move_path.pop_front()
+			if move_path.size() > 0:
+				play_move_animation()
+			else:
+				is_moving = false
+				grid_manager.update_occupied_tiles()
+				update_movement_range()  # Update movement range after moving
+				# Optionally, play idle animation here
+	elif is_moving:
+		# Fallback for non-path movement (shouldn't happen)
+		is_moving = false
+		grid_manager.update_occupied_tiles()
+		update_movement_range()
 	# Update weapon UI position to follow player
 	update_weapon_ui_position()
 
 func play_move_animation():
-	var direction = target_position - previous_grid_position
-	
+	if move_path.size() == 0:
+		return
+	var direction = move_path[0] - grid_position
 	if direction.x > 0:
 		anim.play("walk_right")
 	elif direction.x < 0:
 		anim.play("walk_left")
 	elif direction.y > 0:
 		anim.play("walk_down")
-	elif direction.y < 0: 
+	elif direction.y < 0:
 		anim.play("walk_up")
 
 func _input(event):
 	if grid_manager.current_turn != "player" or is_interacting_with_ui:
 		return
-		
+	
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		var mouse_pos = get_global_mouse_position()
 		var target_grid_pos = grid_manager.world_to_grid(mouse_pos)
 		
-		# Handle unit selection
-		if grid_manager.world_to_grid(position).distance_to(target_grid_pos) < 1:
+		# Handle unit selection (only if not in attack mode)
+		if current_mode != "attack" and grid_manager.world_to_grid(position).distance_to(target_grid_pos) < 1:
 			if grid_manager.selected_unit == self:
 				grid_manager.selected_unit = null
 				grid_manager.valid_moves = []
@@ -212,44 +224,43 @@ func _input(event):
 				if current_action_points > 0:
 					current_mode = "move"
 					update_movement_range()
-					# Update UI mode button
-					var battle_ui = get_node("/root/main/CanvasLayer/BattleUI")
-					if battle_ui:
-						battle_ui.update_mode_button()
 			return
 		
-		# Only handle movement and attacks if we're selected
-		if grid_manager.selected_unit != self:
-			return
-		
-		# Handle movement
-		if current_mode == "move" and target_grid_pos in grid_manager.valid_moves:
-			# Use Manhattan distance for AP cost
+		# Only handle movement if we're selected and in move mode
+		if current_mode == "move" and grid_manager.selected_unit == self and target_grid_pos in grid_manager.valid_moves:
 			var distance = int(abs(grid_position.x - target_grid_pos.x) + abs(grid_position.y - target_grid_pos.y))
 			if current_action_points >= distance and distance > 0:
-				#get position before moving
 				previous_grid_position = grid_position
-				
-				target_position = target_grid_pos
+				# Build move_path: vertical then horizontal
+				move_path.clear()
+				var cur = grid_position
+				var vert_dir = sign(target_grid_pos.y - cur.y)
+				for i in range(abs(target_grid_pos.y - cur.y)):
+					cur = Vector2(cur.x, cur.y + vert_dir)
+					move_path.append(cur)
+				var horiz_dir = sign(target_grid_pos.x - cur.x)
+				for i in range(abs(target_grid_pos.x - cur.x)):
+					cur = Vector2(cur.x + horiz_dir, cur.y)
+					move_path.append(cur)
 				is_moving = true
 				grid_manager.valid_moves = []
 				current_action_points -= distance
 				update_ui()
-			
-				play_move_animation()
+				play_move_animation() # Play the first animation immediately
+				# Animation for subsequent steps is handled in _process
 		
-		# Handle attacks
+		# Handle attacks (allow even if not previously selected)
 		elif current_mode == "attack" and target_grid_pos in grid_manager.valid_attacks:
 			var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
 			if target_unit:
 				var weapon = weapons[current_weapon]
-				var ap_cost = ceil(weapon.range / 2)  # AP cost is half the weapon's range, rounded up
+				var ap_cost = get_attack_ap_cost()
 				if current_action_points >= ap_cost:
 					attack(target_unit)
 					current_action_points -= ap_cost
 					update_ui()
-					
-					# If we're out of AP, end turn
+					current_mode = "move"
+					update_movement_range()
 					if current_action_points <= 0:
 						end_turn()
 
@@ -261,14 +272,16 @@ func update_ui():
 	update_weapon_ui()
 
 func update_movement_range():
-	# Calculate all possible moves within movement range (orthogonal only)
-	var all_moves = grid_manager.calculate_movement_range(grid_position, movement_range)
+	# Use current_action_points as the movement range
+	var all_moves = grid_manager.calculate_movement_range(grid_position, current_action_points)
 	
-	# Filter moves based on available AP
+	# Filter moves based on available AP (Manhattan distance)
 	var valid_moves = []
 	for move in all_moves:
-		var distance = int(abs(grid_position.x - move.x) + abs(grid_position.y - move.y))
-		if distance <= current_action_points and distance > 0:  # Only show moves we can afford
+		var dx = abs(grid_position.x - move.x)
+		var dy = abs(grid_position.y - move.y)
+		var distance = int(dx + dy)
+		if distance <= current_action_points and distance > 0:
 			valid_moves.append(move)
 	
 	grid_manager.valid_moves = valid_moves
@@ -323,6 +336,7 @@ func load_string_to_weapon(weapon_name, new_string):
 	# If all constraints are met, load the string
 	weapon.loaded_string = new_string
 	print("Successfully loaded string '", new_string, "' into ", weapon.name)
+	update_ui() # Always update UI after loading
 	return true
 
 func attack(target):
@@ -335,6 +349,7 @@ func attack(target):
 	print("Attacked with ", weapon.name, " using string: ", weapon.loaded_string)
 	# Clear the loaded string after use
 	weapon.loaded_string = ""
+	update_ui() # Always update UI after attacking
 
 func take_damage(amount):
 	current_health -= amount
@@ -359,3 +374,19 @@ func reset_turn():
 	grid_manager.valid_moves = []
 	grid_manager.valid_attacks = []
 	update_ui()
+
+# Add a helper to get AP cost for attack
+func get_attack_ap_cost():
+	var weapon = weapons[current_weapon]
+	return ceil(weapon.range / 2)
+
+# When a weapon is selected, enter attack mode
+func set_weapon_and_attack_mode(weapon_id):
+	current_weapon = weapon_id
+	weapon_type = weapons[weapon_id].type
+	current_mode = "attack"
+	update_attack_range()
+	update_ui()
+	# Always select this player for attack mode
+	if grid_manager:
+		grid_manager.selected_unit = self

@@ -1,35 +1,54 @@
 extends Node2D
 class_name BaseRoom
 
-signal player_entered(room)
+signal player_entered(room_rect: Rect2)
+signal player_exited
 signal combat_triggered(room, enemies)
 
 @export var has_combat := false
 @export var enemy_data := []  # Array of enemy definitions for this room
 @export var combat_positions := []  # Array of Vector2i positions for combatants
+@export var room_width: int = 20  # Width in grid cells
+@export var room_height: int = 15  # Height in grid cells
 
 var player_in_room := false
 var combat_completed := false
+var room_rect: Rect2
+var room_area: Area2D
 
 func _ready() -> void:
-	# Connect to area signals for player detection
-	for door in [$north_door, $east_door, $south_door, $west_door]:
-		if door.has_node("Area2D"):
-			door.get_node("Area2D").connect("body_entered", Callable(self, "_on_door_area_entered"))
-			door.get_node("Area2D").connect("body_exited", Callable(self, "_on_door_area_exited"))
+	# Create room area for player detection
+	room_area = Area2D.new()
+	var collision = CollisionShape2D.new()
+	var shape = RectangleShape2D.new()
+	var grid_manager = get_node("/root/main/GridManager")
+	var cell_size = grid_manager.GRID_SIZE
+	shape.size = Vector2(room_width * cell_size, room_height * cell_size)
+	collision.shape = shape
+	room_area.add_child(collision)
+	add_child(room_area)
+	
+	# Connect area signals
+	room_area.body_entered.connect(_on_room_area_entered)
+	room_area.body_exited.connect(_on_room_area_exited)
+	
+	# Calculate room boundaries in world coordinates
+	var top_left = grid_manager.grid_to_world(Vector2.ZERO)
+	room_rect = Rect2(top_left, Vector2(room_width * cell_size, room_height * cell_size))
 
-func _on_door_area_entered(body: Node2D) -> void:
+func _on_room_area_entered(body: Node2D) -> void:
 	if body.is_in_group("player") and not player_in_room:
 		player_in_room = true
-		emit_signal("player_entered", self)
+		player_entered.emit(room_rect)
 		
 		# Trigger combat if this room has combat and it hasn't been completed
 		if has_combat and not combat_completed and enemy_data.size() > 0:
 			emit_signal("combat_triggered", self, enemy_data)
 
-func _on_door_area_exited(body: Node2D) -> void:
+func _on_room_area_exited(body: Node2D) -> void:
 	if body.is_in_group("player"):
 		player_in_room = false
+		player_exited.emit()
 
 func set_doors(neighbors: Dictionary) -> void:
 	$north_door.visible = neighbors.get("up", false)
