@@ -19,9 +19,12 @@ var enemies: Array = []  # Array to store spawned enemies
 var enemy_scene = preload("res://enemy.tscn")
 var non_floor_tile_coords: Array[Vector2i] = []  # Store coordinates of non-floor tiles
 
-func _ready() -> void:
-	# Create room area for player detection
-	room_area = Area2D.new()
+# Door traversal popup
+var door_popup_scene = preload("res://ui/door_traversal_popup.tscn")
+var door_popup_instance = null
+
+func _ready() -> void:	
+	room_area = Area2D.new() #room area for player detection
 	var collision = CollisionShape2D.new()
 	var shape = RectangleShape2D.new()
 	var grid_manager = get_node("/root/main/GridManager")
@@ -42,6 +45,156 @@ func _ready() -> void:
 	# Spawn enemies if this room should have combat
 	if has_combat:
 		spawn_enemies()
+	
+	# Set up door interactions
+	setup_door_interactions()
+	
+	# Create door popup instance
+	create_door_popup()
+
+func create_door_popup():
+	if not door_popup_instance:
+		door_popup_instance = door_popup_scene.instantiate()
+		#add to canvas layer for proper UI display
+		var canvas_layer = get_node("/root/main/CanvasLayer")
+		if canvas_layer:
+			canvas_layer.add_child(door_popup_instance)
+
+func setup_door_interactions():
+	# Add interaction areas to each door
+	var doors = ["north_door", "south_door", "east_door", "west_door"]
+	for door_name in doors:
+		if has_node(door_name):
+			var door = get_node(door_name)
+			setup_door_interaction(door, door_name)
+
+func setup_door_interaction(door: Node2D, door_name: String):
+	# Create Area2D for door interaction
+	var door_area = Area2D.new()
+	door_area.name = door_name + "_area"
+	
+	# Create collision shape
+	var collision = CollisionShape2D.new()
+	var shape = RectangleShape2D.new()
+	shape.size = Vector2(32, 32)  # 1x1 grid cell for precise interaction
+	collision.shape = shape
+	door_area.add_child(collision)
+	
+	# Add to door
+	door.add_child(door_area)
+	
+	door_area.area_entered.connect(_on_door_entered.bind(door_name))
+	door_area.area_exited.connect(_on_door_exited.bind(door_name))
+
+func _on_door_entered(area: Area2D, door_name: String):
+	if area.is_in_group("player"):
+		var door = get_node(door_name)
+		if door and door.visible:
+			show_door_traversal_popup(door_name)
+
+func _on_door_exited(area: Area2D, door_name: String):
+	if area.is_in_group("player"):
+		# Hide the popup when player moves away from door
+		if door_popup_instance and door_popup_instance.visible:
+			door_popup_instance.hide_popup()
+
+func show_door_traversal_popup(door_name: String):
+	# Make sure we have a popup instance
+	if not door_popup_instance:
+		create_door_popup()
+	
+	if door_popup_instance:
+		door_popup_instance.show_door_prompt(door_name, self)
+
+func teleport_player_through_door(door_name: String):
+	var direction = get_door_direction(door_name)
+	var target_room_pos = get_target_room_position(direction)
+	
+	if target_room_pos == Vector2i(-1, -1):
+		print("no room found in direction: ", direction)
+		return
+	
+	var target_room = find_room_at_position(target_room_pos)
+	if not target_room:
+		print("Target room not found at: ", target_room_pos)
+		return
+	
+	var opposite_door = get_opposite_door_name(door_name)
+	if not target_room.has_node(opposite_door):
+		print("Target room doesn't have door: ", opposite_door)
+		return
+	
+	# teleport the player
+	var player = get_node("/root/main/Player")
+	if player:
+		var target_door = target_room.get_node(opposite_door)
+		var teleport_pos = target_room.global_position + target_door.position
+		
+		# offset the player a little away from the door
+		var offset = get_door_teleport_offset(opposite_door)
+		teleport_pos += offset
+		
+		player.global_position = teleport_pos
+		player.grid_position = get_node("/root/main/GridManager").world_to_grid(teleport_pos)
+		
+		# Update grid manager
+		get_node("/root/main/GridManager").update_occupied_tiles()
+		
+		print("Player teleported from ", door_name, " to ", opposite_door, " at ", target_room_pos)
+
+func get_door_direction(door_name: String) -> Vector2i:
+	match door_name:
+		"north_door": return Vector2i.UP
+		"south_door": return Vector2i.DOWN
+		"east_door": return Vector2i.RIGHT
+		"west_door": return Vector2i.LEFT
+		_: return Vector2i.ZERO
+
+func get_opposite_door_name(door_name: String) -> String:
+	match door_name:
+		"north_door": return "south_door"
+		"south_door": return "north_door"
+		"east_door": return "west_door"
+		"west_door": return "east_door"
+		_: return ""
+
+func get_door_teleport_offset(door_name: String) -> Vector2:
+	# Offset player away from the door they're teleporting to
+	match door_name:
+		"north_door": return Vector2(0, 16)  # Place player below north door
+		"south_door": return Vector2(0, -16)  # Place player above south door
+		"east_door": return Vector2(-16, 0)   # Place player left of east door
+		"west_door": return Vector2(16, 0)    # Place player right of west door
+		_: return Vector2.ZERO
+
+func get_target_room_position(direction: Vector2i) -> Vector2i:
+	#get this room's position in the dungeon grid
+	var dungeon_level = get_node("/root/main/DungeonContainer").get_child(0)
+	var current_room_pos = get_room_grid_position()
+	
+	if current_room_pos == Vector2i(-1, -1):
+		return Vector2i(-1, -1)
+	
+	return current_room_pos + direction
+
+func get_room_grid_position() -> Vector2i:
+	# calculate this room's position in the dungeon grid
+	var cell_size = 16 * 15  
+	var room_grid_pos = Vector2i(global_position / cell_size)
+	return room_grid_pos
+
+func find_room_at_position(grid_pos: Vector2i) -> Node2D:
+	# Find the room at the specified grid position
+	var dungeon_container = get_node("/root/main/DungeonContainer")
+	var cell_size = 16 * 15
+	var target_world_pos = Vector2(grid_pos * cell_size)
+	
+	for room in dungeon_container.get_child(0).get_children():
+		if room.is_in_group("rooms"):
+			if room.global_position == target_world_pos:
+				return room
+	
+	return null
 
 func is_valid_spawn_position(x: int, y: int, floor_sprite: TileMapLayer, grid_manager: Node) -> bool:
 	# Check if position is within room bounds

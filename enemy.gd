@@ -216,11 +216,16 @@ func take_turn():
 		if valid_moves.size() > 0:
 			var random_move = valid_moves[randi() % valid_moves.size()]
 			move_path.clear()
-			move_path.append(random_move)
-			is_moving = true
-			current_action_points -= 1  # Still only cost 1 AP for random moves
-			update_enemy_ui()  # Update UI after AP change
-			play_move_animation()
+			var path = find_path_to_target(random_move)
+			if path.size() > 0:
+				var movement_cost = path.size() - 1  # Subtract 1 because path includes start position
+				if movement_cost <= current_action_points:
+					move_path = path
+					move_path.pop_front()  # Remove starting position from path
+					is_moving = true
+					current_action_points -= movement_cost
+					update_enemy_ui()  # Update UI after AP change
+					play_move_animation()
 		return
 	
 	var player = get_node("/root/main/Player")
@@ -252,61 +257,44 @@ func take_turn():
 		
 		if best_move:
 			print("Enemy moving to: ", best_move)
-			# Build move_path: vertical then horizontal
+			# Use proper A* pathfinding to respect walls
 			move_path.clear()
-			var cur = grid_position
-			var remaining_ap = current_action_points
-			
-			# First move vertically
-			var vert_dir = sign(best_move.y - cur.y)
-			while cur.y != best_move.y and remaining_ap > 0:
-				var next_pos = Vector2(cur.x, cur.y + vert_dir)
-				if is_position_occupied(next_pos):
-					break
-				cur = next_pos
-				move_path.append(cur)
-				remaining_ap -= 1
-			
-			# Then move horizontally
-			var horiz_dir = sign(best_move.x - cur.x)
-			while cur.x != best_move.x and remaining_ap > 0:
-				var next_pos = Vector2(cur.x + horiz_dir, cur.y)
-				if is_position_occupied(next_pos):
-					break
-				cur = next_pos
-				move_path.append(cur)
-				remaining_ap -= 1
-			
-			# Calculate total movement cost
-			var total_movement_cost = move_path.size()
-			
-			# Only move if we can afford it
-			if total_movement_cost <= current_action_points:
-				is_moving = true
-				current_action_points -= total_movement_cost
-				update_enemy_ui()  # Update UI after AP change
-				play_move_animation()
-			else:
-				# If we can't afford the full movement, move as far as we can
-				var affordable_path = []
-				remaining_ap = current_action_points
-				
-				for pos in move_path:
-					if remaining_ap > 0:
-						affordable_path.append(pos)
-						remaining_ap -= 1
-					else:
-						break
-				
-				if affordable_path.size() > 0:
-					move_path = affordable_path
-					current_action_points = remaining_ap
-					update_enemy_ui()  # Update UI after AP change
+			var path = find_path_to_target(best_move)
+			if path.size() > 0:
+				# Calculate movement cost based on actual path length
+				var movement_cost = path.size() - 1  # Subtract 1 because path includes start position
+				if movement_cost <= current_action_points:
+					move_path = path
+					move_path.pop_front()  # Remove starting position from path
 					is_moving = true
+					current_action_points -= movement_cost
+					update_enemy_ui()  # Update UI after AP change
 					play_move_animation()
 				else:
-					has_moved = true
-					check_and_attack()
+					# If we can't afford the full movement, move as far as we can
+					var affordable_path = []
+					var remaining_ap = current_action_points
+					
+					for i in range(1, path.size()):  # Start from 1 to skip starting position
+						if remaining_ap > 0:
+							affordable_path.append(path[i])
+							remaining_ap -= 1
+						else:
+							break
+					
+					if affordable_path.size() > 0:
+						move_path = affordable_path
+						current_action_points -= affordable_path.size()
+						update_enemy_ui()  # Update UI after AP change
+						is_moving = true
+						play_move_animation()
+					else:
+						has_moved = true
+						check_and_attack()
+			else:
+				# No valid path found
+				has_moved = true
+				check_and_attack()
 		else:
 			has_moved = true
 			check_and_attack()
