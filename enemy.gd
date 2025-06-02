@@ -70,7 +70,13 @@ var string_label
 var action_points_bar
 var action_points_label
 
+# Hack effect state
+var is_stunned = false
+var is_confused = false
+var is_overwrite = false
+
 func _ready():
+	add_to_group("enemy")
 	grid_manager = get_node("../../GridManager")
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
@@ -168,7 +174,27 @@ func play_move_animation():
 
 func take_turn():
 	print("Enemy taking turn")
+	if is_stunned:
+		print("Enemy is stunned and skips turn.")
+		is_stunned = false
+		return
+	if is_overwrite:
+		print("Enemy is overwriting its string with another enemy's string.")
+		is_overwrite = false
+		_overwrite_string_with_another_enemy()
 	if current_action_points <= 0:
+		return
+	if is_confused:
+		print("Enemy is confused and moves randomly.")
+		is_confused = false
+		var valid_moves = grid_manager.calculate_movement_range(grid_position, current_action_points)
+		if valid_moves.size() > 0:
+			var random_move = valid_moves[randi() % valid_moves.size()]
+			move_path.clear()
+			move_path.append(random_move)
+			is_moving = true
+			current_action_points -= 1
+			play_move_animation()
 		return
 	
 	var player = get_node("/root/main/Player")
@@ -294,3 +320,38 @@ func reset_turn():
 	is_moving = false
 	current_action_points = max_action_points
 	update_enemy_ui()
+
+# Hack effect methods
+func apply_stun():
+	is_stunned = true
+
+func apply_confuse():
+	is_confused = true
+
+func apply_overwrite():
+	is_overwrite = true
+
+# Helper for overwrite effect
+func _overwrite_string_with_another_enemy():
+	var main = get_node("/root/main")
+	var enemies = main.enemies.get_children()
+	var other_enemies = []
+	for enemy in enemies:
+		if is_instance_valid(enemy) and enemy != self:
+			other_enemies.append(enemy)
+	if other_enemies.size() > 0:
+		var chosen = other_enemies[randi() % other_enemies.size()]
+		current_string = chosen.current_string
+		print("Enemy string overwritten with: ", current_string)
+		update_enemy_ui()
+
+# Helper to find best move away from player
+func find_best_move_away_from_player(valid_moves, player_pos):
+	var best_move = null
+	var longest_distance = -INF
+	for move in valid_moves:
+		var distance = int(abs(move.x - player_pos.x) + abs(move.y - player_pos.y))
+		if distance > longest_distance:
+			longest_distance = distance
+			best_move = move
+	return best_move

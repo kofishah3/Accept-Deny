@@ -52,6 +52,9 @@ var weapon_string_label: Label
 var load_string_button: Button
 var string_input: LineEdit
 var ui_initialized: bool = false
+var hack_stun_button: Button
+var hack_confuse_button: Button
+var hack_overwrite_button: Button
 
 func _ready():
 	call_deferred("create_ui")
@@ -144,6 +147,32 @@ func create_ui():
 	mode_button.pressed.connect(_on_move_mode_pressed)
 	container.add_child(mode_button)
 	
+	# Create Hacking section
+	var hack_label = Label.new()
+	hack_label.text = "Hacking:"
+	container.add_child(hack_label)
+
+	hack_stun_button = Button.new()
+	hack_stun_button.name = "HackStunButton"
+	hack_stun_button.text = "Stun Target (5 AP)"
+	hack_stun_button.size = Vector2(180, 30)
+	hack_stun_button.pressed.connect(_on_hack_stun_pressed)
+	container.add_child(hack_stun_button)
+
+	hack_confuse_button = Button.new()
+	hack_confuse_button.name = "HackConfuseButton"
+	hack_confuse_button.text = "Confuse Target (2 AP)"
+	hack_confuse_button.size = Vector2(180, 30)
+	hack_confuse_button.pressed.connect(_on_hack_confuse_pressed)
+	container.add_child(hack_confuse_button)
+
+	hack_overwrite_button = Button.new()
+	hack_overwrite_button.name = "HackOverwriteButton"
+	hack_overwrite_button.text = "Overwrite Target (4 AP)"
+	hack_overwrite_button.size = Vector2(180, 30)
+	hack_overwrite_button.pressed.connect(_on_hack_overwrite_pressed)
+	container.add_child(hack_overwrite_button)
+	
 	ui_initialized = true
 	
 	# If we already have a player, update the UI
@@ -184,6 +213,14 @@ func update_ui():
 	
 	# Update mode button text
 	mode_button.text = "Move Mode"
+	
+	# Update hack button states
+	if hack_stun_button:
+		hack_stun_button.disabled = player.current_action_points < 5
+	if hack_confuse_button:
+		hack_confuse_button.disabled = player.current_action_points < 2
+	if hack_overwrite_button:
+		hack_overwrite_button.disabled = player.current_action_points < 4
 
 func _on_weapon_selected(weapon_id: String):
 	if not ui_initialized or not player or not is_instance_valid(player):
@@ -214,4 +251,19 @@ func _on_move_mode_pressed():
 		return
 	player.current_mode = "move"
 	player.update_movement_range()
-	update_ui() 
+	update_ui()
+
+func _on_hack_stun_pressed():
+	if player and is_instance_valid(player):
+		player.enter_hack_mode("stun")
+		update_ui()
+
+func _on_hack_confuse_pressed():
+	if player and is_instance_valid(player):
+		player.enter_hack_mode("confuse")
+		update_ui()
+
+func _on_hack_overwrite_pressed():
+	if player and is_instance_valid(player):
+		player.enter_hack_mode("overwrite")
+		update_ui() 
