@@ -16,8 +16,9 @@ var current_health
 var current_action_points
 
 # Mode
-var current_mode = "move"  # Can be "move", "attack", or "load_string"
+var current_mode = "move"  # Can be "move", "attack", "load_string", or "hack"
 var is_interacting_with_ui = false
+var current_hack_type = ""  # Store the current hack type when in hack mode
 
 # Weapons
 var weapons = {
@@ -109,6 +110,13 @@ var is_moving = false
 var move_speed = 4.0  # Grid cells per second
 var move_path = []
 
+# Hack system
+var hack_costs = {
+	"stun": 5,
+	"confuse": 2,
+	"overwrite": 4
+}
+
 func _ready():
 	add_to_group("player")
 	grid_manager = get_node("/root/main/GridManager")
@@ -175,8 +183,8 @@ func _input(event):
 		var mouse_pos = get_global_mouse_position()
 		var target_grid_pos = grid_manager.world_to_grid(mouse_pos)
 		
-		# Handle unit selection (only if not in attack mode)
-		if current_mode != "attack" and grid_manager.world_to_grid(position).distance_to(target_grid_pos) < 1:
+		# Handle unit selection (only if not in attack or hack mode)
+		if current_mode != "attack" and current_mode != "hack" and grid_manager.world_to_grid(position).distance_to(target_grid_pos) < 1:
 			if grid_manager.selected_unit == self:
 				grid_manager.selected_unit = null
 				grid_manager.valid_moves = []
@@ -186,6 +194,21 @@ func _input(event):
 				if current_action_points > 0:
 					current_mode = "move"
 					update_movement_range()
+			return
+		
+		# Handle hacks
+		if current_mode == "hack":
+			var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
+			if target_unit and target_unit.is_in_group("enemy"):
+				var cost = hack_costs[current_hack_type]
+				if current_action_points >= cost:
+					hack_enemy(target_unit, current_hack_type)
+					current_action_points -= cost
+					update_ui()
+					current_mode = "move"
+					update_movement_range()
+					if current_action_points <= 0:
+						end_turn()
 			return
 		
 		# Handle attacks first (allow even if not previously selected)
@@ -251,6 +274,18 @@ func update_movement_range():
 
 func update_attack_range():
 	grid_manager.valid_moves = []
+	
+	if current_mode == "hack":
+		# For hacking, show all enemies in the room
+		var main = get_node("/root/main")
+		var enemies = main.enemies.get_children()
+		grid_manager.valid_attacks = []
+		for enemy in enemies:
+			if is_instance_valid(enemy):
+				grid_manager.valid_attacks.append(enemy.grid_position)
+		grid_manager.attack_color = Color(0, 1, 0, 0.3)  # Green for hack range
+		return
+		
 	var weapon = weapons[current_weapon]
 	
 	match weapon.attack_type:
@@ -348,3 +383,29 @@ func play_move_animation():
 		anim.play("walk_down")
 	elif direction.y < 0:
 		anim.play("walk_up")
+
+func hack_enemy(target_enemy, hack_type: String):
+	if not hack_costs.has(hack_type):
+		print("Invalid hack type")
+		return
+	var cost = hack_costs[hack_type]
+	if current_action_points < cost:
+		print("Not enough AP to hack.")
+		return
+	
+	if is_instance_valid(target_enemy):
+		match hack_type:
+			"stun": target_enemy.apply_stun()
+			"confuse": target_enemy.apply_confuse()
+			"overwrite": target_enemy.apply_overwrite()
+		print("Hacked enemy with ", hack_type)
+		update_ui()
+
+func enter_hack_mode(hack_type: String):
+	current_hack_type = hack_type
+	current_mode = "hack"
+	update_attack_range()
+	update_ui()
+	# Always select this player for hack mode
+	if grid_manager:
+		grid_manager.selected_unit = self
