@@ -51,12 +51,12 @@ size_flags_horizontal = 4
 theme = SubResource("Theme_dix6n")
 
 [node name="Player" parent="." instance=ExtResource("2_jfg53")]
-position = Vector2(150.01, 68.4613)
+position = Vector2(511.959, 338.205)
 scale = Vector2(0.392099, 0.387833)
 
 [node name="Enemy" parent="." instance=ExtResource("3_rwd6p")]
-position = Vector2(311.987, 70.4594)
-scale = Vector2(0.415029, 0.405812)
+position = Vector2(894.906, 329.214)
+scale = Vector2(0.945285, 0.924293)
 
 [node name="GonnaUse4" type="Sprite2D" parent="Enemy"]
 position = Vector2(-24.0001, -59)
@@ -80,19 +80,22 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 7.0
-offset_top = -59.0
-offset_right = 56.0
-offset_bottom = -10.0
+offset_left = 537.956
+offset_top = -353.823
+offset_right = 586.956
+offset_bottom = -304.823
 grow_vertical = 0
+scale = Vector2(3.13675, 2.92485)
 pivot_offset = Vector2(237.997, -93.5349)
 texture = ExtResource("7_xbyut")
 region_rect = Rect2(0, 0, 66, 63)
 
 [node name="Char" type="TextureRect" parent="PlayerDisplay"]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 3.48936
+offset_top = 4.27992
+offset_right = 43.4894
+offset_bottom = 44.2799
 
 [node name="HealthProgressBar" type="ProgressBar" parent="PlayerDisplay"]
 visible = false
@@ -149,15 +152,15 @@ texture_progress = ExtResource("11_d6gw6")
 
 [node name="Inventory" type="GridContainer" parent="."]
 layout_mode = 2
-anchor_left = 0.330763
-anchor_top = 0.835733
-anchor_right = 0.333367
-anchor_bottom = 0.840341
+anchor_left = 0.337477
+anchor_top = 0.865373
+anchor_right = 0.338259
+anchor_bottom = 0.86676
 offset_right = 130.0
 offset_bottom = 31.0
 grow_vertical = 2
 rotation = -0.000385932
-scale = Vector2(0.630406, 0.623601)
+scale = Vector2(1.98308, 1.96168)
 theme_override_constants/h_separation = 1
 theme_override_constants/v_separation = 0
 columns = 4
@@ -192,22 +195,23 @@ size_flags_vertical = 4
 [node name="Phase Display" type="CanvasLayer" parent="."]
 
 [node name="Player-Green" type="Panel" parent="Phase Display"]
-offset_left = 322.0
-offset_top = 6.0
-offset_right = 371.0
-offset_bottom = 20.0
+offset_left = 1040.0
+offset_top = 32.0
+offset_right = 1097.0
+offset_bottom = 47.0
+scale = Vector2(3.70233, 3.70233)
 theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
 
 [node name="Who-Phase" type="Label" parent="Phase Display"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -57.0
-offset_top = 9.0
-offset_right = 16.0
-offset_bottom = 26.0
+offset_left = -208.0
+offset_top = 48.0
+offset_right = -135.0
+offset_bottom = 65.0
 grow_horizontal = 0
-scale = Vector2(0.557079, 0.557079)
+scale = Vector2(2.06249, 2.06249)
 theme_override_font_sizes/font_size = 11
 text = "Who? Phase"
 horizontal_alignment = 1
@@ -226,11 +230,16 @@ grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
 
 [node name="Accumulated String View" type="NinePatchRect" parent="."]
-layout_mode = 0
-offset_left = 171.0
-offset_top = 8.0
-offset_right = 222.0
-offset_bottom = 19.0
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -88.0464
+offset_top = 32.4954
+offset_right = -37.0464
+offset_bottom = 43.4954
+grow_horizontal = 2
+scale = Vector2(3.38917, 3.38917)
 texture = ExtResource("13_8mgfu")
 
 [node name="AccumulatedString" type="HBoxContainer" parent="Accumulated String View"]
@@ -272,14 +281,14 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -159.0
-offset_top = -39.0
-offset_right = 26.0
-offset_bottom = 26.0
+offset_left = -536.073
+offset_top = -113.051
+offset_right = -351.073
+offset_bottom = -48.0513
 grow_horizontal = 0
 grow_vertical = 0
 rotation = -0.00224055
-scale = Vector2(0.373605, 0.373605)
+scale = Vector2(1.2064, 1.2064)
 texture = ExtResource("15_fn08l")
 region_rect = Rect2(0, 0, 64, 65)
 
@@ -304,14 +313,14 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -82.0115
-offset_top = -38.6431
-offset_right = 102.989
-offset_bottom = 26.3569
+offset_left = -272.11
+offset_top = -113.051
+offset_right = -87.1096
+offset_bottom = -48.0513
 grow_horizontal = 0
 grow_vertical = 0
 rotation = -0.00224055
-scale = Vector2(0.373605, 0.373605)
+scale = Vector2(1.17401, 1.18069)
 texture = ExtResource("15_fn08l")
 region_rect = Rect2(0, 0, 64, 65)
 
