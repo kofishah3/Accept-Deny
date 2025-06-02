@@ -129,6 +129,11 @@ func _spawn_rooms() -> void:
 				var room = scene.instantiate()
 				room.position = Vector2(x, y) * cell_size
 				room.add_to_group("rooms")  # Add room to the rooms group
+				
+				# Set up combat for non-start rooms
+				if room_type != "S":
+					room.has_combat = true
+				
 				add_child(room)
 				
 				if room.has_method("set_theme"):

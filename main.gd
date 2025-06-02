@@ -39,7 +39,7 @@ func _ready():
 			
 		#var wall_positions = room_and_wall_data
 		pass
-    
+	
 	# Wait for dungeon to be ready
 	await get_tree().create_timer(0.1).timeout
 	
@@ -96,13 +96,21 @@ func _process(_delta):
 
 func process_enemy_turns():
 	print("Processing enemy turns")
+	var active_enemies = []
+	
+	# First, collect all active enemies
 	for enemy in enemies.get_children():
-		if enemy and is_instance_valid(enemy):
-			print("Processing enemy: ", enemy.name)
-			enemy.take_turn()
-			# Wait for enemy to complete their turn
-			await get_tree().create_timer(1.0).timeout
-			enemy.reset_turn()
+		if enemy and is_instance_valid(enemy) and enemy.is_player_in_range():
+			active_enemies.append(enemy)
+	
+	# Process only active enemies
+	for enemy in active_enemies:
+		print("Processing enemy: ", enemy.name)
+		enemy.take_turn()
+		# Wait a shorter time for active enemies
+		await get_tree().create_timer(0.3).timeout
+		enemy.reset_turn()
+	
 	print("All enemies processed")
 	end_enemy_turn()
 
