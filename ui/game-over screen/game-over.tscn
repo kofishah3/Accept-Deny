@@ -217,7 +217,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="Transparent" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0.392157)
+layout_mode = 0
+offset_left = 72.0
+offset_top = 80.0
+offset_right = 1208.0
+offset_bottom = 640.0
+color = Color(0, 0, 0, 1)
+
+[node name="Border" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -226,16 +235,16 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_gud10")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="Label & Buttons" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -360.0
+offset_left = -384.0
 offset_top = -128.0
-offset_right = -172.0
+offset_right = -181.0
 offset_bottom = -39.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -243,7 +252,7 @@ scale = Vector2(3.78666, 3.76891)
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="Label" type="Label" parent="Label & Buttons"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.658911, 4.06705e-06, 2.16588e-06, 1)
 theme_override_colors/font_shadow_color = Color(0.301961, 0, 0, 1)
@@ -254,33 +263,33 @@ vertical_alignment = 1
 visible_characters = 0
 visible_ratio = 0.0
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Label & Buttons"]
 root_node = NodePath("../Label")
 libraries = {
 &"": SubResource("AnimationLibrary_pxquw")
 }
 autoplay = "typewriter_effect"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Buttons" type="HBoxContainer" parent="Label & Buttons"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer/HBoxContainer"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Label & Buttons/Buttons"]
 libraries = {
 &"": SubResource("AnimationLibrary_2ywwe")
 }
 autoplay = "buttons"
 
-[node name="TextureButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+[node name="TextureButton" type="TextureButton" parent="Label & Buttons/Buttons"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 texture_normal = ExtResource("5_gud10")
 texture_pressed = ExtResource("6_6tuk2")
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/TextureButton"]
+[node name="Label" type="Label" parent="Label & Buttons/Buttons/TextureButton"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -298,13 +307,13 @@ theme_override_font_sizes/font_size = 9
 text = "Restart"
 horizontal_alignment = 1
 
-[node name="TextureButton2" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+[node name="TextureButton2" type="TextureButton" parent="Label & Buttons/Buttons"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 texture_normal = ExtResource("7_qpl7n")
 texture_pressed = ExtResource("8_dcu8f")
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/TextureButton2"]
+[node name="Label" type="Label" parent="Label & Buttons/Buttons/TextureButton2"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -322,7 +331,7 @@ theme_override_font_sizes/font_size = 9
 text = "Exit"
 horizontal_alignment = 1
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+[node name="Regex Animation" type="HBoxContainer" parent="."]
 layout_mode = 2
 offset_left = 20.0
 offset_top = 164.0
@@ -334,25 +343,25 @@ scale = Vector2(3.25207, 3.25207)
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="NEWSprite" type="Sprite2D" parent="HBoxContainer2"]
+[node name="NEWSprite" type="Sprite2D" parent="Regex Animation"]
 position = Vector2(160.245, -1)
 scale = Vector2(0.995308, 1)
 texture = ExtResource("2_6tuk2")
 hframes = 2
 
-[node name="NEWSprite2" type="Sprite2D" parent="HBoxContainer2"]
+[node name="NEWSprite2" type="Sprite2D" parent="Regex Animation"]
 position = Vector2(191.099, -1)
 scale = Vector2(0.995308, 1)
 texture = ExtResource("3_qpl7n")
 hframes = 2
 
-[node name="NEWSprite3" type="Sprite2D" parent="HBoxContainer2"]
+[node name="NEWSprite3" type="Sprite2D" parent="Regex Animation"]
 position = Vector2(222.949, -1)
 scale = Vector2(0.995308, 1)
 texture = ExtResource("4_dcu8f")
 hframes = 2
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer2"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Regex Animation"]
 libraries = {
 &"": SubResource("AnimationLibrary_v1pfc")
 }

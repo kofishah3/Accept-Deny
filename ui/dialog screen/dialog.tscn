@@ -33,7 +33,7 @@ offset_left = 22.0
 offset_top = 33.0
 offset_right = 254.0
 offset_bottom = 58.0
-theme_override_font_sizes/normal_font_size = 10
+theme_override_font_sizes/normal_font_size = 9
 text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
 
 [node name="Name" type="RichTextLabel" parent="Player Dialog"]
@@ -67,7 +67,7 @@ offset_left = 22.0
 offset_top = 33.0
 offset_right = 254.0
 offset_bottom = 58.0
-theme_override_font_sizes/normal_font_size = 10
+theme_override_font_sizes/normal_font_size = 9
 text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
 
 [node name="Name" type="RichTextLabel" parent="Enemy"]

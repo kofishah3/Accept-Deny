@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dx6nymuqu0fyi"]
+[gd_scene load_steps=25 format=3 uid="uid://dx6nymuqu0fyi"]
 
 [ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="1_ylauv"]
 [ext_resource type="PackedScene" uid="uid://dev1r1jpyo8a4" path="res://player.tscn" id="2_jfg53"]
@@ -15,6 +15,10 @@
 [ext_resource type="Texture2D" uid="uid://qan412vxahu7" path="res://ui_elements/on-game/Border/stringBorder.png" id="13_8mgfu"]
 [ext_resource type="Texture2D" uid="uid://dh15dc6h5ar8e" path="res://ui_elements/regex-shapes/grey-loading.png" id="14_uvf25"]
 [ext_resource type="Texture2D" uid="uid://m3so316sw6rv" path="res://ui_elements/on-game/Border/buttonBorder.png" id="15_fn08l"]
+[ext_resource type="Texture2D" uid="uid://bvwefi47f7rvm" path="res://ui_elements/on-game/move-button.png" id="16_rwd6p"]
+[ext_resource type="Texture2D" uid="uid://db4dn2l8btt8m" path="res://ui_elements/on-game/move-button-pressed.png" id="17_tdaem"]
+[ext_resource type="Texture2D" uid="uid://dob1lwjm47jf8" path="res://ui_elements/on-game/endturn-button.png" id="18_yix3w"]
+[ext_resource type="Texture2D" uid="uid://dd13m6gkpqnok" path="res://ui_elements/on-game/endturn-button-pressed.png" id="19_krqp1"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dix6n"]
 
@@ -31,11 +35,18 @@ script/source = "extends ProgressBar
 "
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ylauv"]
-bg_color = Color(0, 0.97414, 0.293411, 0.419608)
+bg_color = Color(0, 0.972549, 0.294118, 0.392157)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yix3w"]
+bg_color = Color(0.796078, 0, 0.00784314, 0.392157)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [node name="UI" type="Control"]
 layout_mode = 3
@@ -212,7 +223,7 @@ offset_right = -135.0
 offset_bottom = 59.0
 grow_horizontal = 0
 scale = Vector2(2.06249, 2.06249)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 text = "Who? Phase"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -222,12 +233,12 @@ visible = false
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -62.0
-offset_top = 6.0
-offset_right = -13.0
-offset_bottom = 20.0
+offset_left = -243.0
+offset_top = 31.0
+offset_right = -25.0
+offset_bottom = 87.0
 grow_horizontal = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
+theme_override_styles/panel = SubResource("StyleBoxFlat_yix3w")
 
 [node name="Accumulated String View" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -292,19 +303,38 @@ scale = Vector2(1.2064, 1.2064)
 texture = ExtResource("15_fn08l")
 region_rect = Rect2(0, 0, 64, 65)
 
-[node name="Button" type="Button" parent="Attack_Move Button"]
+[node name="TextureButton" type="TextureButton" parent="Attack_Move Button"]
 layout_mode = 1
-anchors_preset = -1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -73.4028
+offset_top = -48.1917
+offset_right = -9.40278
+offset_bottom = -16.1917
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(2.24946, 2.24946)
+texture_normal = ExtResource("16_rwd6p")
+texture_pressed = ExtResource("17_tdaem")
+
+[node name="Label" type="Label" parent="Attack_Move Button/TextureButton"]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
-anchor_bottom = 0.727
-offset_left = 21.0
-offset_top = -5.0
-offset_right = -15.0
-offset_bottom = 0.744999
-scale = Vector2(0.975791, 0.974642)
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 24
-text = "MOVE"
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = 3.0
+offset_right = -4.0
+offset_bottom = -7.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 9
+text = "Move"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="End Turn Button" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -324,15 +354,28 @@ scale = Vector2(1.17401, 1.18069)
 texture = ExtResource("15_fn08l")
 region_rect = Rect2(0, 0, 64, 65)
 
-[node name="Button" type="Button" parent="End Turn Button"]
+[node name="TextureButton" type="TextureButton" parent="End Turn Button"]
 layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 0.727
-offset_left = 21.4219
-offset_top = -5.30027
-offset_right = -14.5781
-offset_bottom = 0.717728
-scale = Vector2(0.975791, 0.974642)
-theme_override_font_sizes/font_size = 22
-text = "END TURN"
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -69.4732
+offset_top = -46.8334
+offset_right = -5.47324
+offset_bottom = -14.8334
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(2.20046, 2.20046)
+texture_normal = ExtResource("18_yix3w")
+texture_pressed = ExtResource("19_krqp1")
+
+[node name="Label" type="Label" parent="End Turn Button/TextureButton"]
+layout_mode = 0
+offset_left = 9.26898
+offset_top = 8.86504
+offset_right = 57.269
+offset_bottom = 17.865
+theme_override_font_sizes/font_size = 9
+text = "End Turn"

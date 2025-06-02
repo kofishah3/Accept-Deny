@@ -51,7 +51,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TextureButton:modulate")
+tracks/0/path = NodePath("Continue:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -63,7 +63,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("TextureButton2:modulate")
+tracks/1/path = NodePath("Restart:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -79,7 +79,7 @@ length = 3.0
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TextureButton:modulate")
+tracks/0/path = NodePath("Continue:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -91,7 +91,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("TextureButton2:modulate")
+tracks/1/path = NodePath("Restart:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -212,7 +212,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="Transparency" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0.392157)
+offset_left = 72.0
+offset_top = 80.0
+offset_right = 1208.0
+offset_bottom = 640.0
+color = Color(0, 0, 0, 1)
+
+[node name="Border" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -221,7 +229,7 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_2qsmu")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="Label & Buttons" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -238,7 +246,7 @@ scale = Vector2(3.73665, 3.71913)
 theme_override_constants/separation = 24
 alignment = 1
 
-[node name="Label" type="Label" parent="VBoxContainer"]
+[node name="Label" type="Label" parent="Label & Buttons"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "YOU WIN!"
@@ -247,33 +255,33 @@ vertical_alignment = 1
 visible_characters = 0
 visible_ratio = 0.0
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Label & Buttons"]
 root_node = NodePath("../Label")
 libraries = {
 &"": SubResource("AnimationLibrary_pxquw")
 }
 autoplay = "typewriter_effect"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Buttons" type="HBoxContainer" parent="Label & Buttons"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="VBoxContainer/HBoxContainer"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Label & Buttons/Buttons"]
 libraries = {
 &"": SubResource("AnimationLibrary_2ywwe")
 }
 autoplay = "buttons"
 
-[node name="TextureButton" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+[node name="Continue" type="TextureButton" parent="Label & Buttons/Buttons"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 texture_normal = ExtResource("5_v1pfc")
 texture_pressed = ExtResource("6_1tsyl")
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/TextureButton"]
+[node name="Label" type="Label" parent="Label & Buttons/Buttons/Continue"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -291,13 +299,13 @@ theme_override_font_sizes/font_size = 9
 text = "Continue"
 horizontal_alignment = 1
 
-[node name="TextureButton2" type="TextureButton" parent="VBoxContainer/HBoxContainer"]
+[node name="Restart" type="TextureButton" parent="Label & Buttons/Buttons"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 texture_normal = ExtResource("7_2ywwe")
 texture_pressed = ExtResource("8_4pee7")
 
-[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer/TextureButton2"]
+[node name="Label" type="Label" parent="Label & Buttons/Buttons/Restart"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -315,7 +323,7 @@ theme_override_font_sizes/font_size = 9
 text = "Restart"
 horizontal_alignment = 1
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="."]
+[node name="Regex Animation" type="HBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -334,24 +342,24 @@ size_flags_vertical = 4
 theme_override_constants/separation = 12
 alignment = 1
 
-[node name="Sprite2D" type="Sprite2D" parent="HBoxContainer2"]
+[node name="Sprite2D" type="Sprite2D" parent="Regex Animation"]
 position = Vector2(159.249, -1)
 texture = ExtResource("2_odp4d")
 hframes = 2
 frame = 1
 
-[node name="Sprite2D3" type="Sprite2D" parent="HBoxContainer2"]
+[node name="Sprite2D3" type="Sprite2D" parent="Regex Animation"]
 position = Vector2(191.099, -1)
 texture = ExtResource("3_v1pfc")
 hframes = 2
 frame = 1
 
-[node name="Sprite2D2" type="Sprite2D" parent="HBoxContainer2"]
+[node name="Sprite2D2" type="Sprite2D" parent="Regex Animation"]
 position = Vector2(221.954, -2)
 texture = ExtResource("4_1tsyl")
 hframes = 2
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="HBoxContainer2"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Regex Animation"]
 libraries = {
 &"": SubResource("AnimationLibrary_v1pfc")
 }
