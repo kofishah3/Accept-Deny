@@ -64,7 +64,7 @@ var weapons = {
 		"color": Color(1, 0, 0, 0.3),
 		"ap_cost": 2,
 		"attack_type": "aoe",
-		"aoe_size": Vector2(0, 3),
+		"aoe_size": Vector2(0, 3),  # Default vertical AOE
 		"diagonal_allowed": false
 	},
 	"sniper": {
@@ -437,6 +437,21 @@ func has_line_of_sight_to(target_pos: Vector2) -> bool:
 	
 	return true
 
+func play_attack_animation(target_pos: Vector2):
+	var direction = target_pos - grid_position
+	if abs(direction.x) > abs(direction.y):
+		# Horizontal shot
+		if direction.x > 0:
+			anim.play("walk_right")
+		else:
+			anim.play("walk_left")
+	else:
+		# Vertical shot
+		if direction.y > 0:
+			anim.play("walk_down")
+		else:
+			anim.play("walk_up")
+
 func attack(target):
 	var weapon = weapons[current_weapon]
 	if weapon.loaded_string == "":
@@ -445,6 +460,9 @@ func attack(target):
 	
 	# Handle both unit targets and position targets
 	var target_pos = target.grid_position if target is Node2D else target
+	
+	# Play attack animation based on direction
+	play_attack_animation(target_pos)
 	
 	match weapon.attack_type:
 		"single":
@@ -456,10 +474,25 @@ func attack(target):
 			for line_target in line_targets:
 				line_target.take_damage(weapon.loaded_string)
 		"aoe":
-			# Attack all units in AOE
-			var aoe_targets = grid_manager.get_units_in_aoe(target_pos, weapon.aoe_size)
-			for aoe_target in aoe_targets:
-				aoe_target.take_damage(weapon.loaded_string)
+			# For shotgun, calculate direction and rotate AOE accordingly
+			if current_weapon == "shotgun":
+				var direction = (target_pos - grid_position).normalized()
+				var rotated_aoe_size = Vector2(0, 3)  # Default vertical AOE
+				
+				# Rotate AOE based on direction
+				if abs(direction.x) < abs(direction.y):
+					# Horizontal shot for up/down
+					rotated_aoe_size = Vector2(3, 0)
+				
+				# Attack all units in AOE
+				var aoe_targets = grid_manager.get_units_in_aoe(target_pos, rotated_aoe_size)
+				for aoe_target in aoe_targets:
+					aoe_target.take_damage(weapon.loaded_string)
+			else:
+				# For other AOE weapons (like EMP grenade)
+				var aoe_targets = grid_manager.get_units_in_aoe(target_pos, weapon.aoe_size)
+				for aoe_target in aoe_targets:
+					aoe_target.take_damage(weapon.loaded_string)
 		"piercing":
 			# Attack all units in line of sight
 			var piercing_targets = grid_manager.get_units_in_line(grid_position, target_pos)

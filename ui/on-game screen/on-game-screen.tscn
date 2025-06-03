@@ -401,9 +401,8 @@ offset_bottom = -18.669
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.20046, 2.20046)
-texture_normal = ExtResource("18_yix3w")
-texture_pressed = ExtResource("19_krqp1")
-mouse_filter = 2
+texture_normal = ExtResource("16_tdaem")
+texture_pressed = ExtResource("17_yix3w")
 
 [node name="Label" type="Label" parent="End Turn Button/TextureButton"]
 layout_mode = 0
