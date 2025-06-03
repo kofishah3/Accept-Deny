@@ -64,7 +64,8 @@ var weapons = {
 		"color": Color(1, 0, 0, 0.3),
 		"ap_cost": 2,
 		"attack_type": "aoe",
-		"aoe_size": Vector2(0, 3)
+		"aoe_size": Vector2(0, 3),
+		"diagonal_allowed": false
 	},
 	"sniper": {
 		"name": "Sniper",
@@ -145,8 +146,8 @@ func load_string_to_weapon(weapon_id: String, new_string: String) -> bool:
 		return false
 	
 	# Check allowed characters
-	for char in new_string:
-		if not constraints.allowed_chars.has(char):
+	for character in new_string:
+		if not constraints.allowed_chars.has(character):
 			return false
 	
 	# Check pattern if specified
