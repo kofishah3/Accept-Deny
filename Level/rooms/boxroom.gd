@@ -20,6 +20,7 @@ func set_theme(theme_chosen : int) -> void:
 	current_theme = theme_chosen
 	set_floor_theme(floor_sprite, current_theme)
 	# Update non-floor tile record when theme changes
+	_collect_non_floor_tiles(floor_sprite)
 	# Add random decorations
 	#_add_random_decor(details_layer, 3) #looks ugly, will add last
 			

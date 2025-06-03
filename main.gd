@@ -18,7 +18,6 @@ func _ready():
 	$GridManager.current_turn = current_turn
 	dungeon_instance = dungeon_scene.instantiate()
 	dungeon_container.add_child(dungeon_instance)
-	
 
 	#get the room world positions and their wall data
 	if dungeon_instance.has_method("get_room_pos_data"):

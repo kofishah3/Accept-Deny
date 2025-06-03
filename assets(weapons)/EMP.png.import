@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c5xqww3qwo8nv"
-path="res://.godot/imported/New Piskel (1).png-f6accbb198b455f8807fe914a6817d8d.ctex"
+path="res://.godot/imported/EMP.png-cf63696ef147e48937f84565da2828f7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets(weapons)/New Piskel (1).png"
-dest_files=["res://.godot/imported/New Piskel (1).png-f6accbb198b455f8807fe914a6817d8d.ctex"]
+source_file="res://assets(weapons)/EMP.png"
+dest_files=["res://.godot/imported/EMP.png-cf63696ef147e48937f84565da2828f7.ctex"]
 
 [params]
 
