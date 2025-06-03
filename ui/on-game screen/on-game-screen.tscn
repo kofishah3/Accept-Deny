@@ -1,8 +1,6 @@
-[gd_scene load_steps=25 format=3 uid="uid://dx6nymuqu0fyi"]
+[gd_scene load_steps=23 format=3 uid="uid://dcncfug8eug4q"]
 
 [ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="1_ylauv"]
-[ext_resource type="PackedScene" uid="uid://dev1r1jpyo8a4" path="res://player.tscn" id="2_jfg53"]
-[ext_resource type="PackedScene" uid="uid://cny6qsw5au8ur" path="res://enemy.tscn" id="3_rwd6p"]
 [ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/red-diamond.png" id="4_tdaem"]
 [ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="5_yix3w"]
 [ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/green-triangle.png" id="6_krqp1"]
@@ -60,31 +58,6 @@ scale = Vector2(1.00014, 1.00095)
 pivot_offset = Vector2(220, 554)
 size_flags_horizontal = 4
 theme = SubResource("Theme_dix6n")
-
-[node name="Player" parent="." instance=ExtResource("2_jfg53")]
-position = Vector2(511.959, 338.205)
-scale = Vector2(0.392099, 0.387833)
-
-[node name="Enemy" parent="." instance=ExtResource("3_rwd6p")]
-position = Vector2(894.906, 329.214)
-scale = Vector2(0.945285, 0.924293)
-
-[node name="GonnaUse4" type="Sprite2D" parent="Enemy"]
-position = Vector2(-24.0001, -59)
-scale = Vector2(5, 5)
-texture = ExtResource("4_tdaem")
-
-[node name="GonnaUse5" type="Sprite2D" parent="Enemy"]
-z_index = -2
-position = Vector2(-10, -59)
-scale = Vector2(4.97501, 4.97501)
-texture = ExtResource("5_yix3w")
-
-[node name="GonnaUse3" type="Sprite2D" parent="Enemy"]
-z_index = -3
-position = Vector2(6, -59)
-scale = Vector2(5.02498, 5.02498)
-texture = ExtResource("6_krqp1")
 
 [node name="PlayerDisplay" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -163,10 +136,10 @@ texture_progress = ExtResource("11_d6gw6")
 
 [node name="Inventory" type="GridContainer" parent="."]
 layout_mode = 2
-anchor_left = 0.337477
-anchor_top = 0.865373
-anchor_right = 0.338259
-anchor_bottom = 0.86676
+anchor_left = 0.310918
+anchor_top = 0.85983
+anchor_right = 0.344512
+anchor_bottom = 0.9056
 offset_right = 130.0
 offset_bottom = 31.0
 grow_vertical = 2
@@ -174,7 +147,7 @@ rotation = -0.000385932
 scale = Vector2(1.98308, 1.96168)
 theme_override_constants/h_separation = 1
 theme_override_constants/v_separation = 0
-columns = 4
+columns = 5
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot" parent="Inventory" instance=ExtResource("12_lsr1k")]
@@ -198,6 +171,12 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="Slot4" parent="Inventory" instance=ExtResource("12_lsr1k")]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="Slot5" parent="Inventory" instance=ExtResource("12_lsr1k")]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -266,21 +245,25 @@ grow_horizontal = 2
 scale = Vector2(1.21328, 1.21328)
 
 [node name="Green-triangle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(11.9772, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("6_krqp1")
 
 [node name="Grey-loading" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(25.9751, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("14_uvf25")
 
 [node name="Red-diamond" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(4.97801, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("4_tdaem")
 
 [node name="Yellow-circle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(18.976, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("5_yix3w")
@@ -310,10 +293,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -73.4028
-offset_top = -48.1917
-offset_right = -9.40278
-offset_bottom = -16.1917
+offset_left = -73.4046
+offset_top = -47.3635
+offset_right = -9.40461
+offset_bottom = -15.3635
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.24946, 2.24946)
@@ -343,10 +326,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -272.11
-offset_top = -113.051
-offset_right = -87.1096
-offset_bottom = -48.0513
+offset_left = -272.0
+offset_top = -106.0
+offset_right = -104.0
+offset_bottom = -47.0
 grow_horizontal = 0
 grow_vertical = 0
 rotation = -0.00224055
@@ -361,10 +344,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -69.4732
-offset_top = -46.8334
-offset_right = -5.47324
-offset_bottom = -14.8334
+offset_left = -68.7162
+offset_top = -50.669
+offset_right = -4.71625
+offset_bottom = -18.669
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.20046, 2.20046)
