@@ -1,0 +1,89 @@
+[gd_scene load_steps=5 format=3 uid="uid://bwywhnuhadetv"]
+
+[ext_resource type="Texture2D" uid="uid://bgpbt4bejlw0y" path="res://ui_elements/on-game/Border/inventoryBorder.png" id="1_sqnoq"]
+[ext_resource type="FontFile" uid="uid://8rxtgy12pkqv" path="res://themes/dnf-paste-8x12.ttf" id="2_08a52"]
+[ext_resource type="Texture2D" uid="uid://bb7h8m4plxfj6" path="res://ui_elements/on-game/hack-button.png" id="3_08a52"]
+[ext_resource type="Texture2D" uid="uid://c7lukel6b0m6l" path="res://ui_elements/on-game/hack-button-pressed.png" id="4_0pot8"]
+
+[node name="Regex-Load-Panel" type="TextureRect"]
+offset_left = 169.0
+offset_top = 85.0
+offset_right = 263.0
+offset_bottom = 175.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+texture = ExtResource("1_sqnoq")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 23.0
+offset_top = 12.0
+offset_right = 129.0
+offset_bottom = 29.0
+scale = Vector2(0.440393, 0.443667)
+theme_override_fonts/font = ExtResource("2_08a52")
+text = "Hacks"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 23.0
+offset_right = 94.0
+offset_bottom = 127.0
+scale = Vector2(0.537324, 0.537324)
+
+[node name="Confuse" type="TextureButton" parent="VBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("3_08a52")
+texture_pressed = ExtResource("4_0pot8")
+
+[node name="Label" type="Label" parent="VBoxContainer/Confuse"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 9
+text = "Confuse"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Stun" type="TextureButton" parent="VBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("3_08a52")
+texture_pressed = ExtResource("4_0pot8")
+
+[node name="Label" type="Label" parent="VBoxContainer/Stun"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 9
+text = "Stun"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Overwrite" type="TextureButton" parent="VBoxContainer"]
+layout_mode = 2
+texture_normal = ExtResource("3_08a52")
+texture_pressed = ExtResource("4_0pot8")
+
+[node name="Label" type="Label" parent="VBoxContainer/Overwrite"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 5.58322
+offset_top = -1.27923
+offset_right = -4.41678
+offset_bottom = -1.27923
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 9
+text = "Overwrite"
+horizontal_alignment = 1
+vertical_alignment = 1
