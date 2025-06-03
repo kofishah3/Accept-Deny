@@ -29,7 +29,7 @@ Button/font_sizes/font_size = 12
 Button/styles/normal = ExtResource("3_ahs3n")
 Button/styles/pressed = SubResource("StyleBoxEmpty_4k1ms")
 
-[node name="Regex-Load-Panel" type="TextureRect"]
+[node name="Regex-Load-Panel2" type="TextureRect"]
 offset_left = 169.0
 offset_top = 85.0
 offset_right = 279.0
