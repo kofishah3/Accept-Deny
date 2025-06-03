@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=3 uid="uid://dagm104qf1258"]
+[gd_scene load_steps=9 format=3 uid="uid://dagm104qf1258"]
 
 [ext_resource type="Script" uid="uid://baf34domhu0ih" path="res://main.gd" id="1_2yge"]
 [ext_resource type="PackedScene" uid="uid://b6x8v0j6y5n3q" path="res://ui/battle_ui.tscn" id="2_3k4m3"]
+[ext_resource type="AudioStream" uid="uid://cuw2yysbxik2h" path="res://assets/audio/BACKGROUND MUSIC.mp3" id="2_5vw27"]
 [ext_resource type="Script" uid="uid://b2hveid58gygm" path="res://camera_2d.gd" id="2_7mycd"]
 [ext_resource type="Script" uid="uid://ddqndv57cu6hd" path="res://grid_manager.gd" id="2_h2yge"]
 [ext_resource type="PackedScene" uid="uid://dev1r1jpyo8a4" path="res://player.tscn" id="3_1bvp3"]
@@ -10,6 +11,12 @@
 
 [node name="main" type="Node2D"]
 script = ExtResource("1_2yge")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("2_5vw27")
+volume_db = 5.0
+autoplay = true
+playback_type = 1
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(500, 288)

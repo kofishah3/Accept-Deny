@@ -10,8 +10,8 @@ extends Area2D
 @export var resistance = 3
 @export var skill = 6
 @export var luck = 4
-@export var max_health = 1000
-@export var max_action_points = 1000
+@export var max_health = 20
+@export var max_action_points = 6
 var current_health
 var current_action_points
 
