@@ -70,15 +70,15 @@ var weapon_string_label: Label
 var load_string_button: Button
 var string_input: LineEdit
 var ui_initialized: bool = false
-var hack_stun_button: Button
-var hack_confuse_button: Button
-var hack_overwrite_button: Button
 var currently_selected_slot: Control = null  # Track the currently selected weapon slot
 var weapon_tooltip: Control = null  # Tooltip for weapon information
 var regex_load_panel: Control = null  # Regex load panel instance
+var hacks_panel: Control = null  # Hacks panel instance
+var hacks_button: Button = null  # Reference to the hacks button
 
 @onready var on_game_screen_scene := preload("res://ui/on-game screen/on-game-screen.tscn")
 @onready var regex_load_panel_scene := preload("res://ui/on-game screen/regex-load-panel.tscn")
+@onready var hacks_panel_scene := preload("res://ui/on-game screen/hacks_panel.tscn")
 var on_game_screen_instance: Control
 
 func _ready():
@@ -136,6 +136,12 @@ func create_ui():
 	attack_move_button.pressed.connect(_on_move_mode_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	
+	# Connect the hacks button from the scene
+	hacks_button = player_display_node.get_node("Char/Hacks Button")
+	if hacks_button:
+		hacks_button.pressed.connect(_on_hacks_button_pressed)
+		hacks_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	
 	#create additional UI elements for weapon selection and hacking
 	create_additional_ui_elements()
 	
@@ -147,6 +153,9 @@ func create_ui():
 	
 	# Create regex load panel
 	create_regex_load_panel()
+	
+	# Create hacks panel
+	create_hacks_panel()
 	
 	# Update hint display
 	update_hint_display()
@@ -262,30 +271,6 @@ func create_additional_ui_elements():
 	hack_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	additional_container.add_child(hack_label)
 
-	hack_stun_button = Button.new()
-	hack_stun_button.name = "HackStunButton"
-	hack_stun_button.text = "Stun Target (5 AP)"
-	hack_stun_button.size = Vector2(180, 30)
-	hack_stun_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
-	hack_stun_button.pressed.connect(_on_hack_stun_pressed)
-	additional_container.add_child(hack_stun_button)
-
-	hack_confuse_button = Button.new()
-	hack_confuse_button.name = "HackConfuseButton"
-	hack_confuse_button.text = "Confuse Target (2 AP)"
-	hack_confuse_button.size = Vector2(180, 30)
-	hack_confuse_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
-	hack_confuse_button.pressed.connect(_on_hack_confuse_pressed)
-	additional_container.add_child(hack_confuse_button)
-
-	hack_overwrite_button = Button.new()
-	hack_overwrite_button.name = "HackOverwriteButton"
-	hack_overwrite_button.text = "Overwrite Target (4 AP)"
-	hack_overwrite_button.size = Vector2(180, 30)
-	hack_overwrite_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
-	hack_overwrite_button.pressed.connect(_on_hack_overwrite_pressed)
-	additional_container.add_child(hack_overwrite_button)
-
 func set_player(new_player: Node2D):
 	player = new_player
 	if ui_initialized:
@@ -328,13 +313,9 @@ func update_ui():
 	if load_string_button:
 		load_string_button.disabled = player.current_action_points < 1
 	
-	# Update hack button states
-	if hack_stun_button:
-		hack_stun_button.disabled = player.current_action_points < 5
-	if hack_confuse_button:
-		hack_confuse_button.disabled = player.current_action_points < 2
-	if hack_overwrite_button:
-		hack_overwrite_button.disabled = player.current_action_points < 4
+	# Update hacks button state
+	if hacks_button:
+		hacks_button.disabled = player.current_action_points < 2  # Minimum AP needed for confuse hack
 
 func _on_weapon_selected(weapon_id: String):
 	if not ui_initialized or not player or not is_instance_valid(player):
@@ -367,20 +348,11 @@ func _on_move_mode_pressed():
 	player.update_movement_range()
 	update_ui()
 
-func _on_hack_stun_pressed():
-	if player and is_instance_valid(player):
-		player.enter_hack_mode("stun")
-		update_ui()
-
-func _on_hack_confuse_pressed():
-	if player and is_instance_valid(player):
-		player.enter_hack_mode("confuse")
-		update_ui()
-
-func _on_hack_overwrite_pressed():
-	if player and is_instance_valid(player):
-		player.enter_hack_mode("overwrite")
-		update_ui()
+func _on_hacks_button_pressed():
+	if not ui_initialized or not player or not is_instance_valid(player):
+		return
+	
+	show_hacks_panel()
 
 func load_weapon_textures_to_inventory():
 	if not inventory_node:
@@ -646,18 +618,31 @@ func _on_regex_save_pressed():
 
 func _input(event):
 	# Close regex panel with Escape key
-	if event.is_action_pressed("ui_cancel") and regex_load_panel and regex_load_panel.visible:
-		hide_regex_load_panel()
-	
-	# Close regex panel when clicking outside of it
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event.is_action_pressed("ui_cancel"):
 		if regex_load_panel and regex_load_panel.visible:
-			var mouse_pos = get_global_mouse_position()
+			hide_regex_load_panel()
+		elif hacks_panel and hacks_panel.visible:
+			hide_hacks_panel()
+	
+	# Close panels when clicking outside of them
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var mouse_pos = get_global_mouse_position()
+		
+		# Check regex panel
+		if regex_load_panel and regex_load_panel.visible:
 			# Account for the panel's scale when calculating the rect
 			var scaled_size = regex_load_panel.size * regex_load_panel.scale
 			var panel_rect = Rect2(regex_load_panel.global_position, scaled_size)
 			if not panel_rect.has_point(mouse_pos):
 				hide_regex_load_panel()
+		
+		# Check hacks panel
+		elif hacks_panel and hacks_panel.visible:
+			# Account for the panel's scale when calculating the rect
+			var scaled_size = hacks_panel.size * hacks_panel.scale
+			var panel_rect = Rect2(hacks_panel.global_position, scaled_size)
+			if not panel_rect.has_point(mouse_pos):
+				hide_hacks_panel()
 
 func update_phase_display(is_player_turn: bool):
 	if not phase_display_node:
@@ -683,3 +668,73 @@ func update_phase_display(is_player_turn: bool):
 			enemy_panel.visible = true
 		if phase_label:
 			phase_label.text = "Enemy's Turn"
+
+func create_hacks_panel():
+	hacks_panel = hacks_panel_scene.instantiate()
+	hacks_panel.scale = Vector2(4, 4)  # Make bigger
+	hacks_panel.visible = false  # Keep hidden until opened
+	add_child(hacks_panel)
+	
+	# Connect hack buttons to their respective functions
+	var confuse_button = hacks_panel.get_node("VBoxContainer/Confuse")
+	var stun_button = hacks_panel.get_node("VBoxContainer/Stun")
+	var overwrite_button = hacks_panel.get_node("VBoxContainer/Overwrite")
+	
+	if confuse_button:
+		confuse_button.pressed.connect(_on_hack_confuse_pressed)
+	if stun_button:
+		stun_button.pressed.connect(_on_hack_stun_pressed)
+	if overwrite_button:
+		overwrite_button.pressed.connect(_on_hack_overwrite_pressed)
+	
+	# Make the panel consume input events so they don't propagate
+	hacks_panel.gui_input.connect(_on_hacks_panel_input)
+	
+	# Position the panel (can be adjusted)
+	hacks_panel.position = Vector2(10, 10)
+
+func _on_hacks_panel_input(event: InputEvent):
+	# Consume input events so they don't reach the main _input function
+	if event is InputEventMouseButton:
+		get_viewport().set_input_as_handled()
+
+func show_hacks_panel():
+	if not hacks_panel or not player:
+		return
+	
+	# Update button states based on available AP
+	var confuse_button = hacks_panel.get_node("VBoxContainer/Confuse")
+	var stun_button = hacks_panel.get_node("VBoxContainer/Stun")
+	var overwrite_button = hacks_panel.get_node("VBoxContainer/Overwrite")
+	
+	if confuse_button:
+		confuse_button.disabled = player.current_action_points < 2
+	if stun_button:
+		stun_button.disabled = player.current_action_points < 5
+	if overwrite_button:
+		overwrite_button.disabled = player.current_action_points < 4
+	
+	# Show the panel
+	hacks_panel.visible = true
+
+func hide_hacks_panel():
+	if hacks_panel:
+		hacks_panel.visible = false
+
+func _on_hack_stun_pressed():
+	if player and is_instance_valid(player):
+		player.enter_hack_mode("stun")
+		hide_hacks_panel()
+		update_ui()
+
+func _on_hack_confuse_pressed():
+	if player and is_instance_valid(player):
+		player.enter_hack_mode("confuse")
+		hide_hacks_panel()
+		update_ui()
+
+func _on_hack_overwrite_pressed():
+	if player and is_instance_valid(player):
+		player.enter_hack_mode("overwrite")
+		hide_hacks_panel()
+		update_ui()
