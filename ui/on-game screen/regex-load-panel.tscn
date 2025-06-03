@@ -1,6 +1,7 @@
-[gd_scene load_steps=9 format=3 uid="uid://c1jtjkob3pjgb"]
+[gd_scene load_steps=10 format=3 uid="uid://c1jtjkob3pjgb"]
 
 [ext_resource type="Texture2D" uid="uid://bgpbt4bejlw0y" path="res://ui_elements/on-game/Border/inventoryBorder.png" id="1_k3or5"]
+[ext_resource type="FontFile" uid="uid://dtdyl56wg2wkw" path="res://themes/regex.ttf" id="2_ahs3n"]
 [ext_resource type="FontFile" uid="uid://8rxtgy12pkqv" path="res://themes/dnf-paste-8x12.ttf" id="2_p4vil"]
 [ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="3_ahs3n"]
 
@@ -48,6 +49,7 @@ theme = SubResource("Theme_hfjtw")
 theme_override_colors/selection_color = Color(1, 1, 1, 1)
 theme_override_colors/font_selected_color = Color(0, 0, 0, 1)
 theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_ahs3n")
 theme_override_font_sizes/font_size = 12
 theme_override_styles/normal = SubResource("StyleBoxFlat_cywpn")
 caret_blink = true

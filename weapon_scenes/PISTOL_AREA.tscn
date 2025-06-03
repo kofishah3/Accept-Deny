@@ -1,0 +1,65 @@
+[gd_scene load_steps=8 format=3 uid="uid://b3km63m86wkub"]
+
+[ext_resource type="Texture2D" uid="uid://cxxwutrc86k3f" path="res://assets(weapons)/PISTOL.png" id="1_5jtgc"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qef7w"]
+atlas = ExtResource("1_5jtgc")
+region = Rect2(64, 32, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h5mvl"]
+atlas = ExtResource("1_5jtgc")
+region = Rect2(64, 48, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_btxyv"]
+atlas = ExtResource("1_5jtgc")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_br0n6"]
+atlas = ExtResource("1_5jtgc")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2dpye"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qef7w")
+}],
+"loop": true,
+"name": &"pistol_back",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h5mvl")
+}],
+"loop": true,
+"name": &"pistol_front",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_btxyv")
+}],
+"loop": true,
+"name": &"pistol_left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_br0n6")
+}],
+"loop": true,
+"name": &"pistol_right",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r3mq1"]
+
+[node name="PISTOL" type="Area2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_2dpye")
+animation = &"pistol_right"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_r3mq1")

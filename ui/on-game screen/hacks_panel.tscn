@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://bwywhnuhadetv"]
 
 [ext_resource type="Texture2D" uid="uid://bgpbt4bejlw0y" path="res://ui_elements/on-game/Border/inventoryBorder.png" id="1_sqnoq"]
-[ext_resource type="FontFile" uid="uid://8rxtgy12pkqv" path="res://themes/dnf-paste-8x12.ttf" id="2_08a52"]
+[ext_resource type="FontFile" uid="uid://bwbn1rev81ww" path="res://themes/Monocraft.ttc" id="2_08a52"]
 [ext_resource type="Texture2D" uid="uid://bb7h8m4plxfj6" path="res://ui_elements/on-game/hack-button.png" id="3_08a52"]
 [ext_resource type="Texture2D" uid="uid://c7lukel6b0m6l" path="res://ui_elements/on-game/hack-button-pressed.png" id="4_0pot8"]
 

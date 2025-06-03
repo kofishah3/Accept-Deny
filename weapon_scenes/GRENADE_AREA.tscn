@@ -1,0 +1,50 @@
+[gd_scene load_steps=8 format=3 uid="uid://sr2cpacjheun"]
+
+[ext_resource type="Texture2D" uid="uid://c5xqww3qwo8nv" path="res://assets(weapons)/New Piskel (1).png" id="1_nna13"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e7114"]
+atlas = ExtResource("1_nna13")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y1ayg"]
+atlas = ExtResource("1_nna13")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rrlnp"]
+atlas = ExtResource("1_nna13")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6rnhw"]
+atlas = ExtResource("1_nna13")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2dpye"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e7114")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y1ayg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rrlnp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6rnhw")
+}],
+"loop": true,
+"name": &"grenade",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r3mq1"]
+
+[node name="GRENADE" type="Area2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_2dpye")
+animation = &"grenade"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_r3mq1")

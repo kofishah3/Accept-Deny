@@ -28,7 +28,7 @@ var weapons = {
 		"loaded_string": "",
 		"constraints": {
 			"max_length": 3,
-			"allowed_chars": ["a", "b", "c"],
+			"allowed_chars": ["1", "2", "3"],
 			"pattern": "any"
 		},
 		"range": 1,
@@ -42,7 +42,7 @@ var weapons = {
 		"loaded_string": "",
 		"constraints": {
 			"max_length": 3,
-			"allowed_chars": ["a", "b", "c"],
+			"allowed_chars": ["1", "2", "3"],
 			"pattern": "any"
 		},
 		"range": 6,
@@ -57,7 +57,7 @@ var weapons = {
 		"loaded_string": "",
 		"constraints": {
 			"max_length": 3,
-			"allowed_chars": ["a", "b", "c"],
+			"allowed_chars": ["1", "2", "3"],
 			"pattern": "any"
 		},
 		"range": 1,
@@ -73,7 +73,7 @@ var weapons = {
 		"loaded_string": "",
 		"constraints": {
 			"max_length": 5,
-			"allowed_chars": ["a", "b", "c"],
+			"allowed_chars": ["1", "2", "3"],
 			"pattern": "any"
 		},
 		"range": -1,  # -1 indicates unlimited range
@@ -88,7 +88,7 @@ var weapons = {
 		"loaded_string": "",
 		"constraints": {
 			"max_length": 2,
-			"allowed_chars": ["a", "b", "c"],
+			"allowed_chars": ["1", "2", "3"],
 			"pattern": "any"
 		},
 		"range": 5,

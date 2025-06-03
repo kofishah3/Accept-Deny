@@ -1,0 +1,97 @@
+[gd_scene load_steps=14 format=3 uid="uid://dxweycxxxnle4"]
+
+[ext_resource type="Texture2D" uid="uid://clr5kpueb3s74" path="res://assets(weapons)/BATON.png" id="1_7qhob"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qcgyd"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(64, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0bc5s"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(16, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_oupbi"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(32, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o6my4"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(48, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_juovx"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(0, 16, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2eahs"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(0, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ahdcu"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(16, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5sql0"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(32, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cbgn1"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(48, 0, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v3a0k"]
+atlas = ExtResource("1_7qhob")
+region = Rect2(64, 0, 16, 16)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2dpye"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qcgyd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0bc5s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_oupbi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o6my4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_juovx")
+}],
+"loop": true,
+"name": &"baton_left",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2eahs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ahdcu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5sql0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cbgn1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v3a0k")
+}],
+"loop": true,
+"name": &"baton_right",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_r3mq1"]
+
+[node name="baton" type="Area2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_2dpye")
+animation = &"baton_left"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_r3mq1")
