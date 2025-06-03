@@ -433,6 +433,7 @@ region_enabled = true
 region_rect = Rect2(16, 176, 16, 16)
 
 [node name="west_door" type="Marker2D" parent="."]
+visible = false
 position = Vector2(16, 64)
 
 [node name="WestDoor" type="Sprite2D" parent="west_door"]
@@ -442,6 +443,7 @@ region_enabled = true
 region_rect = Rect2(0, 208, 16, 16)
 
 [node name="east_door" type="Marker2D" parent="."]
+visible = false
 position = Vector2(192, 64)
 
 [node name="EastDoor" type="Sprite2D" parent="east_door"]

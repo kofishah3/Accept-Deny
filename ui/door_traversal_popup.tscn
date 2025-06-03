@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bxl2vn1qm8wcp"]
+[gd_scene load_steps=3 format=3 uid="uid://bxl2vn1qm8wcp"]
 
-[ext_resource type="Script" uid="uid://uhis7fut6u1o" path="res://ui/door_traversal_popup.gd" id="1_traversal"]
+[ext_resource type="Script" uid="uid://uhis7fut6u1o" path="res://Level/rooms/door_traversal_popup.gd" id="1_traversal"]
+[ext_resource type="FontFile" uid="uid://dtdyl56wg2wkw" path="res://themes/regex.ttf" id="2_x524d"]
 
 [node name="DoorTraversalPopup" type="Control"]
 layout_mode = 3
@@ -34,6 +35,7 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="CenterContainer/PanelContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_x524d")
 text = "  Traverse?  "
 horizontal_alignment = 1
 

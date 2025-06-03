@@ -10,8 +10,8 @@ extends Area2D
 @export var resistance = 3
 @export var skill = 6
 @export var luck = 4
-@export var max_health = 20
-@export var max_action_points = 6
+@export var max_health = 1000
+@export var max_action_points = 1000
 var current_health
 var current_action_points
 
@@ -514,12 +514,35 @@ func attack(target):
 	update_ui()
 
 func take_damage(amount):
+	# Start the flicker effect
+	start_damage_flicker()
 	current_health -= amount
 	update_ui()
 	if current_health <= 0:
 		await get_tree().create_timer(1.0).timeout	
 		die()
+
+# New function to handle damage flickering
+func start_damage_flicker():
+	# Create a timer for the flicker effect
+	var flicker_timer = get_tree().create_timer(0.5)  # 0.5 seconds total duration
+	var flicker_count = 0
+	var max_flickers = 5  # Number of times to flicker
+	
+	# Start the flickering
+	while flicker_count < max_flickers:
+		# Toggle between red and normal color
+		if flicker_count % 2 == 0:
+			anim.modulate = Color(1, 0, 0)  # Red
+		else:
+			anim.modulate = Color(1, 1, 1)  # Normal
 		
+		flicker_count += 1
+		await get_tree().create_timer(0.1).timeout  # 0.1 seconds between flickers
+	
+	# Reset to normal color after flickering
+	anim.modulate = Color(1, 1, 1)
+
 func die():
 	call_deferred("go_to_game_over")
 
