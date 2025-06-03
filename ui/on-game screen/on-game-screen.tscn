@@ -1,9 +1,9 @@
-[gd_scene load_steps=23 format=3 uid="uid://dcncfug8eug4q"]
+[gd_scene load_steps=26 format=3 uid="uid://dx6nymuqu0fyi"]
 
 [ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="1_ylauv"]
-[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/red-diamond.png" id="4_tdaem"]
-[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="5_yix3w"]
-[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/green-triangle.png" id="6_krqp1"]
+[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/symbol-a.png" id="4_tdaem"]
+[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/symbol-b.png" id="5_yix3w"]
+[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/symbol-c.png" id="6_krqp1"]
 [ext_resource type="Texture2D" uid="uid://d2uc8ebmomdtn" path="res://ui_elements/on-game/Border/playerBorder.png" id="7_xbyut"]
 [ext_resource type="Texture2D" uid="uid://b4bft84tp32hx" path="res://ui_elements/on-game/Health/healthUnder.png" id="8_op8jk"]
 [ext_resource type="Texture2D" uid="uid://dcaqowbgs16w3" path="res://ui_elements/on-game/Health/healthProgress.png" id="9_xqqyk"]
@@ -14,9 +14,9 @@
 [ext_resource type="Texture2D" uid="uid://dh15dc6h5ar8e" path="res://ui_elements/regex-shapes/grey-loading.png" id="14_uvf25"]
 [ext_resource type="Texture2D" uid="uid://m3so316sw6rv" path="res://ui_elements/on-game/Border/buttonBorder.png" id="15_fn08l"]
 [ext_resource type="Texture2D" uid="uid://bvwefi47f7rvm" path="res://ui_elements/on-game/move-button.png" id="16_rwd6p"]
+[ext_resource type="Texture2D" uid="uid://q2vlrls82uaa" path="res://ui_elements/game-win-&-over/lose-button-1.png" id="16_tdaem"]
 [ext_resource type="Texture2D" uid="uid://db4dn2l8btt8m" path="res://ui_elements/on-game/move-button-pressed.png" id="17_tdaem"]
-[ext_resource type="Texture2D" uid="uid://dob1lwjm47jf8" path="res://ui_elements/on-game/endturn-button.png" id="18_yix3w"]
-[ext_resource type="Texture2D" uid="uid://dd13m6gkpqnok" path="res://ui_elements/on-game/endturn-button-pressed.png" id="19_krqp1"]
+[ext_resource type="Texture2D" uid="uid://b42xprjg2ffil" path="res://ui_elements/game-win-&-over/lose-button-1-pressed.png" id="17_yix3w"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dix6n"]
 
@@ -24,6 +24,17 @@
 Button/font_sizes/font_size = 16
 Button/styles/focus = SubResource("StyleBoxEmpty_dix6n")
 Button/styles/normal = ExtResource("1_ylauv")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tdaem"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rwd6p"]
+bg_color = Color(0.241156, 0.241156, 0.241156, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rwd6p"]
 
 [sub_resource type="GDScript" id="GDScript_tvqor"]
 script/source = "extends ProgressBar
@@ -80,6 +91,18 @@ offset_left = 3.48936
 offset_top = 4.27992
 offset_right = 43.4894
 offset_bottom = 44.2799
+
+[node name="Hacks Button" type="Button" parent="PlayerDisplay/Char"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 5.0
+offset_right = 38.0
+offset_bottom = 37.0
+theme_override_font_sizes/font_size = 9
+theme_override_styles/hover = SubResource("StyleBoxEmpty_tdaem")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_rwd6p")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rwd6p")
+text = "Hacks"
 
 [node name="HealthProgressBar" type="ProgressBar" parent="PlayerDisplay"]
 visible = false
@@ -351,8 +374,8 @@ offset_bottom = -18.669
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.20046, 2.20046)
-texture_normal = ExtResource("18_yix3w")
-texture_pressed = ExtResource("19_krqp1")
+texture_normal = ExtResource("16_tdaem")
+texture_pressed = ExtResource("17_yix3w")
 
 [node name="Label" type="Label" parent="End Turn Button/TextureButton"]
 layout_mode = 0
