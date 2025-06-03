@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dymbxiosrxhj5"
-path="res://.godot/imported/red-diamond.png-bec85e687e3396a71fb21fdb217f313f.ctex"
+uid="uid://b1s2m47s3iqg3"
+path="res://.godot/imported/symbol-c.png-770c384e912d636a21dfc4c1cb90065e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui_elements/regex-shapes/red-diamond.png"
-dest_files=["res://.godot/imported/red-diamond.png-bec85e687e3396a71fb21fdb217f313f.ctex"]
+source_file="res://ui_elements/regex-shapes/symbol-c.png"
+dest_files=["res://.godot/imported/symbol-c.png-770c384e912d636a21dfc4c1cb90065e.ctex"]
 
 [params]
 

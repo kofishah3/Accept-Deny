@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mh8rijrmqxqo"
-path="res://.godot/imported/yellow-circle.png-7cb1e922094522bde348f0fd1b48c010.ctex"
+uid="uid://c3lu5i7k65aah"
+path="res://.godot/imported/lose-button-2.png-43f484567d8f7272712410cad36eb3b1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui_elements/regex-shapes/yellow-circle.png"
-dest_files=["res://.godot/imported/yellow-circle.png-7cb1e922094522bde348f0fd1b48c010.ctex"]
+source_file="res://ui_elements/on-game/lose-button-2.png"
+dest_files=["res://.godot/imported/lose-button-2.png-43f484567d8f7272712410cad36eb3b1.ctex"]
 
 [params]
 

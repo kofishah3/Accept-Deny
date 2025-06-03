@@ -81,11 +81,18 @@ var regex_load_panel: Control = null  # Regex load panel instance
 var on_game_screen_instance: Control
 
 func _ready():
+	# Set the UI to block input events
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	# Make sure the UI is on top
+	show_behind_parent = false
+	top_level = true
 	call_deferred("create_ui")
 
 func create_ui():
 	# Create the UI instance
 	on_game_screen_instance = on_game_screen_scene.instantiate()
+	# Make sure the UI instance blocks input
+	on_game_screen_instance.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(on_game_screen_instance)
 	
 	#cache UI elements from the on-game-screen scene
@@ -96,13 +103,31 @@ func create_ui():
 	attack_move_button_node = on_game_screen_instance.get_node("Attack_Move Button")
 	end_turn_button_node = on_game_screen_instance.get_node("End Turn Button")
 	
+	# Set all UI elements to block input
+	for node in [player_display_node, inventory_node, phase_display_node, 
+				accumulated_string_view_node, attack_move_button_node, end_turn_button_node]:
+		if node and node is Control:
+			node.mouse_filter = Control.MOUSE_FILTER_STOP
+	
 	#get health and ap progress bars from PlayerDisplay
 	health_bar = player_display_node.get_node("HealthTextureProgressBar")
 	ap_bar = player_display_node.get_node("ManaTextureProgressBar")
 	
+	# Set progress bars to block input
+	if health_bar and health_bar is Control:
+		health_bar.mouse_filter = Control.MOUSE_FILTER_STOP
+	if ap_bar and ap_bar is Control:
+		ap_bar.mouse_filter = Control.MOUSE_FILTER_STOP
+	
 	#connect existing button signals
 	var attack_move_button = attack_move_button_node.get_node("TextureButton")
 	var end_turn_button = end_turn_button_node.get_node("TextureButton")
+
+	# Set buttons to block input
+	if attack_move_button and attack_move_button is Control:
+		attack_move_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	if end_turn_button and end_turn_button is Control:
+		end_turn_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	
 	attack_move_button.pressed.connect(_on_move_mode_pressed)
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
@@ -132,16 +157,19 @@ func create_additional_ui_elements():
 	additional_container.position = Vector2(20, 20)
 	additional_container.size = Vector2(200, 600)
 	additional_container.visible = false  # Hide the additional UI elements
+	additional_container.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	add_child(additional_container)
 	
 	# Weapon selection section
 	var weapon_label = Label.new()
 	weapon_label.text = "Weapons:"
 	weapon_label.add_theme_font_size_override("font_size", 16)
+	weapon_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	additional_container.add_child(weapon_label)
 	
 	weapon_container = VBoxContainer.new()
 	weapon_container.name = "WeaponButtons"
+	weapon_container.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	additional_container.add_child(weapon_container)
 	
 	for weapon_id in weapons:
@@ -150,6 +178,7 @@ func create_additional_ui_elements():
 		button.name = weapon_id
 		button.text = weapon.name + " (" + str(weapon.ap_cost) + " AP)"
 		button.size = Vector2(180, 30)
+		button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 		button.pressed.connect(_on_weapon_selected.bind(weapon_id))
 		weapon_container.add_child(button)
 	
@@ -157,23 +186,27 @@ func create_additional_ui_elements():
 	var string_section_label = Label.new()
 	string_section_label.text = "Weapon String:"
 	string_section_label.add_theme_font_size_override("font_size", 16)
+	string_section_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	additional_container.add_child(string_section_label)
 	
 	weapon_string_label = Label.new()
 	weapon_string_label.name = "WeaponStringLabel"
 	weapon_string_label.text = "String: "
+	weapon_string_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	additional_container.add_child(weapon_string_label)
 	
 	string_input = LineEdit.new()
 	string_input.name = "StringInput"
 	string_input.placeholder_text = "Enter regex string..."
 	string_input.size = Vector2(180, 30)
+	string_input.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	additional_container.add_child(string_input)
 	
 	load_string_button = Button.new()
 	load_string_button.name = "LoadStringButton"
 	load_string_button.text = "Load String (1 AP)"
 	load_string_button.size = Vector2(180, 30)
+	load_string_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	load_string_button.pressed.connect(_on_load_string_pressed)
 	additional_container.add_child(load_string_button)
 	
@@ -181,12 +214,14 @@ func create_additional_ui_elements():
 	var hack_label = Label.new()
 	hack_label.text = "Hacking:"
 	hack_label.add_theme_font_size_override("font_size", 16)
+	hack_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	additional_container.add_child(hack_label)
 
 	hack_stun_button = Button.new()
 	hack_stun_button.name = "HackStunButton"
 	hack_stun_button.text = "Stun Target (5 AP)"
 	hack_stun_button.size = Vector2(180, 30)
+	hack_stun_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	hack_stun_button.pressed.connect(_on_hack_stun_pressed)
 	additional_container.add_child(hack_stun_button)
 
@@ -194,6 +229,7 @@ func create_additional_ui_elements():
 	hack_confuse_button.name = "HackConfuseButton"
 	hack_confuse_button.text = "Confuse Target (2 AP)"
 	hack_confuse_button.size = Vector2(180, 30)
+	hack_confuse_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	hack_confuse_button.pressed.connect(_on_hack_confuse_pressed)
 	additional_container.add_child(hack_confuse_button)
 
@@ -201,6 +237,7 @@ func create_additional_ui_elements():
 	hack_overwrite_button.name = "HackOverwriteButton"
 	hack_overwrite_button.text = "Overwrite Target (4 AP)"
 	hack_overwrite_button.size = Vector2(180, 30)
+	hack_overwrite_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	hack_overwrite_button.pressed.connect(_on_hack_overwrite_pressed)
 	additional_container.add_child(hack_overwrite_button)
 

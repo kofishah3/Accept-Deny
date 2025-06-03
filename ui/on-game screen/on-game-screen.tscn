@@ -1,9 +1,9 @@
-[gd_scene load_steps=23 format=3 uid="uid://dcncfug8eug4q"]
+[gd_scene load_steps=26 format=3 uid="uid://dx6nymuqu0fyi"]
 
 [ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="1_ylauv"]
-[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/red-diamond.png" id="4_tdaem"]
-[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="5_yix3w"]
-[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/green-triangle.png" id="6_krqp1"]
+[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/symbol-a.png" id="4_tdaem"]
+[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/symbol-b.png" id="5_yix3w"]
+[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/symbol-c.png" id="6_krqp1"]
 [ext_resource type="Texture2D" uid="uid://d2uc8ebmomdtn" path="res://ui_elements/on-game/Border/playerBorder.png" id="7_xbyut"]
 [ext_resource type="Texture2D" uid="uid://b4bft84tp32hx" path="res://ui_elements/on-game/Health/healthUnder.png" id="8_op8jk"]
 [ext_resource type="Texture2D" uid="uid://dcaqowbgs16w3" path="res://ui_elements/on-game/Health/healthProgress.png" id="9_xqqyk"]
@@ -14,9 +14,9 @@
 [ext_resource type="Texture2D" uid="uid://dh15dc6h5ar8e" path="res://ui_elements/regex-shapes/grey-loading.png" id="14_uvf25"]
 [ext_resource type="Texture2D" uid="uid://m3so316sw6rv" path="res://ui_elements/on-game/Border/buttonBorder.png" id="15_fn08l"]
 [ext_resource type="Texture2D" uid="uid://bvwefi47f7rvm" path="res://ui_elements/on-game/move-button.png" id="16_rwd6p"]
+[ext_resource type="Texture2D" uid="uid://q2vlrls82uaa" path="res://ui_elements/game-win-&-over/lose-button-1.png" id="16_tdaem"]
 [ext_resource type="Texture2D" uid="uid://db4dn2l8btt8m" path="res://ui_elements/on-game/move-button-pressed.png" id="17_tdaem"]
-[ext_resource type="Texture2D" uid="uid://dob1lwjm47jf8" path="res://ui_elements/on-game/endturn-button.png" id="18_yix3w"]
-[ext_resource type="Texture2D" uid="uid://dd13m6gkpqnok" path="res://ui_elements/on-game/endturn-button-pressed.png" id="19_krqp1"]
+[ext_resource type="Texture2D" uid="uid://b42xprjg2ffil" path="res://ui_elements/game-win-&-over/lose-button-1-pressed.png" id="17_yix3w"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dix6n"]
 
@@ -24,6 +24,17 @@
 Button/font_sizes/font_size = 16
 Button/styles/focus = SubResource("StyleBoxEmpty_dix6n")
 Button/styles/normal = ExtResource("1_ylauv")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tdaem"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rwd6p"]
+bg_color = Color(0.241156, 0.241156, 0.241156, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rwd6p"]
 
 [sub_resource type="GDScript" id="GDScript_tvqor"]
 script/source = "extends ProgressBar
@@ -58,6 +69,7 @@ scale = Vector2(1.00014, 1.00095)
 pivot_offset = Vector2(220, 554)
 size_flags_horizontal = 4
 theme = SubResource("Theme_dix6n")
+mouse_filter = 2
 
 [node name="PlayerDisplay" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -73,6 +85,7 @@ scale = Vector2(3.13675, 2.92485)
 pivot_offset = Vector2(237.997, -93.5349)
 texture = ExtResource("7_xbyut")
 region_rect = Rect2(0, 0, 66, 63)
+mouse_filter = 2
 
 [node name="Char" type="TextureRect" parent="PlayerDisplay"]
 layout_mode = 0
@@ -80,6 +93,19 @@ offset_left = 3.48936
 offset_top = 4.27992
 offset_right = 43.4894
 offset_bottom = 44.2799
+mouse_filter = 2
+
+[node name="Hacks Button" type="Button" parent="PlayerDisplay/Char"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 5.0
+offset_right = 38.0
+offset_bottom = 37.0
+theme_override_font_sizes/font_size = 9
+theme_override_styles/hover = SubResource("StyleBoxEmpty_tdaem")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_rwd6p")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rwd6p")
+text = "Hacks"
 
 [node name="HealthProgressBar" type="ProgressBar" parent="PlayerDisplay"]
 visible = false
@@ -94,6 +120,7 @@ offset_bottom = -60.9952
 grow_vertical = 0
 value = 100.0
 script = SubResource("GDScript_tvqor")
+mouse_filter = 2
 
 [node name="HealthTextureProgressBar" type="TextureProgressBar" parent="PlayerDisplay"]
 layout_mode = 1
@@ -108,6 +135,7 @@ grow_vertical = 0
 scale = Vector2(1.5, 1.5)
 texture_under = ExtResource("8_op8jk")
 texture_progress = ExtResource("9_xqqyk")
+mouse_filter = 2
 
 [node name="ManaProgressBar" type="ProgressBar" parent="PlayerDisplay"]
 visible = false
@@ -122,6 +150,7 @@ offset_bottom = -60.9952
 grow_vertical = 0
 value = 100.0
 script = SubResource("GDScript_tvqor")
+mouse_filter = 2
 
 [node name="ManaTextureProgressBar" type="TextureProgressBar" parent="PlayerDisplay"]
 layout_mode = 1
@@ -133,6 +162,7 @@ offset_right = 39.0244
 offset_bottom = 43.3521
 texture_under = ExtResource("10_51rf7")
 texture_progress = ExtResource("11_d6gw6")
+mouse_filter = 2
 
 [node name="Inventory" type="GridContainer" parent="."]
 layout_mode = 2
@@ -149,6 +179,7 @@ theme_override_constants/h_separation = 1
 theme_override_constants/v_separation = 0
 columns = 5
 metadata/_edit_use_anchors_ = true
+mouse_filter = 2
 
 [node name="Slot" parent="Inventory" instance=ExtResource("12_lsr1k")]
 clip_contents = true
@@ -156,6 +187,7 @@ custom_minimum_size = Vector2(15, 32)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_filter = 2
 
 [node name="Slot2" parent="Inventory" instance=ExtResource("12_lsr1k")]
 clip_contents = true
@@ -163,18 +195,28 @@ custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_filter = 2
 
 [node name="Slot3" parent="Inventory" instance=ExtResource("12_lsr1k")]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_filter = 2
 
 [node name="Slot4" parent="Inventory" instance=ExtResource("12_lsr1k")]
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="Slot5" parent="Inventory" instance=ExtResource("12_lsr1k")]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_filter = 2
 
 [node name="Slot5" parent="Inventory" instance=ExtResource("12_lsr1k")]
 custom_minimum_size = Vector2(32, 32)
@@ -183,6 +225,7 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 
 [node name="Phase Display" type="CanvasLayer" parent="."]
+mouse_filter = 2
 
 [node name="Player-Green" type="Panel" parent="Phase Display"]
 offset_left = 1036.0
@@ -191,6 +234,7 @@ offset_right = 1095.0
 offset_bottom = 47.0
 scale = Vector2(3.70233, 3.70233)
 theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
+mouse_filter = 2
 
 [node name="Who-Phase" type="Label" parent="Phase Display"]
 anchors_preset = 1
@@ -206,6 +250,7 @@ theme_override_font_sizes/font_size = 9
 text = "Who? Phase"
 horizontal_alignment = 1
 vertical_alignment = 1
+mouse_filter = 2
 
 [node name="Enemy-Red" type="Panel" parent="Phase Display"]
 visible = false
@@ -218,6 +263,7 @@ offset_right = -25.0
 offset_bottom = 87.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_yix3w")
+mouse_filter = 2
 
 [node name="Accumulated String View" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -231,6 +277,7 @@ offset_bottom = 43.4954
 grow_horizontal = 2
 scale = Vector2(3.38917, 3.38917)
 texture = ExtResource("13_8mgfu")
+mouse_filter = 2
 
 [node name="AccumulatedString" type="HBoxContainer" parent="Accumulated String View"]
 layout_mode = 1
@@ -243,30 +290,35 @@ offset_right = 9.5
 offset_bottom = 7.0
 grow_horizontal = 2
 scale = Vector2(1.21328, 1.21328)
+mouse_filter = 2
 
 [node name="Green-triangle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
 visible = false
 position = Vector2(11.9772, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("6_krqp1")
+mouse_filter = 2
 
 [node name="Grey-loading" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
 visible = false
 position = Vector2(25.9751, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("14_uvf25")
+mouse_filter = 2
 
 [node name="Red-diamond" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
 visible = false
 position = Vector2(4.97801, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("4_tdaem")
+mouse_filter = 2
 
 [node name="Yellow-circle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
 visible = false
 position = Vector2(18.976, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("5_yix3w")
+mouse_filter = 2
 
 [node name="Attack_Move Button" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -285,6 +337,7 @@ rotation = -0.00224055
 scale = Vector2(1.2064, 1.2064)
 texture = ExtResource("15_fn08l")
 region_rect = Rect2(0, 0, 64, 65)
+mouse_filter = 2
 
 [node name="TextureButton" type="TextureButton" parent="Attack_Move Button"]
 layout_mode = 1
@@ -302,6 +355,7 @@ grow_vertical = 2
 scale = Vector2(2.24946, 2.24946)
 texture_normal = ExtResource("16_rwd6p")
 texture_pressed = ExtResource("17_tdaem")
+mouse_filter = 2
 
 [node name="Label" type="Label" parent="Attack_Move Button/TextureButton"]
 layout_mode = 1
@@ -318,6 +372,7 @@ theme_override_font_sizes/font_size = 9
 text = "Move"
 horizontal_alignment = 1
 vertical_alignment = 1
+mouse_filter = 2
 
 [node name="End Turn Button" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -336,6 +391,7 @@ rotation = -0.00224055
 scale = Vector2(1.17401, 1.18069)
 texture = ExtResource("15_fn08l")
 region_rect = Rect2(0, 0, 64, 65)
+mouse_filter = 2
 
 [node name="TextureButton" type="TextureButton" parent="End Turn Button"]
 layout_mode = 1
@@ -351,8 +407,8 @@ offset_bottom = -18.669
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.20046, 2.20046)
-texture_normal = ExtResource("18_yix3w")
-texture_pressed = ExtResource("19_krqp1")
+texture_normal = ExtResource("16_tdaem")
+texture_pressed = ExtResource("17_yix3w")
 
 [node name="Label" type="Label" parent="End Turn Button/TextureButton"]
 layout_mode = 0
@@ -362,3 +418,4 @@ offset_right = 57.269
 offset_bottom = 17.865
 theme_override_font_sizes/font_size = 9
 text = "End Turn"
+mouse_filter = 2

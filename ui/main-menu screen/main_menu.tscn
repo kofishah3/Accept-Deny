@@ -9,9 +9,9 @@
 [ext_resource type="Texture2D" uid="uid://htar048q5meg" path="res://ui_elements/main-menu/main-button-3.png" id="7_o1whf"]
 [ext_resource type="Texture2D" uid="uid://bkuxng1dlta2g" path="res://ui_elements/main-menu/main-border.png" id="8_15c5s"]
 [ext_resource type="Texture2D" uid="uid://dhi7p5wy0sq21" path="res://ui_elements/main-menu/main-button-3-pressed.png" id="8_pjqei"]
-[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/green-triangle.png" id="9_ni65f"]
-[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/red-diamond.png" id="10_e0m0q"]
-[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="11_bxm30"]
+[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/symbol-c.png" id="9_ni65f"]
+[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/symbol-a.png" id="10_e0m0q"]
+[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/symbol-b.png" id="11_bxm30"]
 
 [sub_resource type="GDScript" id="GDScript_eetwo"]
 script/source = "extends Node2D

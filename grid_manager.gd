@@ -17,10 +17,23 @@ var wall_global_positions: Array[Vector2i] = []
 var aoe_impact_tiles = []
 var aoe_impact_timer = 0.0
 const AOE_IMPACT_DURATION = 0.5  # Duration of the impact effect in seconds
+var hovered_tile = null  # Track the currently hovered tile
+var hover_aoe_tiles = []  # Store the AOE tiles for the hovered position
 
 func _ready():
 	# Initialize the grid
 	update_occupied_tiles()
+
+func _input(event):
+	if event is InputEventMouseMotion:
+		var mouse_pos = get_global_mouse_position()
+		var new_hovered_tile = world_to_grid(mouse_pos)
+		if new_hovered_tile != hovered_tile:
+			hovered_tile = new_hovered_tile
+			# Update hover AOE tiles if we're in attack mode and the tile is valid
+			if selected_unit and selected_unit.current_mode == "attack":
+				update_hover_aoe_tiles()
+			queue_redraw()
 
 func _draw():
 	# Draw grid lines
@@ -38,6 +51,11 @@ func _draw():
 	for attack in valid_attacks:
 		var rect = Rect2(attack * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
 		draw_rect(rect, attack_color)  # Use consistent semi-transparent red
+	
+	# Draw hover AOE preview
+	for tile in hover_aoe_tiles:
+		var rect = Rect2(tile * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
+		draw_rect(rect, Color(1, 0, 0, 0.2))  # Lighter red for hover preview
 	
 	# Draw AOE impact effect
 	for tile in aoe_impact_tiles:
@@ -220,7 +238,8 @@ func update_aoe_attack_range(unit_pos: Vector2, attack_range: int, aoe_size: Vec
 		for x in range(-half_size.x, half_size.x + 1):
 			for y in range(-half_size.y, half_size.y + 1):
 				var aoe_pos = target_pos + Vector2(x, y)
-				if is_valid_grid_position(aoe_pos) and not aoe_tiles.has(aoe_pos):
+				# Only add AOE tiles that are valid grid positions and walkable
+				if is_valid_grid_position(aoe_pos) and _is_walkable(aoe_pos) and not aoe_tiles.has(aoe_pos):
 					aoe_tiles.append(aoe_pos)
 	
 	# Update the attack color to show AOE outline
@@ -240,7 +259,11 @@ func update_piercing_attack_range(unit_pos: Vector2, diagonal_allowed: bool) -> 
 			current_pos += dir
 			if not is_valid_grid_position(current_pos):
 				break
-			valid_positions.append(current_pos)
+			# Only add positions that are walkable
+			if _is_walkable(current_pos):
+				valid_positions.append(current_pos)
+			else:
+				break  # Stop checking in this direction if we hit an unwalkable tile
 	return valid_positions
 
 func get_units_in_line(start_pos: Vector2, end_pos: Vector2) -> Array:
@@ -270,7 +293,8 @@ func show_aoe_impact(center_pos: Vector2, aoe_size: Vector2):
 	for x in range(-half_size.x, half_size.x + 1):
 		for y in range(-half_size.y, half_size.y + 1):
 			var check_pos = center_pos + Vector2(x, y)
-			if is_valid_grid_position(check_pos):
+			# Only show impact on valid grid positions and walkable tiles
+			if is_valid_grid_position(check_pos) and _is_walkable(check_pos):
 				aoe_impact_tiles.append(check_pos)
 	
 	# Start the impact effect timer
@@ -284,7 +308,8 @@ func get_units_in_aoe(center_pos: Vector2, aoe_size: Vector2) -> Array:
 	for x in range(-half_size.x, half_size.x + 1):
 		for y in range(-half_size.y, half_size.y + 1):
 			var check_pos = center_pos + Vector2(x, y)
-			if is_valid_grid_position(check_pos):
+			# Only check valid grid positions and walkable tiles
+			if is_valid_grid_position(check_pos) and _is_walkable(check_pos):
 				var unit = get_unit_at_position(check_pos)
 				if unit and not unit.is_in_group("player"):  # Exclude player from AOE
 					units.append(unit)
@@ -292,4 +317,25 @@ func get_units_in_aoe(center_pos: Vector2, aoe_size: Vector2) -> Array:
 	# Show the AOE impact effect
 	show_aoe_impact(center_pos, aoe_size)
 	
-	return units 
+	return units
+
+func update_hover_aoe_tiles():
+	hover_aoe_tiles.clear()
+	if not hovered_tile or not selected_unit or selected_unit.current_mode != "attack":
+		return
+		
+	var weapon = selected_unit.weapons[selected_unit.current_weapon]
+	if weapon.attack_type != "aoe":
+		return
+		
+	# Only show preview if the hovered tile is a valid attack position
+	if not valid_attacks.has(hovered_tile):
+		return
+		
+	var half_size = weapon.aoe_size / 2
+	for x in range(-half_size.x, half_size.x + 1):
+		for y in range(-half_size.y, half_size.y + 1):
+			var aoe_pos = hovered_tile + Vector2(x, y)
+			# Only show AOE preview on valid grid positions and walkable tiles
+			if is_valid_grid_position(aoe_pos) and _is_walkable(aoe_pos):
+				hover_aoe_tiles.append(aoe_pos)
