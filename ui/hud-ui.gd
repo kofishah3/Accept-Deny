@@ -2,6 +2,7 @@ extends Control
 
 var player: Node2D
 var current_weapon: String = "baton"
+var hint_label: Label  # Add hint display label
 var weapons: Dictionary = {
 	"baton": {
 		"name": "Baton",
@@ -88,6 +89,9 @@ func create_ui():
 	on_game_screen_instance = on_game_screen_scene.instantiate()
 	add_child(on_game_screen_instance)
 	
+	# Create hint display at the top of the screen
+	create_hint_display()
+	
 	#cache UI elements from the on-game-screen scene
 	player_display_node = on_game_screen_instance.get_node("PlayerDisplay")
 	inventory_node = on_game_screen_instance.get_node("Inventory")
@@ -119,14 +123,55 @@ func create_ui():
 	# Create regex load panel
 	create_regex_load_panel()
 	
+	# Update hint display
+	update_hint_display()
+	
 	ui_initialized = true
 	
 	# If we already have a player, update the UI
 	if player and is_instance_valid(player):
 		update_ui()
 
+func create_hint_display():
+	# Create a hint label at the top center of the screen
+	hint_label = Label.new()
+	hint_label.name = "HintLabel"
+	hint_label.text = "Dungeon Hint: Loading..."
+	hint_label.add_theme_font_size_override("font_size", 18)
+	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	
+	# Position lower to avoid overlapping with other UI elements
+	hint_label.anchors_preset = Control.PRESET_TOP_WIDE
+	hint_label.position = Vector2(0, 60)  
+	hint_label.size = Vector2(get_viewport().size.x, 40)
+	
+	# Style the hint label
+	hint_label.add_theme_color_override("font_color", Color(1, 1, 0))  # Yellow text
+	hint_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))  # Black shadow
+	hint_label.add_theme_constant_override("shadow_offset_x", 2)
+	hint_label.add_theme_constant_override("shadow_offset_y", 2)
+	
+	add_child(hint_label)
+
+func update_hint_display():
+	if not hint_label:
+		return
+		
+	# Get the current hint from the dungeon level
+	var dungeon_container = get_node("/root/main/DungeonContainer")
+	if dungeon_container and dungeon_container.get_child_count() > 0:
+		var dungeon_level = dungeon_container.get_child(0)
+		var current_hint = dungeon_level.get_current_hint()
+		if current_hint != "":
+			hint_label.text = "Pattern Hint: " + current_hint
+		else:
+			hint_label.text = "No active pattern hint"
+	else:
+		hint_label.text = "Dungeon Hint: Loading..."
+
 func create_additional_ui_elements():
-	# Create container for additional UI elements positioned on the left side
+	# Create container for additional UI elements	 positioned on the left side
 	var additional_container = VBoxContainer.new()
 	additional_container.name = "AdditionalUIContainer"
 	additional_container.position = Vector2(20, 20)

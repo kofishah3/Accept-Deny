@@ -1,7 +1,6 @@
 extends "res://Level/rooms/base_room.gd"
 
 @onready var floor_sprite = $RoomSprite
-@onready var details_layer = $DetailsLayer
 
 var floor_tile_theme1: Array[Vector2i] = [Vector2i(15,6), Vector2i(15,7), Vector2i(16,6), Vector2i(16,7)]
 var floor_tile_theme2: Array[Vector2i] = [Vector2i(17,6), Vector2i(17,7), Vector2i(17,6), Vector2i(18,7)]
