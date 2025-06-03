@@ -391,11 +391,32 @@ func update_attack_range():
 				if has_line_of_sight_to(pos):
 					valid_attacks.append(pos)
 		"aoe":
-			var aoe_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, weapon.aoe_size, weapon.diagonal_allowed)
-			# Filter for line of sight
-			for pos in aoe_attacks:
-				if has_line_of_sight_to(pos):
-					valid_attacks.append(pos)
+			if current_weapon == "shotgun":
+				# For shotgun, we need to check all four directions
+				var directions = [
+					Vector2(1, 0),  # Right
+					Vector2(-1, 0), # Left
+					Vector2(0, 1),  # Down
+					Vector2(0, -1)  # Up
+				]
+				
+				for dir in directions:
+					var aoe_size = Vector2(3, 0) if abs(dir.x) > 0 else Vector2(0, 3)
+					if dir.y < 0:  # If shooting up, invert the y component
+						aoe_size.y = -3
+					
+					var aoe_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, aoe_size, weapon.diagonal_allowed)
+					# Filter for line of sight
+					for pos in aoe_attacks:
+						if has_line_of_sight_to(pos):
+							valid_attacks.append(pos)
+			else:
+				# For other AOE weapons (like EMP grenade)
+				var aoe_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, weapon.aoe_size, weapon.diagonal_allowed)
+				# Filter for line of sight
+				for pos in aoe_attacks:
+					if has_line_of_sight_to(pos):
+						valid_attacks.append(pos)
 		"piercing":
 			var piercing_attacks = grid_manager.update_piercing_attack_range(grid_position, weapon.diagonal_allowed)
 			# Filter for line of sight
@@ -456,10 +477,31 @@ func attack(target):
 			for line_target in line_targets:
 				line_target.take_damage(weapon.loaded_string)
 		"aoe":
-			# Attack all units in AOE
-			var aoe_targets = grid_manager.get_units_in_aoe(target_pos, weapon.aoe_size)
-			for aoe_target in aoe_targets:
-				aoe_target.take_damage(weapon.loaded_string)
+			# For shotgun, calculate direction and rotate AOE accordingly
+			if current_weapon == "shotgun":
+				var direction = (target_pos - grid_position).normalized()
+				var rotated_aoe_size = Vector2(0, 3)
+				
+				# Determine the direction and rotate AOE accordingly
+				if abs(direction.x) > abs(direction.y):
+					# Horizontal shot
+					rotated_aoe_size = Vector2(3, 0)
+				elif direction.y < 0:
+					# Shooting up
+					rotated_aoe_size = Vector2(0, -3)
+				else:
+					# Shooting down (default)
+					rotated_aoe_size = Vector2(0, 3)
+				
+				# Attack all units in AOE
+				var aoe_targets = grid_manager.get_units_in_aoe(target_pos, rotated_aoe_size)
+				for aoe_target in aoe_targets:
+					aoe_target.take_damage(weapon.loaded_string)
+			else:
+				# For other AOE weapons (like EMP grenade)
+				var aoe_targets = grid_manager.get_units_in_aoe(target_pos, weapon.aoe_size)
+				for aoe_target in aoe_targets:
+					aoe_target.take_damage(weapon.loaded_string)
 		"piercing":
 			# Attack all units in line of sight
 			var piercing_targets = grid_manager.get_units_in_line(grid_position, target_pos)
