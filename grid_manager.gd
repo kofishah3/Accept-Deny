@@ -178,23 +178,42 @@ func update_line_attack_range(unit_pos: Vector2, attack_range: int, diagonal_all
 				break  # Stop checking in this direction if we hit a wall
 	return valid_positions
 
-func update_aoe_attack_range(unit_pos: Vector2, attack_range: int, aoe_size: Vector2) -> Array:
+func update_aoe_attack_range(unit_pos: Vector2, attack_range: int, aoe_size: Vector2, diagonal_allowed: bool) -> Array:
 	var valid_positions = []
 	var player = get_node("/root/main/Player")
 	var player_pos = player.grid_position if player else null
 	
-	# First, find valid target positions (where the AOE can be centered)
+	# Calculate all possible positions within range
 	for x in range(-attack_range, attack_range + 1):
 		for y in range(-attack_range, attack_range + 1):
 			var new_pos = unit_pos + Vector2(x, y)
-			if is_valid_grid_position(new_pos):
-				# Manhattan distance for attack range
+			
+			# Skip if not a valid grid position
+			if not is_valid_grid_position(new_pos):
+				continue
+				
+			# Skip if it's the unit's own position
+			if new_pos == unit_pos:
+				continue
+				
+			# Skip if it's the player's position
+			if new_pos == player_pos:
+				continue
+				
+			# Skip if not walkable
+			if not _is_walkable(new_pos):
+				continue
+			
+			# For diagonal movement, use max distance
+			if diagonal_allowed:
+				if max(abs(x), abs(y)) <= attack_range:
+					valid_positions.append(new_pos)
+			# For non-diagonal movement, use Manhattan distance
+			else:
 				if abs(x) + abs(y) <= attack_range:
-					# Only add if the tile is walkable and not the player's position
-					if _is_walkable(new_pos) and new_pos != player_pos:
-						valid_positions.append(new_pos)
+					valid_positions.append(new_pos)
 	
-	# Then, calculate all tiles that would be affected by the AOE
+	# Calculate AOE tiles for visualization
 	var aoe_tiles = []
 	for target_pos in valid_positions:
 		var half_size = aoe_size / 2
@@ -206,7 +225,6 @@ func update_aoe_attack_range(unit_pos: Vector2, attack_range: int, aoe_size: Vec
 	
 	# Update the attack color to show AOE outline
 	attack_color = Color(1, 0, 0, 0.3)  # Red tint for AOE
-	valid_attacks = aoe_tiles
 	
 	return valid_positions
 
