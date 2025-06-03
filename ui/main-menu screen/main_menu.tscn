@@ -14,28 +14,29 @@
 [ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="11_bxm30"]
 
 [sub_resource type="GDScript" id="GDScript_eetwo"]
+script/source = "extends Node2D
+
+func _on_play_button_pressed():
+	get_tree().change_scene_to_file(\"res://main.tscn\")
+"
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_cmhnm"]
 shader = ExtResource("1_ur3co")
 
-[node name="Main Menu" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Main Menu" type="Node2D"]
 scale = Vector2(1.00119, 0.994708)
 script = SubResource("GDScript_eetwo")
 
 [node name="Background" type="TextureRect" parent="."]
 texture_repeat = 2
 material = SubResource("ShaderMaterial_cmhnm")
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 4.0
+offset_left = -1.0
+offset_top = -1.0
+offset_right = 1279.0
+offset_bottom = 726.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_pjqei")
@@ -43,7 +44,6 @@ expand_mode = 5
 
 [node name="Transparency" type="ColorRect" parent="."]
 modulate = Color(1, 1, 1, 0.784314)
-layout_mode = 0
 offset_left = 274.0
 offset_top = 140.0
 offset_right = 1003.0
@@ -51,7 +51,6 @@ offset_bottom = 307.0
 color = Color(0, 0, 0, 1)
 
 [node name="Title Border" type="VBoxContainer" parent="."]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -108,14 +107,13 @@ scale = Vector2(9.55972, 9.60975)
 texture = ExtResource("10_e0m0q")
 
 [node name="Main Buttons" type="HBoxContainer" parent="."]
-layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -184.542
-offset_top = 426.256
-offset_right = -64.542
-offset_bottom = 458.256
+offset_left = 455.458
+offset_top = 418.213
+offset_right = 575.458
+offset_bottom = 450.213
 grow_horizontal = 2
 scale = Vector2(3.13651, 3.13651)
 size_flags_horizontal = 4
@@ -136,3 +134,5 @@ texture_pressed = ExtResource("6_qadfv")
 layout_mode = 2
 texture_normal = ExtResource("7_o1whf")
 texture_pressed = ExtResource("8_pjqei")
+
+[connection signal="pressed" from="Main Buttons/Play Button" to="." method="_on_play_button_pressed"]

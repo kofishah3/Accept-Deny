@@ -1,5 +1,6 @@
-[gd_scene load_steps=19 format=3 uid="uid://bel7cxpe5mu4u"]
+[gd_scene load_steps=20 format=3 uid="uid://bel7cxpe5mu4u"]
 
+[ext_resource type="Script" uid="uid://dy4lf4sc8ak84" path="res://ui/game-over screen/game_over.gd" id="1_6tuk2"]
 [ext_resource type="Texture2D" uid="uid://2ix7w80ie2a5" path="res://ui_elements/game-win-&-over/border.png" id="1_gud10"]
 [ext_resource type="Texture2D" uid="uid://c8fsl3owyipa1" path="res://ui_elements/game-win-&-over/red-diamond.png" id="2_6tuk2"]
 [ext_resource type="Texture2D" uid="uid://b6idmbjafvcb4" path="res://ui_elements/game-win-&-over/yellow-circle.png" id="3_qpl7n"]
@@ -51,7 +52,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TextureButton:modulate")
+tracks/0/path = NodePath("Restart:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -63,7 +64,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("TextureButton2:modulate")
+tracks/1/path = NodePath("Exit:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -79,7 +80,7 @@ length = 3.0
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("TextureButton:modulate")
+tracks/0/path = NodePath("Restart:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -91,7 +92,7 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("TextureButton2:modulate")
+tracks/1/path = NodePath("Exit:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
@@ -209,17 +210,11 @@ _data = {
 &"regex-game over": SubResource("Animation_gud10")
 }
 
-[node name="Game Over Screen" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Game Over Screen" type="Node2D"]
+script = ExtResource("1_6tuk2")
 
 [node name="Transparent" type="ColorRect" parent="."]
 modulate = Color(1, 1, 1, 0.392157)
-layout_mode = 0
 offset_left = 72.0
 offset_top = 80.0
 offset_right = 1208.0
@@ -227,25 +222,25 @@ offset_bottom = 640.0
 color = Color(0, 0, 0, 1)
 
 [node name="Border" type="TextureRect" parent="."]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 1280.0
+offset_bottom = 720.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_gud10")
 
 [node name="Label & Buttons" type="VBoxContainer" parent="."]
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -384.0
-offset_top = -128.0
-offset_right = -181.0
-offset_bottom = -39.0
+offset_left = 256.0
+offset_top = 240.0
+offset_right = 459.0
+offset_bottom = 329.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(3.78666, 3.76891)
@@ -283,13 +278,13 @@ libraries = {
 }
 autoplay = "buttons"
 
-[node name="TextureButton" type="TextureButton" parent="Label & Buttons/Buttons"]
+[node name="Restart" type="TextureButton" parent="Label & Buttons/Buttons"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 texture_normal = ExtResource("5_gud10")
 texture_pressed = ExtResource("6_6tuk2")
 
-[node name="Label" type="Label" parent="Label & Buttons/Buttons/TextureButton"]
+[node name="Label" type="Label" parent="Label & Buttons/Buttons/Restart"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -307,13 +302,13 @@ theme_override_font_sizes/font_size = 9
 text = "Restart"
 horizontal_alignment = 1
 
-[node name="TextureButton2" type="TextureButton" parent="Label & Buttons/Buttons"]
+[node name="Exit" type="TextureButton" parent="Label & Buttons/Buttons"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 2
 texture_normal = ExtResource("7_qpl7n")
 texture_pressed = ExtResource("8_dcu8f")
 
-[node name="Label" type="Label" parent="Label & Buttons/Buttons/TextureButton2"]
+[node name="Label" type="Label" parent="Label & Buttons/Buttons/Exit"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -332,7 +327,6 @@ text = "Exit"
 horizontal_alignment = 1
 
 [node name="Regex Animation" type="HBoxContainer" parent="."]
-layout_mode = 2
 offset_left = 20.0
 offset_top = 164.0
 offset_right = 404.0
@@ -366,3 +360,6 @@ libraries = {
 &"": SubResource("AnimationLibrary_v1pfc")
 }
 autoplay = "regex-game over"
+
+[connection signal="pressed" from="Label & Buttons/Buttons/Restart" to="." method="_on_restart_pressed"]
+[connection signal="pressed" from="Label & Buttons/Buttons/Exit" to="." method="_on_exit_pressed"]

@@ -1,5 +1,6 @@
-[gd_scene load_steps=18 format=3 uid="uid://cuc1rajr1uyay"]
+[gd_scene load_steps=19 format=3 uid="uid://cuc1rajr1uyay"]
 
+[ext_resource type="Script" uid="uid://dt8wlupld18bi" path="res://ui/game-win screen/game_win.gd" id="1_1tsyl"]
 [ext_resource type="Texture2D" uid="uid://2ix7w80ie2a5" path="res://ui_elements/game-win-&-over/border.png" id="1_2qsmu"]
 [ext_resource type="Texture2D" uid="uid://c8fsl3owyipa1" path="res://ui_elements/game-win-&-over/red-diamond.png" id="2_odp4d"]
 [ext_resource type="Texture2D" uid="uid://b6idmbjafvcb4" path="res://ui_elements/game-win-&-over/yellow-circle.png" id="3_v1pfc"]
@@ -204,13 +205,8 @@ _data = {
 &"Regex": SubResource("Animation_c6sx4")
 }
 
-[node name="Game Win Screen" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Game Win Screen" type="Node2D"]
+script = ExtResource("1_1tsyl")
 
 [node name="Transparency" type="ColorRect" parent="."]
 modulate = Color(1, 1, 1, 0.392157)
@@ -221,25 +217,25 @@ offset_bottom = 640.0
 color = Color(0, 0, 0, 1)
 
 [node name="Border" type="TextureRect" parent="."]
-layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = 1280.0
+offset_bottom = 720.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_2qsmu")
 
 [node name="Label & Buttons" type="VBoxContainer" parent="."]
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -120.0
-offset_right = -149.0
-offset_bottom = -31.0
+offset_left = 320.0
+offset_top = 240.0
+offset_right = 491.0
+offset_bottom = 329.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(3.73665, 3.71913)
@@ -324,16 +320,15 @@ text = "Restart"
 horizontal_alignment = 1
 
 [node name="Regex Animation" type="HBoxContainer" parent="."]
-layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -616.0
-offset_top = -192.0
-offset_right = -242.0
-offset_bottom = -171.0
+offset_left = 24.0
+offset_top = 164.0
+offset_right = 398.0
+offset_bottom = 185.0
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(3.21171, 3.21171)
@@ -364,3 +359,6 @@ libraries = {
 &"": SubResource("AnimationLibrary_v1pfc")
 }
 autoplay = "Regex"
+
+[connection signal="pressed" from="Label & Buttons/Buttons/Continue" to="." method="_on_continue_pressed"]
+[connection signal="pressed" from="Label & Buttons/Buttons/Restart" to="." method="_on_restart_pressed"]
