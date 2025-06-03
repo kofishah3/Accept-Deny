@@ -14,6 +14,9 @@ var occupied_tiles = {} # Dictionary to track occupied tiles
 var move_ap_costs = {} # Dictionary to store AP cost for each valid move
 var disabled_tiles = {}
 var wall_global_positions: Array[Vector2i] = []
+var aoe_impact_tiles = []
+var aoe_impact_timer = 0.0
+const AOE_IMPACT_DURATION = 0.5  # Duration of the impact effect in seconds
 
 func _ready():
 	# Initialize the grid
@@ -36,13 +39,26 @@ func _draw():
 		var rect = Rect2(attack * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
 		draw_rect(rect, attack_color)  # Use consistent semi-transparent red
 	
+	# Draw AOE impact effect
+	for tile in aoe_impact_tiles:
+		var rect = Rect2(tile * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
+		# Use a brighter red for the impact effect
+		var impact_color = Color(1, 0, 0, 0.6)
+		draw_rect(rect, impact_color)
+	
 	# Draw disabled (unwalkable) tiles
 	for tile in disabled_tiles.keys():
 		var rect = Rect2(tile * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
 		draw_rect(rect, Color(1, 0, 0, 0.0))  # Semi-transparent red -- set to 0.0 for transparent
 
-func _process(_delta):
+func _process(delta):
 	queue_redraw()  # Redraw every frame to update highlights
+	
+	# Update AOE impact effect
+	if aoe_impact_tiles.size() > 0:
+		aoe_impact_timer -= delta
+		if aoe_impact_timer <= 0:
+			aoe_impact_tiles.clear()
 
 func mark_unwalkable_tiles(tile_list: Array[Vector2i]) -> void:
 	for pos in tile_list:
@@ -75,8 +91,8 @@ func world_to_grid(world_pos: Vector2) -> Vector2:
 
 func grid_to_world(grid_pos: Vector2) -> Vector2:
 	return Vector2(
-		grid_pos.x * GRID_SIZE + GRID_SIZE/2.0,
-		grid_pos.y * GRID_SIZE + GRID_SIZE/2.0
+		grid_pos.x * GRID_SIZE + 8.0,  # Half of 16 (GRID_SIZE) to center on 1x1 tile
+		grid_pos.y * GRID_SIZE + 8.0   # Half of 16 (GRID_SIZE) to center on 1x1 tile
 	)
 
 func is_valid_grid_position(pos: Vector2) -> bool:
@@ -132,7 +148,9 @@ func update_attack_range(unit_pos: Vector2, attack_range: int) -> Array:
 				if abs(x) + abs(y) <= attack_range:
 					# Don't add the unit's own position
 					if new_pos != unit_pos:
-						valid_positions.append(new_pos)
+						# Only add if the tile is walkable
+						if _is_walkable(new_pos):
+							valid_positions.append(new_pos)
 	return valid_positions
 
 func get_unit_at_position(grid_pos: Vector2) -> Node:
@@ -151,20 +169,63 @@ func update_line_attack_range(unit_pos: Vector2, attack_range: int, diagonal_all
 		for i in range(1, attack_range + 1):
 			var new_pos = unit_pos + (dir * i)
 			if is_valid_grid_position(new_pos):
-				valid_positions.append(new_pos)
+				# Only add if the tile is walkable
+				if _is_walkable(new_pos):
+					valid_positions.append(new_pos)
+				else:
+					break  # Stop checking in this direction if we hit an unwalkable tile
 			else:
 				break  # Stop checking in this direction if we hit a wall
 	return valid_positions
 
-func update_aoe_attack_range(unit_pos: Vector2, attack_range: int, aoe_size: Vector2) -> Array:
+func update_aoe_attack_range(unit_pos: Vector2, attack_range: int, aoe_size: Vector2, diagonal_allowed: bool) -> Array:
 	var valid_positions = []
+	var player = get_node("/root/main/Player")
+	var player_pos = player.grid_position if player else null
+	
+	# Calculate all possible positions within range
 	for x in range(-attack_range, attack_range + 1):
 		for y in range(-attack_range, attack_range + 1):
 			var new_pos = unit_pos + Vector2(x, y)
-			if is_valid_grid_position(new_pos):
-				# Manhattan distance for attack range
+			
+			# Skip if not a valid grid position
+			if not is_valid_grid_position(new_pos):
+				continue
+				
+			# Skip if it's the unit's own position
+			if new_pos == unit_pos:
+				continue
+				
+			# Skip if it's the player's position
+			if new_pos == player_pos:
+				continue
+				
+			# Skip if not walkable
+			if not _is_walkable(new_pos):
+				continue
+			
+			# For diagonal movement, use max distance
+			if diagonal_allowed:
+				if max(abs(x), abs(y)) <= attack_range:
+					valid_positions.append(new_pos)
+			# For non-diagonal movement, use Manhattan distance
+			else:
 				if abs(x) + abs(y) <= attack_range:
 					valid_positions.append(new_pos)
+	
+	# Calculate AOE tiles for visualization
+	var aoe_tiles = []
+	for target_pos in valid_positions:
+		var half_size = aoe_size / 2
+		for x in range(-half_size.x, half_size.x + 1):
+			for y in range(-half_size.y, half_size.y + 1):
+				var aoe_pos = target_pos + Vector2(x, y)
+				if is_valid_grid_position(aoe_pos) and not aoe_tiles.has(aoe_pos):
+					aoe_tiles.append(aoe_pos)
+	
+	# Update the attack color to show AOE outline
+	attack_color = Color(1, 0, 0, 0.3)  # Red tint for AOE
+	
 	return valid_positions
 
 func update_piercing_attack_range(unit_pos: Vector2, diagonal_allowed: bool) -> Array:
@@ -201,10 +262,25 @@ func get_units_in_line(start_pos: Vector2, end_pos: Vector2) -> Array:
 	
 	return units
 
+func show_aoe_impact(center_pos: Vector2, aoe_size: Vector2):
+	aoe_impact_tiles.clear()
+	var half_size = aoe_size / 2
+	
+	# Calculate the AOE area
+	for x in range(-half_size.x, half_size.x + 1):
+		for y in range(-half_size.y, half_size.y + 1):
+			var check_pos = center_pos + Vector2(x, y)
+			if is_valid_grid_position(check_pos):
+				aoe_impact_tiles.append(check_pos)
+	
+	# Start the impact effect timer
+	aoe_impact_timer = AOE_IMPACT_DURATION
+
 func get_units_in_aoe(center_pos: Vector2, aoe_size: Vector2) -> Array:
 	var units = []
 	var half_size = aoe_size / 2
 	
+	# Calculate the AOE area
 	for x in range(-half_size.x, half_size.x + 1):
 		for y in range(-half_size.y, half_size.y + 1):
 			var check_pos = center_pos + Vector2(x, y)
@@ -212,5 +288,8 @@ func get_units_in_aoe(center_pos: Vector2, aoe_size: Vector2) -> Array:
 				var unit = get_unit_at_position(check_pos)
 				if unit and not unit.is_in_group("player"):  # Exclude player from AOE
 					units.append(unit)
+	
+	# Show the AOE impact effect
+	show_aoe_impact(center_pos, aoe_size)
 	
 	return units 

@@ -12,7 +12,7 @@ extends Area2D
 @export var luck = 3
 @export var string_length = 5  # Length of the enemy's string
 @export var max_action_points = 6
-@export var enemy_ui_offset := Vector2(10, -100)
+@export var enemy_ui_offset := Vector2(-65, -50)  # Centered horizontally, positioned above enemy
 var current_string = ""
 var current_action_points
 
@@ -23,6 +23,12 @@ var is_baton_target = false  # New variable to track if enemy is being targeted 
 
 var previous_grid_position = Vector2.ZERO
 var move_path = []
+
+# Movement state
+enum MovementState { IDLE, MOVING, ATTACKING }
+var current_state = MovementState.IDLE
+var move_speed = 4
+var max_movement_range = 3
 
 # Weapons
 var weapons = {
@@ -53,8 +59,6 @@ var grid_position = Vector2.ZERO
 var has_moved = false
 var has_attacked = false
 var target_position = Vector2.ZERO
-var is_moving = false
-var move_speed = 4.0  # Grid cells per second
 
 # UI elements
 var enemy_ui_scene = preload("res://ui/enemy_ui.tscn")
@@ -71,114 +75,260 @@ var is_overwrite = false
 # Activation radius
 const ACTIVATION_RADIUS = 8  # Manhattan distance for activation
 
+# Movement constants
+const MOVEMENT_COST = 1  # Cost per tile moved
+const DIAGONAL_COST = 1.4  # Cost for diagonal movement
+
 func _ready():
 	add_to_group("enemy")
 	grid_manager = get_node("../../GridManager")
 	grid_position = grid_manager.world_to_grid(position)
 	position = grid_manager.grid_to_world(grid_position)
 	
-	# Ensure string_length has a valid value
-	if string_length == null or string_length <= 0:
-		string_length = 5  # Default value
+	$AnimatedSprite2D.position = Vector2.ZERO
 	
-	# Ensure max_action_points has a valid value
+	if string_length == null or string_length <= 0:
+		string_length = 5
+	
 	if max_action_points == null or max_action_points <= 0:
-		max_action_points = 4  # Default value
+		max_action_points = 4
 	
 	generate_new_string()
 	current_action_points = max_action_points
 	
-	# Create UI instance for this enemy
 	create_enemy_ui()
-	
 	update_enemy_ui()
 	
-	# Connect input event
 	input_pickable = true
 	connect("input_event", Callable(self, "_on_input_event"))
 
-func create_enemy_ui():
-	# Create new UI instance
-	enemy_ui_instance = enemy_ui_scene.instantiate()
-	
-	# Add to canvas layer
-	var canvas_layer = get_node("/root/main/CanvasLayer")
-	if canvas_layer:
-		canvas_layer.add_child(enemy_ui_instance)
-		
-		# Get UI elements
-		string_label = enemy_ui_instance.get_node("StringLabel")
-		action_points_bar = enemy_ui_instance.get_node("ActionPointsBar")
-		action_points_label = enemy_ui_instance.get_node("ActionPointsLabel")
-		
-		print("Created new enemy UI instance")
-		print("StringLabel found: ", string_label != null)
-		print("ActionPointsBar found: ", action_points_bar != null)
-		print("ActionPointsLabel found: ", action_points_label != null)
-
-func generate_new_string():
-	var chars = ["a", "b", "c"]
-	current_string = ""
-	for i in range(string_length):
-		current_string += chars[randi() % chars.size()]
-
-func update_enemy_ui():
-	if string_label:
-		string_label.text = "String: " + current_string
-	
-	if action_points_bar:
-		action_points_bar.max_value = max_action_points
-		action_points_bar.value = current_action_points
-	
-	if action_points_label:
-		action_points_label.text = "AP: " + str(current_action_points) + "/" + str(max_action_points)
-	
-	# Update UI position relative to enemy
-	update_enemy_ui_position()
-
-func update_enemy_ui_position():
-	if enemy_ui_instance and get_viewport():
-		var screen_pos = get_global_transform_with_canvas().origin
-		# Apply offset and set the UI position
-		enemy_ui_instance.position = screen_pos + enemy_ui_offset
-
 func _process(delta):
-	if is_moving and move_path.size() > 0:
-		var next_grid = move_path[0]
-		var target_world_pos = grid_manager.grid_to_world(next_grid)
-		position = position.move_toward(target_world_pos, move_speed * grid_manager.GRID_SIZE * delta)
-		if position.distance_to(target_world_pos) < 1:
-			position = target_world_pos
-			grid_position = next_grid
-			move_path.pop_front()
-			if move_path.size() > 0:
-				play_move_animation()
-			else:
-				is_moving = false
-				has_moved = true
-				grid_manager.update_occupied_tiles()
-				update_enemy_ui()  # Update UI after movement is complete
-				check_and_attack()
-	elif is_moving:
-		# Fallback for non-path movement (shouldn't happen)
-		is_moving = false
-		grid_manager.update_occupied_tiles()
-		update_enemy_ui()  # Update UI after movement is complete
-	# Update enemy UI position to follow enemy
+	match current_state:
+		MovementState.MOVING:
+			process_movement(delta)
+		MovementState.IDLE:
+			pass  # Removed position snapping
+	
 	update_enemy_ui_position()
+
+func process_movement(delta):
+	if move_path.size() == 0:
+		current_state = MovementState.IDLE
+		grid_manager.update_occupied_tiles()
+		update_enemy_ui()
+		check_and_attack()
+		return
+	
+	var next_grid = move_path[0]
+	var target_world_pos = grid_manager.grid_to_world(next_grid)
+	var move_distance = move_speed * grid_manager.GRID_SIZE * delta
+	
+	var distance_to_target = position.distance_to(target_world_pos)
+	if distance_to_target <= move_distance:
+		position = target_world_pos
+		grid_position = next_grid
+		move_path.pop_front()
+		if move_path.size() > 0:
+			play_move_animation()
+		else:
+			current_state = MovementState.IDLE
+			grid_manager.update_occupied_tiles()
+			update_enemy_ui()
+			check_and_attack()
+	else:
+		var direction = (target_world_pos - position).normalized()
+		position += direction * move_distance
+
+func take_turn():
+	if not is_player_in_range() or is_stunned or current_action_points <= 0:
+		return
+	
+	position = grid_manager.grid_to_world(grid_position)
+	
+	var player = get_node("/root/main/Player")
+	if not player or not is_instance_valid(player):
+		return
+	
+	# Try to attack first if in range
+	if try_attack(player):
+		has_attacked = true
+		return
+	
+	# If we haven't moved and have enough AP, try to move
+	if not has_moved and current_action_points >= MOVEMENT_COST:
+		try_move_towards_player(player.grid_position)
+
+func try_attack(player) -> bool:
+	var attack_cost = get_attack_ap_cost()
+	if current_action_points < attack_cost:
+		return false
+	
+	var attack_range = weapons[current_weapon].range
+	var distance = int(abs(grid_position.x - player.grid_position.x) + abs(grid_position.y - player.grid_position.y))
+	
+	if distance <= attack_range and has_line_of_sight_to(player.grid_position):
+		attack(player)
+		current_action_points -= attack_cost
+		update_enemy_ui()
+		return true
+	
+	return false
+
+func try_move_towards_player(player_pos: Vector2):
+	var best_move = evaluate_best_move_towards_player(player_pos)
+	if best_move:
+		# Calculate the path to the target position
+		var path = []
+		var current = grid_position
+		var target = best_move
+		
+		# Calculate the number of steps needed in each direction
+		var dx = target.x - current.x
+		var dy = target.y - current.y
+		
+		# Check if we can move in a straight line
+		var is_straight_line = false
+		if dx == 0 or dy == 0:
+			is_straight_line = true
+		
+		if is_straight_line:
+			# For straight moves, add all steps up to the target
+			var step = Vector2(sign(dx), sign(dy))
+			for i in range(abs(dx) + abs(dy)):
+				path.append(current + step)
+				current += step
+		else:
+			# For diagonal moves, check which direction gets us closer to the player
+			var horizontal_dist = abs((current.x + sign(dx)) - player_pos.x)
+			var vertical_dist = abs((current.y + sign(dy)) - player_pos.y)
+			
+			# Calculate how many steps we can take in each direction
+			var steps_x = min(abs(dx), max_movement_range)
+			var steps_y = min(abs(dy), max_movement_range)
+			
+			# Move in the direction that gets us closer to the player first
+			if horizontal_dist < vertical_dist:
+				# Move horizontally first
+				for i in range(steps_x):
+					path.append(current + Vector2(sign(dx), 0))
+					current += Vector2(sign(dx), 0)
+				# Then move vertically
+				for i in range(steps_y):
+					path.append(current + Vector2(0, sign(dy)))
+					current += Vector2(0, sign(dy))
+			else:
+				# Move vertically first
+				for i in range(steps_y):
+					path.append(current + Vector2(0, sign(dy)))
+					current += Vector2(0, sign(dy))
+				# Then move horizontally
+				for i in range(steps_x):
+					path.append(current + Vector2(sign(dx), 0))
+					current += Vector2(sign(dx), 0)
+		
+		move_path = path
+		current_state = MovementState.MOVING
+		current_action_points -= MOVEMENT_COST
+		has_moved = true
+		update_enemy_ui()
+		play_move_animation()
+
+func evaluate_best_move_towards_player(player_pos: Vector2) -> Vector2:
+	var valid_moves = get_valid_moves()
+	var best_move = null
+	var best_score = -INF
+	
+	for move in valid_moves:
+		var score = evaluate_move(move, player_pos)
+		if score > best_score:
+			best_score = score
+			best_move = move
+	
+	return best_move
+
+func get_valid_moves() -> Array:
+	var moves = []
+	var max_range = min(max_movement_range, current_action_points)
+	
+	# Check all directions including diagonals
+	var directions = [
+		Vector2(1,0), Vector2(-1,0), Vector2(0,1), Vector2(0,-1),  # Cardinal
+		Vector2(1,1), Vector2(-1,1), Vector2(1,-1), Vector2(-1,-1)  # Diagonal
+	]
+	
+	for dir in directions:
+		for i in range(1, max_range + 1):
+			var pos = grid_position + (dir * i)
+			if is_valid_move(pos):
+				moves.append(pos)
+	
+	return moves
+
+func is_valid_move(pos: Vector2) -> bool:
+	if not grid_manager._is_walkable(pos) or is_position_occupied(pos):
+		return false
+	
+	# Calculate Manhattan distance for movement range check
+	var distance = int(abs(pos.x - grid_position.x) + abs(pos.y - grid_position.y))
+	return distance <= max_movement_range
+
+func evaluate_move(pos: Vector2, player_pos: Vector2) -> float:
+	var distance_to_player = int(abs(pos.x - player_pos.x) + abs(pos.y - player_pos.y))
+	var distance_from_start = int(abs(pos.x - grid_position.x) + abs(pos.y - grid_position.y))
+	
+	# Prefer moves that get closer to the player while staying within range
+	var score = -distance_to_player
+	
+	# Penalize moves that are too far from our current position
+	if distance_from_start > max_movement_range:
+		score -= 1000
+	
+	# Bonus for positions that have line of sight to player
+	if has_line_of_sight_to(player_pos):
+		score += 50
+	
+	# Check if this move is in a straight line towards the player
+	var is_straight_line = false
+	if pos.x == grid_position.x and player_pos.x == grid_position.x:
+		is_straight_line = true  # Vertical line
+	elif pos.y == grid_position.y and player_pos.y == grid_position.y:
+		is_straight_line = true  # Horizontal line
+	
+	# Strongly prefer straight line moves
+	if is_straight_line:
+		score += 100
+	
+	# Only use diagonal moves if they get us significantly closer
+	if pos.x != grid_position.x and pos.y != grid_position.y:
+		var straight_distance = int(abs(grid_position.x - player_pos.x) + abs(grid_position.y - player_pos.y))
+		var diagonal_distance = int(abs(pos.x - player_pos.x) + abs(pos.y - player_pos.y))
+		if diagonal_distance < straight_distance - 1:  # Only if diagonal saves at least 2 steps
+			score += 25
+		else:
+			score -= 50  # Penalize unnecessary diagonal moves
+	
+	return score
 
 func play_move_animation():
 	if move_path.size() == 0:
 		return
-	var direction = move_path[0] - grid_position
-	if direction.x > 0:
-		anim.play("walk_right")
-	elif direction.x < 0:
-		anim.play("walk_left")
-	elif direction.y > 0:
-		anim.play("walk_down")
-	elif direction.y < 0:
-		anim.play("walk_up")
+	
+	var next_pos = move_path[0]
+	var dx = next_pos.x - grid_position.x
+	var dy = next_pos.y - grid_position.y
+	
+	# Play horizontal animation first if there's horizontal movement
+	if dx != 0:
+		if dx > 0:
+			anim.play("walk_right")
+		else:
+			anim.play("walk_left")
+	# Then play vertical animation if there's vertical movement
+	elif dy != 0:
+		if dy > 0:
+			anim.play("walk_down")
+		else:
+			anim.play("walk_up")
 
 func is_player_in_range() -> bool:
 	var player = get_node("/root/main/Player")
@@ -189,180 +339,138 @@ func is_player_in_range() -> bool:
 	var distance = int(abs(grid_position.x - player.grid_position.x) + abs(grid_position.y - player.grid_position.y))
 	return distance <= ACTIVATION_RADIUS
 
-func take_turn():
-	print("Enemy taking turn")
+func take_damage(attack_string):
+	# For each character in the attack string, try to match and remove from current string
+	var new_string = current_string
+	var i = 0
+	while i < attack_string.length() and new_string.length() > 0:
+		var char_pos = new_string.find(attack_string[i])
+		if char_pos != -1:
+			# Remove the matched character
+			new_string = new_string.substr(0, char_pos) + new_string.substr(char_pos + 1)
+		i += 1
 	
-	# Check if player is in range before taking any action
-	if not is_player_in_range():
-		print("Player not in range, skipping turn")
-		return
-		
-	if is_stunned:
-		print("Enemy is stunned and skips turn.")
-		is_stunned = false
-		return
-	if is_overwrite:
-		print("Enemy is overwriting its string with another enemy's string.")
-		is_overwrite = false
-		_overwrite_string_with_another_enemy()
-	if current_action_points <= 0:
-		return
-	if is_confused:
-		print("Enemy is confused and moves randomly.")
-		is_confused = false
-		var valid_moves = grid_manager.calculate_movement_range(grid_position, current_action_points)
-		# Filter out occupied positions
-		valid_moves = valid_moves.filter(func(pos): return not is_position_occupied(pos))
-		if valid_moves.size() > 0:
-			var random_move = valid_moves[randi() % valid_moves.size()]
-			move_path.clear()
-			var path = find_path_to_target(random_move)
-			if path.size() > 0:
-				var movement_cost = path.size() - 1  # Subtract 1 because path includes start position
-				if movement_cost <= current_action_points:
-					move_path = path
-					move_path.pop_front()  # Remove starting position from path
-					is_moving = true
-					current_action_points -= movement_cost
-					update_enemy_ui()  # Update UI after AP change
-					play_move_animation()
-		return
+	current_string = new_string
+	update_enemy_ui()
 	
-	var player = get_node("/root/main/Player")
-	if not player or not is_instance_valid(player):
-		return
+	if current_string.length() == 0:
+		queue_free()
+
+func reset_turn():
+	has_moved = false
+	has_attacked = false
+	current_action_points = max_action_points
+	update_enemy_ui()
+
+# Hack effect methods
+func apply_stun():
+	is_stunned = true
+
+func apply_confuse():
+	is_confused = true
+
+func apply_overwrite():
+	var main = get_node("/root/main")
+	var enemies = main.enemies.get_children()
+	var active_enemies = []
+	var inactive_enemies = []
 	
-	# Calculate if we can attack and still have enough AP to move
-	var attack_cost = get_attack_ap_cost()
-	var can_attack_and_move = current_action_points >= (attack_cost + 1)  # Need at least 1 AP to move
-	
-	# Try to attack first if in range and we have enough AP
-	if current_action_points >= attack_cost:
-		var attack_range = weapons[current_weapon].range
-		var distance = int(abs(grid_position.x - player.grid_position.x) + abs(grid_position.y - player.grid_position.y))
-		if distance <= attack_range:
-			attack(player)
-			current_action_points -= attack_cost
-			update_enemy_ui()  # Update UI after AP change
-	
-	# If we haven't moved and have enough AP, try to move towards the player
-	if not has_moved and current_action_points >= 1:
-		# Get all valid moves within our AP range
-		var valid_moves = grid_manager.calculate_movement_range(grid_position, current_action_points)
-		# Filter out occupied positions
-		valid_moves = valid_moves.filter(func(pos): return not is_position_occupied(pos))
-		
-		# Find the best move that gets us closest to the player
-		var best_move = find_best_move_towards_player(valid_moves, player.grid_position)
-		
-		if best_move:
-			print("Enemy moving to: ", best_move)
-			# Use proper A* pathfinding to respect walls
-			move_path.clear()
-			var path = find_path_to_target(best_move)
-			if path.size() > 0:
-				# Calculate movement cost based on actual path length
-				var movement_cost = path.size() - 1  # Subtract 1 because path includes start position
-				if movement_cost <= current_action_points:
-					move_path = path
-					move_path.pop_front()  # Remove starting position from path
-					is_moving = true
-					current_action_points -= movement_cost
-					update_enemy_ui()  # Update UI after AP change
-					play_move_animation()
-				else:
-					# If we can't afford the full movement, move as far as we can
-					var affordable_path = []
-					var remaining_ap = current_action_points
-					
-					for i in range(1, path.size()):  # Start from 1 to skip starting position
-						if remaining_ap > 0:
-							affordable_path.append(path[i])
-							remaining_ap -= 1
-						else:
-							break
-					
-					if affordable_path.size() > 0:
-						move_path = affordable_path
-						current_action_points -= affordable_path.size()
-						update_enemy_ui()  # Update UI after AP change
-						is_moving = true
-						play_move_animation()
-					else:
-						has_moved = true
-						check_and_attack()
-			else:
-				# No valid path found
-				has_moved = true
-				check_and_attack()
+	# Separate enemies into active and inactive
+	for enemy in enemies:
+		if is_instance_valid(enemy) and enemy != self:
+			if enemy.is_player_in_range():
+				active_enemies.append(enemy)
 		else:
-			has_moved = true
-			check_and_attack()
-
-func find_path_to_target(target_pos: Vector2) -> Array:
-	var open_set = []
-	var closed_set = {}
-	var came_from = {}
-	var g_score = {}
-	var f_score = {}
+				inactive_enemies.append(enemy)
 	
-	# Initialize start node
-	open_set.append(grid_position)
-	g_score[grid_position] = 0
-	f_score[grid_position] = heuristic(grid_position, target_pos)
-	
-	while open_set.size() > 0:
-		# Find node with lowest f_score
-		var current = open_set[0]
-		var current_index = 0
-		for i in range(open_set.size()):
-			if f_score[open_set[i]] < f_score[current]:
-				current = open_set[i]
-				current_index = i
-		
-		# Remove current from open set and add to closed set
-		open_set.remove_at(current_index)
-		closed_set[current] = true
-		
-		# If we reached the target, reconstruct and return the path
-		if current == target_pos:
-			return reconstruct_path(came_from, current)
-		
-		# Check all neighbors
-		for dir in [Vector2(1,0), Vector2(-1,0), Vector2(0,1), Vector2(0,-1)]:
-			var neighbor = current + dir
-			
-			# Skip if neighbor is not walkable, is occupied, or in closed set
-			if not grid_manager._is_walkable(neighbor) or is_position_occupied(neighbor) or closed_set.has(neighbor):
-				continue
-			
-			var tentative_g_score = g_score[current] + 1
-			
-			# If neighbor is not in open set, add it
-			if not open_set.has(neighbor):
-				open_set.append(neighbor)
-			# If this path to neighbor is worse than previous, skip
-			elif tentative_g_score >= g_score.get(neighbor, INF):
-				continue
-			
-			# This path is the best so far, record it
-			came_from[neighbor] = current
-			g_score[neighbor] = tentative_g_score
-			f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, target_pos)
-	
-	# If we get here, no path was found
-	return []
+	# Try to copy from active enemies first
+	if active_enemies.size() > 0:
+		var chosen = active_enemies[randi() % active_enemies.size()]
+		current_string = chosen.current_string
+		print("Enemy string overwritten with active enemy's string: ", current_string)
+		update_enemy_ui()
+	# Fall back to inactive enemies if no active ones are available
+	elif inactive_enemies.size() > 0:
+		var chosen = inactive_enemies[randi() % inactive_enemies.size()]
+		current_string = chosen.current_string
+		print("Enemy string overwritten with inactive enemy's string: ", current_string)
+		update_enemy_ui()
 
-func heuristic(a: Vector2, b: Vector2) -> float:
-	# Manhattan distance
-	return abs(a.x - b.x) + abs(a.y - b.y)
+# Helper for overwrite effect
+func _overwrite_string_with_another_enemy():
+	var main = get_node("/root/main")
+	var enemies = main.enemies.get_children()
+	var other_enemies = []
+	for enemy in enemies:
+		if is_instance_valid(enemy) and enemy != self:
+			other_enemies.append(enemy)
+	if other_enemies.size() > 0:
+		var chosen = other_enemies[randi() % other_enemies.size()]
+		current_string = chosen.current_string
+		print("Enemy string overwritten with: ", current_string)
+		update_enemy_ui()
 
-func reconstruct_path(came_from: Dictionary, current: Vector2) -> Array:
-	var path = [current]
-	while came_from.has(current):
-		current = came_from[current]
-		path.push_front(current)
-	return path
+# Helper to find best move away from player
+func find_best_move_away_from_player(valid_moves, player_pos):
+	var best_move = null
+	var longest_distance = -INF
+	for move in valid_moves:
+		var distance = int(abs(move.x - player_pos.x) + abs(move.y - player_pos.y))
+		if distance > longest_distance:
+			longest_distance = distance
+			best_move = move
+	return best_move
+
+func is_position_occupied(pos: Vector2) -> bool:
+	# Check if position is occupied by player
+	var player = get_node("/root/main/Player")
+	if player and player.grid_position == pos:
+		return true
+	
+	# Check if position is occupied by other enemies
+	var main = get_node("/root/main")
+	for enemy in main.enemies.get_children():
+		if enemy != self and enemy.grid_position == pos:
+			return true
+	
+	return false
+
+func get_attack_ap_cost() -> int:
+	var weapon = weapons[current_weapon]
+	return ceil(weapon.might / 2)  # AP cost is half the weapon's might, rounded up
+
+func _exit_tree():
+	# Clean up UI when enemy is removed
+	if enemy_ui_instance and is_instance_valid(enemy_ui_instance):
+		enemy_ui_instance.queue_free()
+
+func _on_input_event(_viewport, event, _shape_idx):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var player = get_node("/root/main/Player")
+		if player and player.current_mode == "baton":
+			is_baton_target = true
+			# Let the player handle the baton interaction
+			player.handle_baton_target(self)
+		elif player and player.current_mode == "move":
+			# Only allow move mode interaction if not being targeted by baton
+			if not is_baton_target:
+				player.handle_move_target(self)
+
+func reset_baton_state():
+	is_baton_target = false
+
+func update_enemy_ui():
+	if string_label:
+		string_label.text = "String: " + current_string
+	
+	# Update UI position relative to enemy
+	update_enemy_ui_position()
+
+func update_enemy_ui_position():
+	if enemy_ui_instance and get_viewport():
+		var screen_pos = get_global_transform_with_canvas().origin
+		# Apply offset and set the UI position
+		enemy_ui_instance.position = screen_pos + enemy_ui_offset
 
 func check_and_attack():
 	var player = get_node("/root/main/Player")
@@ -373,13 +481,45 @@ func check_and_attack():
 	var attack_range = weapons[current_weapon].range
 	var distance = int(abs(grid_position.x - player.grid_position.x) + abs(grid_position.y - player.grid_position.y))
 	if distance <= attack_range:
-		var weapon = weapons[current_weapon]
-		var ap_cost = ceil(weapon.might / 2)  # AP cost is half the weapon's might, rounded up
-		if current_action_points >= ap_cost:
-			print("Enemy attacking player")
-			attack(player)
-			current_action_points -= ap_cost
-			update_enemy_ui()
+		# Check if there's line of sight to the player
+		if has_line_of_sight_to(player.grid_position):
+			var weapon = weapons[current_weapon]
+			var ap_cost = ceil(weapon.might / 2)  # AP cost is half the weapon's might, rounded up
+			if current_action_points >= ap_cost:
+				print("Enemy attacking player")
+				attack(player)
+				current_action_points -= ap_cost
+				update_enemy_ui()
+
+func has_line_of_sight_to(target_pos: Vector2) -> bool:
+	var current = grid_position
+	var target = target_pos
+	
+	# Get the direction vector
+	var dir = (target - current).normalized()
+	
+	# Check each tile along the line
+	while current != target:
+		# Move to next tile
+		if abs(dir.x) > abs(dir.y):
+			current.x += sign(dir.x)
+		else:
+			current.y += sign(dir.y)
+		
+		# If we hit the target, we have line of sight
+		if current == target:
+			return true
+		
+		# Check if next tile is unwalkable
+		var next_tile = current + dir
+		if not grid_manager._is_walkable(next_tile):
+			return false
+		
+		# If current tile is unwalkable, no line of sight
+		if not grid_manager._is_walkable(current):
+			return false
+	
+	return true
 
 func attack(target):
 	var weapon = weapons[current_weapon]
@@ -422,110 +562,23 @@ func calculate_damage(target, weapon):
 	
 	return max(1, (attack - defense) * effectiveness)
 
-func take_damage(attack_string):
-	# For each character in the attack string, try to match and remove from current string
-	var new_string = current_string
-	var i = 0
-	while i < attack_string.length() and new_string.length() > 0:
-		var char_pos = new_string.find(attack_string[i])
-		if char_pos != -1:
-			# Remove the matched character
-			new_string = new_string.substr(0, char_pos) + new_string.substr(char_pos + 1)
-		i += 1
+func generate_new_string():
+	var chars = ["a", "b", "c"]
+	current_string = ""
+	for i in range(string_length):
+		current_string += chars[randi() % chars.size()]
+
+func create_enemy_ui():
+	# Create new UI instance
+	enemy_ui_instance = enemy_ui_scene.instantiate()
 	
-	current_string = new_string
-	update_enemy_ui()
-	
-	if current_string.length() == 0:
-		queue_free()
-
-func reset_turn():
-	has_moved = false
-	has_attacked = false
-	is_moving = false
-	current_action_points = max_action_points
-	update_enemy_ui()  # Update UI after resetting AP
-
-# Hack effect methods
-func apply_stun():
-	is_stunned = true
-
-func apply_confuse():
-	is_confused = true
-
-func apply_overwrite():
-	is_overwrite = true
-
-# Helper for overwrite effect
-func _overwrite_string_with_another_enemy():
-	var main = get_node("/root/main")
-	var enemies = main.enemies.get_children()
-	var other_enemies = []
-	for enemy in enemies:
-		if is_instance_valid(enemy) and enemy != self:
-			other_enemies.append(enemy)
-	if other_enemies.size() > 0:
-		var chosen = other_enemies[randi() % other_enemies.size()]
-		current_string = chosen.current_string
-		print("Enemy string overwritten with: ", current_string)
-		update_enemy_ui()
-
-# Helper to find best move away from player
-func find_best_move_away_from_player(valid_moves, player_pos):
-	var best_move = null
-	var longest_distance = -INF
-	for move in valid_moves:
-		var distance = int(abs(move.x - player_pos.x) + abs(move.y - player_pos.y))
-		if distance > longest_distance:
-			longest_distance = distance
-			best_move = move
-	return best_move
-
-# Helper to find best move towards player
-func find_best_move_towards_player(valid_moves, player_pos):
-	var best_move = null
-	var shortest_distance = INF
-	for move in valid_moves:
-		var distance = int(abs(move.x - player_pos.x) + abs(move.y - player_pos.y))
-		if distance < shortest_distance:
-			shortest_distance = distance
-			best_move = move
-	return best_move
-
-func is_position_occupied(pos: Vector2) -> bool:
-	# Check if position is occupied by player
-	var player = get_node("/root/main/Player")
-	if player and player.grid_position == pos:
-		return true
-	
-	# Check if position is occupied by other enemies
-	var main = get_node("/root/main")
-	for enemy in main.enemies.get_children():
-		if enemy != self and enemy.grid_position == pos:
-			return true
-	
-	return false
-
-func get_attack_ap_cost() -> int:
-	var weapon = weapons[current_weapon]
-	return ceil(weapon.might / 2)  # AP cost is half the weapon's might, rounded up
-
-func _exit_tree():
-	# Clean up UI when enemy is removed
-	if enemy_ui_instance and is_instance_valid(enemy_ui_instance):
-		enemy_ui_instance.queue_free()
-
-func _on_input_event(_viewport, event, _shape_idx):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var player = get_node("/root/main/Player")
-		if player and player.current_mode == "baton":
-			is_baton_target = true
-			# Let the player handle the baton interaction
-			player.handle_baton_target(self)
-		elif player and player.current_mode == "move":
-			# Only allow move mode interaction if not being targeted by baton
-			if not is_baton_target:
-				player.handle_move_target(self)
-
-func reset_baton_state():
-	is_baton_target = false
+	# Add to canvas layer
+	var canvas_layer = get_node("/root/main/CanvasLayer")
+	if canvas_layer:
+		canvas_layer.add_child(enemy_ui_instance)
+		
+		# Get UI elements
+		string_label = enemy_ui_instance.get_node("StringLabel")
+		
+		print("Created new enemy UI instance")
+		print("StringLabel found: ", string_label != null)

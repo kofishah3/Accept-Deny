@@ -64,7 +64,7 @@ var weapons = {
 		"color": Color(1, 0, 0, 0.3),
 		"ap_cost": 2,
 		"attack_type": "aoe",
-		"aoe_size": Vector2(2, 3)
+		"aoe_size": Vector2(0, 3)
 	},
 	"sniper": {
 		"name": "Sniper",
@@ -94,7 +94,9 @@ var weapons = {
 		"color": Color(1, 0, 0, 0.3),
 		"ap_cost": 4,
 		"attack_type": "aoe",
-		"aoe_size": Vector2(2, 2)
+		"aoe_size": Vector2(3, 3),  # Increased AOE size
+		"diagonal_allowed": true,  # Allow diagonal attacks
+		"can_target_empty": true  # Allow targeting empty tiles
 	}
 }
 var current_weapon = "baton"  # Changed default weapon to baton
@@ -121,6 +123,7 @@ func _ready():
 	add_to_group("player")
 	grid_manager = get_node("/root/main/GridManager")
 	grid_position = grid_manager.world_to_grid(position)
+	# Snap to grid center on initialization
 	position = grid_manager.grid_to_world(grid_position)
 	current_health = max_health
 	current_action_points = max_action_points
@@ -160,6 +163,7 @@ func _process(delta):
 		var target_world_pos = grid_manager.grid_to_world(next_grid)
 		position = position.move_toward(target_world_pos, move_speed * grid_manager.GRID_SIZE * delta)
 		if position.distance_to(target_world_pos) < 1:
+			# Ensure exact grid center position when movement completes
 			position = target_world_pos
 			grid_position = next_grid
 			move_path.pop_front()
@@ -172,6 +176,8 @@ func _process(delta):
 	elif is_moving:
 		# Fallback for non-path movement (shouldn't happen)
 		is_moving = false
+		# Ensure position is snapped to grid
+		position = grid_manager.grid_to_world(grid_position)
 		grid_manager.update_occupied_tiles()
 		update_movement_range()
 
@@ -213,18 +219,29 @@ func _input(event):
 		
 		# Handle attacks first (allow even if not previously selected)
 		if current_mode == "attack" and target_grid_pos in grid_manager.valid_attacks:
-			var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
-			if target_unit:
-				var weapon = weapons[current_weapon]
-				var ap_cost = get_attack_ap_cost()
-				if current_action_points >= ap_cost:
-					attack(target_unit)
+			var weapon = weapons[current_weapon]
+			var ap_cost = get_attack_ap_cost()
+			if current_action_points >= ap_cost:
+				# For EMP grenade, we can target empty tiles
+				if weapon.get("can_target_empty", false):
+					attack(target_grid_pos)
 					current_action_points -= ap_cost
 					update_ui()
 					current_mode = "move"
 					update_movement_range()
 					if current_action_points <= 0:
 						end_turn()
+				else:
+					# For other weapons, require a target unit
+					var target_unit = grid_manager.get_unit_at_position(target_grid_pos)
+					if target_unit:
+						attack(target_unit)
+						current_action_points -= ap_cost
+						update_ui()
+						current_mode = "move"
+						update_movement_range()
+						if current_action_points <= 0:
+							end_turn()
 			return
 		
 		# Only handle movement if we're selected and in move mode
@@ -357,19 +374,67 @@ func update_attack_range():
 		return
 		
 	var weapon = weapons[current_weapon]
+	var valid_attacks = []
 	
 	match weapon.attack_type:
 		"single":
-			grid_manager.valid_attacks = grid_manager.update_attack_range(grid_position, weapon.range)
+			var range_attacks = grid_manager.update_attack_range(grid_position, weapon.range)
+			# Filter for line of sight
+			for pos in range_attacks:
+				if has_line_of_sight_to(pos):
+					valid_attacks.append(pos)
 		"line":
-			grid_manager.valid_attacks = grid_manager.update_line_attack_range(grid_position, weapon.range, weapon.diagonal_allowed)
+			var line_attacks = grid_manager.update_line_attack_range(grid_position, weapon.range, weapon.diagonal_allowed)
+			# Filter for line of sight
+			for pos in line_attacks:
+				if has_line_of_sight_to(pos):
+					valid_attacks.append(pos)
 		"aoe":
-			grid_manager.valid_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, weapon.aoe_size)
+			var aoe_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, weapon.aoe_size, weapon.diagonal_allowed)
+			# Filter for line of sight
+			for pos in aoe_attacks:
+				if has_line_of_sight_to(pos):
+					valid_attacks.append(pos)
 		"piercing":
-			grid_manager.valid_attacks = grid_manager.update_piercing_attack_range(grid_position, weapon.diagonal_allowed)
+			var piercing_attacks = grid_manager.update_piercing_attack_range(grid_position, weapon.diagonal_allowed)
+			# Filter for line of sight
+			for pos in piercing_attacks:
+				if has_line_of_sight_to(pos):
+					valid_attacks.append(pos)
 	
+	grid_manager.valid_attacks = valid_attacks
 	grid_manager.attack_color = weapon.color
 	print("Updated valid attacks: ", grid_manager.valid_attacks.size())
+
+func has_line_of_sight_to(target_pos: Vector2) -> bool:
+	var current = grid_position
+	var target = target_pos
+	
+	# Get the direction vector
+	var dir = (target - current).normalized()
+	
+	# Check each tile along the line
+	while current != target:
+		# Move to next tile
+		if abs(dir.x) > abs(dir.y):
+			current.x += sign(dir.x)
+		else:
+			current.y += sign(dir.y)
+		
+		# If we hit the target, we have line of sight
+		if current == target:
+			return true
+		
+		# Check if next tile is unwalkable
+		var next_tile = current + dir
+		if not grid_manager._is_walkable(next_tile):
+			return false
+		
+		# If current tile is unwalkable, no line of sight
+		if not grid_manager._is_walkable(current):
+			return false
+	
+	return true
 
 func attack(target):
 	var weapon = weapons[current_weapon]
@@ -377,22 +442,26 @@ func attack(target):
 		print("No string loaded in ", weapon.name)
 		return
 	
+	# Handle both unit targets and position targets
+	var target_pos = target.grid_position if target is Node2D else target
+	
 	match weapon.attack_type:
 		"single":
-			target.take_damage(weapon.loaded_string)
+			if target is Node2D:
+				target.take_damage(weapon.loaded_string)
 		"line":
 			# Attack all units in a line
-			var line_targets = grid_manager.get_units_in_line(grid_position, target.grid_position)
+			var line_targets = grid_manager.get_units_in_line(grid_position, target_pos)
 			for line_target in line_targets:
 				line_target.take_damage(weapon.loaded_string)
 		"aoe":
 			# Attack all units in AOE
-			var aoe_targets = grid_manager.get_units_in_aoe(target.grid_position, weapon.aoe_size)
+			var aoe_targets = grid_manager.get_units_in_aoe(target_pos, weapon.aoe_size)
 			for aoe_target in aoe_targets:
 				aoe_target.take_damage(weapon.loaded_string)
 		"piercing":
 			# Attack all units in line of sight
-			var piercing_targets = grid_manager.get_units_in_line(grid_position, target.grid_position)
+			var piercing_targets = grid_manager.get_units_in_line(grid_position, target_pos)
 			for piercing_target in piercing_targets:
 				piercing_target.take_damage(weapon.loaded_string)
 	
