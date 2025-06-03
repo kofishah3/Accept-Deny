@@ -55,14 +55,12 @@ func _draw():
 	# Draw hover AOE preview
 	for tile in hover_aoe_tiles:
 		var rect = Rect2(tile * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
-		draw_rect(rect, Color(1, 0, 0, 0.2))  # Lighter red for hover preview
+		draw_rect(rect, attack_color)  # Use the same color as valid attacks
 	
 	# Draw AOE impact effect
 	for tile in aoe_impact_tiles:
 		var rect = Rect2(tile * GRID_SIZE, Vector2(GRID_SIZE, GRID_SIZE))
-		# Use a brighter red for the impact effect
-		var impact_color = Color(1, 0, 0, 0.6)
-		draw_rect(rect, impact_color)
+		draw_rect(rect, attack_color)  # Use the same color as valid attacks
 	
 	# Draw disabled (unwalkable) tiles
 	for tile in disabled_tiles.keys():

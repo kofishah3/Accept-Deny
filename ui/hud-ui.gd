@@ -8,7 +8,7 @@ var weapons: Dictionary = {
 		"name": "Baton",
 		"type": "Melee",
 		"range": 1,
-		"regex": "Strings of length 3",
+		"regex": "Strings of length 3 using numbers 1-3",
 		"ap_cost": 1,
 		"color": Color(1, 0, 0, 0.3),
 		"description": "A close-range melee weapon ideal for quick, low-cost attacks."
@@ -17,7 +17,7 @@ var weapons: Dictionary = {
 		"name": "Bow",
 		"type": "Ranged",
 		"range": 6,
-		"regex": "Strings of length 3",
+		"regex": "Strings of length 3 using numbers 1-3",
 		"ap_cost": 3,
 		"color": Color(1, 0, 0, 0.3),
 		"description": "A ranged weapon effective for hitting targets from a distance with moderate action point cost."
@@ -26,7 +26,7 @@ var weapons: Dictionary = {
 		"name": "Shotgun",
 		"type": "AoE",
 		"range": 1,
-		"regex": "Strings of length 3",
+		"regex": "Strings of length 3 using numbers 1-3",
 		"ap_cost": 2,
 		"color": Color(1, 0, 0, 0.3),
 		"description": "A short-range area-of-effect weapon that can hit multiple enemies at once."
@@ -35,7 +35,7 @@ var weapons: Dictionary = {
 		"name": "Sniper",
 		"type": "Piercing",
 		"range": -1,
-		"regex": "Strings of length 5",
+		"regex": "Strings of length 5 using numbers 1-3",
 		"ap_cost": 6,
 		"color": Color(1, 0, 0, 0.3),
 		"description": "A long-range piercing weapon designed for high-damage, precise shots but costs more action points."
@@ -44,7 +44,7 @@ var weapons: Dictionary = {
 		"name": "EMP Grenade",
 		"type": "AoE",
 		"range": 5,
-		"regex": "Strings of length 2",		
+		"regex": "Strings of length 2 using numbers 1-3",
 		"ap_cost": 4,
 		"color": Color(1, 0, 0, 0.3),
 		"description": "An area-of-effect device that disables electronics and affects multiple targets within range."
@@ -67,6 +67,7 @@ var player_display_node: NinePatchRect
 # Additional UI elements we'll add
 var weapon_container: VBoxContainer
 var weapon_string_label: Label
+var loaded_string_label: Label  # New label for loaded weapon string
 var load_string_button: Button
 var string_input: LineEdit
 var ui_initialized: bool = false
@@ -166,10 +167,10 @@ func create_hint_display():
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
-	# Position lower to avoid overlapping with other UI elements
-	hint_label.anchors_preset = Control.PRESET_TOP_WIDE
-	hint_label.position = Vector2(0, 60)  
-	hint_label.size = Vector2(get_viewport().size.x, 40)
+	# Center the hint label on the screen
+	hint_label.anchors_preset = Control.PRESET_CENTER
+	hint_label.position = Vector2(225, 60)  # Move up from center
+	hint_label.size = Vector2(800, 40)  # Make it wider to accommodate text
 	
 	# Style the hint label
 	hint_label.add_theme_color_override("font_color", Color(1, 1, 0))  # Yellow text
@@ -204,6 +205,14 @@ func create_additional_ui_elements():
 	additional_container.visible = false  # Hide the additional UI elements
 	additional_container.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	add_child(additional_container)
+	
+	# Loaded string display
+	loaded_string_label = Label.new()
+	loaded_string_label.name = "LoadedStringLabel"
+	loaded_string_label.text = ""
+	loaded_string_label.add_theme_font_size_override("font_size", 16)
+	loaded_string_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
+	additional_container.add_child(loaded_string_label)
 	
 	# Weapon selection section
 	var weapon_label = Label.new()
@@ -307,6 +316,10 @@ func update_ui():
 	if ap_bar:
 		ap_bar.max_value = player.max_action_points
 		ap_bar.value = player.current_action_points
+	
+	# Update loaded string display
+	if loaded_string_label and player.weapons.has(player.current_weapon):
+		loaded_string_label.text = player.weapons[player.current_weapon].loaded_string
 	
 	# Update weapon button colors and states
 	if weapon_container:
