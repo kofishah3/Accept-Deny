@@ -18,7 +18,6 @@ func _ready():
 	$GridManager.current_turn = current_turn
 	dungeon_instance = dungeon_scene.instantiate()
 	dungeon_container.add_child(dungeon_instance)
-	
 
 	#get the room world positions and their wall data
 	if dungeon_instance.has_method("get_room_pos_data"):
@@ -45,6 +44,12 @@ func _ready():
 	
 	# Spawn player and enemy in starting room
 	spawn_player_and_enemy()
+	
+	# Initialize UI to show current turn (player starts)
+	await get_tree().create_timer(0.2).timeout  # Wait for UI to be ready
+	var battle_ui = get_node("CanvasLayer/BattleUI")
+	if battle_ui:
+		battle_ui.set_current_phase(true)  # true = player turn
 
 func spawn_player_and_enemy():
 	# Find the starting room
@@ -119,6 +124,11 @@ func end_player_turn():
 	current_turn = "enemy"
 	$GridManager.current_turn = current_turn
 	processing_enemy_turns = false
+	
+	# Update UI to show enemy turn
+	var battle_ui = get_node("CanvasLayer/BattleUI")
+	if battle_ui:
+		battle_ui.set_current_phase(false)  # false = enemy turn
 
 func end_enemy_turn():
 	print("Ending enemy turn")
@@ -126,6 +136,11 @@ func end_enemy_turn():
 	$GridManager.current_turn = current_turn
 	reset_player_turn()
 	processing_enemy_turns = false
+	
+	# Update UI to show player turn
+	var battle_ui = get_node("CanvasLayer/BattleUI")
+	if battle_ui:
+		battle_ui.set_current_phase(true)  # true = player turn
 
 func reset_player_turn():
 	var player = $Player

@@ -69,22 +69,31 @@ func setup_door_interactions():
 			setup_door_interaction(door, door_name)
 
 func setup_door_interaction(door: Node2D, door_name: String):
-	# Create Area2D for door interaction
 	var door_area = Area2D.new()
 	door_area.name = door_name + "_area"
-	
-	# Create collision shape
+
 	var collision = CollisionShape2D.new()
 	var shape = RectangleShape2D.new()
-	shape.size = Vector2(32, 32)  # 1x1 grid cell for precise interaction
+	shape.size = Vector2(16, 16)
 	collision.shape = shape
 	door_area.add_child(collision)
-	
-	# Add to door
+
+	# Offset interaction area slightly outside the door
+	match door_name:
+		"south_door":
+			door_area.position = Vector2(0, -10)
+		"north_door":
+			door_area.position = Vector2(0, 4)
+		"east_door":
+			door_area.position = Vector2(-8, 0)
+		"west_door":
+			door_area.position = Vector2(8, 0)
+
 	door.add_child(door_area)
-	
+
 	door_area.area_entered.connect(_on_door_entered.bind(door_name))
 	door_area.area_exited.connect(_on_door_exited.bind(door_name))
+
 
 func _on_door_entered(area: Area2D, door_name: String):
 	if area.is_in_group("player"):
@@ -167,7 +176,7 @@ func get_door_teleport_offset(door_name: String) -> Vector2:
 	# Offset player away from the door they're teleporting to
 	match door_name:
 		"north_door": return Vector2(0, 16)  # Place player below north door
-		"south_door": return Vector2(0, -16)  # Place player above south door
+		"south_door": return Vector2(0, -48)  # Place player above south door
 		"east_door": return Vector2(-16, 0)   # Place player left of east door
 		"west_door": return Vector2(16, 0)    # Place player right of west door
 		_: return Vector2.ZERO

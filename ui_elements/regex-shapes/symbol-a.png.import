@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c5xqww3qwo8nv"
-path="res://.godot/imported/New Piskel (1).png-f6accbb198b455f8807fe914a6817d8d.ctex"
+uid="uid://dymbxiosrxhj5"
+path="res://.godot/imported/symbol-a.png-24d5df00878ecd5c5dfb61701d1ea525.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets(weapons)/New Piskel (1).png"
-dest_files=["res://.godot/imported/New Piskel (1).png-f6accbb198b455f8807fe914a6817d8d.ctex"]
+source_file="res://ui_elements/regex-shapes/symbol-a.png"
+dest_files=["res://.godot/imported/symbol-a.png-24d5df00878ecd5c5dfb61701d1ea525.ctex"]
 
 [params]
 

@@ -29,10 +29,10 @@ Button/styles/normal = ExtResource("3_ahs3n")
 Button/styles/pressed = SubResource("StyleBoxEmpty_4k1ms")
 
 [node name="Regex-Load-Panel" type="TextureRect"]
-offset_left = 145.0
-offset_top = 55.0
-offset_right = 255.0
-offset_bottom = 145.0
+offset_left = 169.0
+offset_top = 85.0
+offset_right = 279.0
+offset_bottom = 175.0
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("1_k3or5")

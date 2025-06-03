@@ -1,11 +1,9 @@
-[gd_scene load_steps=25 format=3 uid="uid://dx6nymuqu0fyi"]
+[gd_scene load_steps=26 format=3 uid="uid://dx6nymuqu0fyi"]
 
 [ext_resource type="StyleBox" uid="uid://dofnvq0vo5pi1" path="res://themes/normal_button.tres" id="1_ylauv"]
-[ext_resource type="PackedScene" uid="uid://dev1r1jpyo8a4" path="res://player.tscn" id="2_jfg53"]
-[ext_resource type="PackedScene" uid="uid://cny6qsw5au8ur" path="res://enemy.tscn" id="3_rwd6p"]
-[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/red-diamond.png" id="4_tdaem"]
-[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/yellow-circle.png" id="5_yix3w"]
-[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/green-triangle.png" id="6_krqp1"]
+[ext_resource type="Texture2D" uid="uid://dymbxiosrxhj5" path="res://ui_elements/regex-shapes/symbol-a.png" id="4_tdaem"]
+[ext_resource type="Texture2D" uid="uid://mh8rijrmqxqo" path="res://ui_elements/regex-shapes/symbol-b.png" id="5_yix3w"]
+[ext_resource type="Texture2D" uid="uid://b1s2m47s3iqg3" path="res://ui_elements/regex-shapes/symbol-c.png" id="6_krqp1"]
 [ext_resource type="Texture2D" uid="uid://d2uc8ebmomdtn" path="res://ui_elements/on-game/Border/playerBorder.png" id="7_xbyut"]
 [ext_resource type="Texture2D" uid="uid://b4bft84tp32hx" path="res://ui_elements/on-game/Health/healthUnder.png" id="8_op8jk"]
 [ext_resource type="Texture2D" uid="uid://dcaqowbgs16w3" path="res://ui_elements/on-game/Health/healthProgress.png" id="9_xqqyk"]
@@ -16,9 +14,9 @@
 [ext_resource type="Texture2D" uid="uid://dh15dc6h5ar8e" path="res://ui_elements/regex-shapes/grey-loading.png" id="14_uvf25"]
 [ext_resource type="Texture2D" uid="uid://m3so316sw6rv" path="res://ui_elements/on-game/Border/buttonBorder.png" id="15_fn08l"]
 [ext_resource type="Texture2D" uid="uid://bvwefi47f7rvm" path="res://ui_elements/on-game/move-button.png" id="16_rwd6p"]
+[ext_resource type="Texture2D" uid="uid://q2vlrls82uaa" path="res://ui_elements/game-win-&-over/lose-button-1.png" id="16_tdaem"]
 [ext_resource type="Texture2D" uid="uid://db4dn2l8btt8m" path="res://ui_elements/on-game/move-button-pressed.png" id="17_tdaem"]
-[ext_resource type="Texture2D" uid="uid://dob1lwjm47jf8" path="res://ui_elements/on-game/endturn-button.png" id="18_yix3w"]
-[ext_resource type="Texture2D" uid="uid://dd13m6gkpqnok" path="res://ui_elements/on-game/endturn-button-pressed.png" id="19_krqp1"]
+[ext_resource type="Texture2D" uid="uid://b42xprjg2ffil" path="res://ui_elements/game-win-&-over/lose-button-1-pressed.png" id="17_yix3w"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dix6n"]
 
@@ -26,6 +24,17 @@
 Button/font_sizes/font_size = 16
 Button/styles/focus = SubResource("StyleBoxEmpty_dix6n")
 Button/styles/normal = ExtResource("1_ylauv")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tdaem"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rwd6p"]
+bg_color = Color(0.241156, 0.241156, 0.241156, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_rwd6p"]
 
 [sub_resource type="GDScript" id="GDScript_tvqor"]
 script/source = "extends ProgressBar
@@ -59,32 +68,8 @@ grow_vertical = 2
 scale = Vector2(1.00014, 1.00095)
 pivot_offset = Vector2(220, 554)
 size_flags_horizontal = 4
+mouse_filter = 2
 theme = SubResource("Theme_dix6n")
-
-[node name="Player" parent="." instance=ExtResource("2_jfg53")]
-position = Vector2(511.959, 338.205)
-scale = Vector2(0.392099, 0.387833)
-
-[node name="Enemy" parent="." instance=ExtResource("3_rwd6p")]
-position = Vector2(894.906, 329.214)
-scale = Vector2(0.945285, 0.924293)
-
-[node name="GonnaUse4" type="Sprite2D" parent="Enemy"]
-position = Vector2(-24.0001, -59)
-scale = Vector2(5, 5)
-texture = ExtResource("4_tdaem")
-
-[node name="GonnaUse5" type="Sprite2D" parent="Enemy"]
-z_index = -2
-position = Vector2(-10, -59)
-scale = Vector2(4.97501, 4.97501)
-texture = ExtResource("5_yix3w")
-
-[node name="GonnaUse3" type="Sprite2D" parent="Enemy"]
-z_index = -3
-position = Vector2(6, -59)
-scale = Vector2(5.02498, 5.02498)
-texture = ExtResource("6_krqp1")
 
 [node name="PlayerDisplay" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -107,6 +92,19 @@ offset_left = 3.48936
 offset_top = 4.27992
 offset_right = 43.4894
 offset_bottom = 44.2799
+mouse_filter = 2
+
+[node name="Hacks Button" type="Button" parent="PlayerDisplay/Char"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 5.0
+offset_right = 38.0
+offset_bottom = 37.0
+theme_override_font_sizes/font_size = 9
+theme_override_styles/hover = SubResource("StyleBoxEmpty_tdaem")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_rwd6p")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_rwd6p")
+text = "Hacks"
 
 [node name="HealthProgressBar" type="ProgressBar" parent="PlayerDisplay"]
 visible = false
@@ -119,6 +117,7 @@ offset_top = -87.9952
 offset_right = 266.011
 offset_bottom = -60.9952
 grow_vertical = 0
+mouse_filter = 2
 value = 100.0
 script = SubResource("GDScript_tvqor")
 
@@ -133,6 +132,7 @@ offset_right = 92.0237
 offset_bottom = -19.6346
 grow_vertical = 0
 scale = Vector2(1.5, 1.5)
+mouse_filter = 2
 texture_under = ExtResource("8_op8jk")
 texture_progress = ExtResource("9_xqqyk")
 
@@ -147,6 +147,7 @@ offset_top = -87.9952
 offset_right = 266.011
 offset_bottom = -60.9952
 grow_vertical = 0
+mouse_filter = 2
 value = 100.0
 script = SubResource("GDScript_tvqor")
 
@@ -158,23 +159,25 @@ offset_left = 39.0244
 offset_top = 27.3521
 offset_right = 39.0244
 offset_bottom = 43.3521
+mouse_filter = 2
 texture_under = ExtResource("10_51rf7")
 texture_progress = ExtResource("11_d6gw6")
 
 [node name="Inventory" type="GridContainer" parent="."]
 layout_mode = 2
-anchor_left = 0.337477
-anchor_top = 0.865373
-anchor_right = 0.338259
-anchor_bottom = 0.86676
+anchor_left = 0.310918
+anchor_top = 0.85983
+anchor_right = 0.344512
+anchor_bottom = 0.9056
 offset_right = 130.0
 offset_bottom = 31.0
 grow_vertical = 2
 rotation = -0.000385932
 scale = Vector2(1.98308, 1.96168)
+mouse_filter = 2
 theme_override_constants/h_separation = 1
 theme_override_constants/v_separation = 0
-columns = 4
+columns = 5
 metadata/_edit_use_anchors_ = true
 
 [node name="Slot" parent="Inventory" instance=ExtResource("12_lsr1k")]
@@ -203,6 +206,12 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 
+[node name="Slot5" parent="Inventory" instance=ExtResource("12_lsr1k")]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
 [node name="Phase Display" type="CanvasLayer" parent="."]
 
 [node name="Player-Green" type="Panel" parent="Phase Display"]
@@ -211,6 +220,7 @@ offset_top = 32.0
 offset_right = 1095.0
 offset_bottom = 47.0
 scale = Vector2(3.70233, 3.70233)
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ylauv")
 
 [node name="Who-Phase" type="Label" parent="Phase Display"]
@@ -238,6 +248,7 @@ offset_top = 31.0
 offset_right = -25.0
 offset_bottom = 87.0
 grow_horizontal = 0
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_yix3w")
 
 [node name="Accumulated String View" type="NinePatchRect" parent="."]
@@ -264,23 +275,28 @@ offset_right = 9.5
 offset_bottom = 7.0
 grow_horizontal = 2
 scale = Vector2(1.21328, 1.21328)
+mouse_filter = 2
 
 [node name="Green-triangle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(11.9772, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("6_krqp1")
 
 [node name="Grey-loading" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(25.9751, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("14_uvf25")
 
 [node name="Red-diamond" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(4.97801, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("4_tdaem")
 
 [node name="Yellow-circle" type="Sprite2D" parent="Accumulated String View/AccumulatedString"]
+visible = false
 position = Vector2(18.976, 6.22084)
 scale = Vector2(1.08944, 1.08944)
 texture = ExtResource("5_yix3w")
@@ -310,13 +326,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -73.4028
-offset_top = -48.1917
-offset_right = -9.40278
-offset_bottom = -16.1917
+offset_left = -73.4046
+offset_top = -47.3635
+offset_right = -9.40461
+offset_bottom = -15.3635
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.24946, 2.24946)
+mouse_filter = 2
 texture_normal = ExtResource("16_rwd6p")
 texture_pressed = ExtResource("17_tdaem")
 
@@ -343,10 +360,10 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -272.11
-offset_top = -113.051
-offset_right = -87.1096
-offset_bottom = -48.0513
+offset_left = -272.0
+offset_top = -106.0
+offset_right = -104.0
+offset_bottom = -47.0
 grow_horizontal = 0
 grow_vertical = 0
 rotation = -0.00224055
@@ -361,15 +378,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -69.4732
-offset_top = -46.8334
-offset_right = -5.47324
-offset_bottom = -14.8334
+offset_left = -68.7162
+offset_top = -50.669
+offset_right = -4.71625
+offset_bottom = -18.669
 grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(2.20046, 2.20046)
-texture_normal = ExtResource("18_yix3w")
-texture_pressed = ExtResource("19_krqp1")
+texture_normal = ExtResource("16_tdaem")
+texture_pressed = ExtResource("17_yix3w")
 
 [node name="Label" type="Label" parent="End Turn Button/TextureButton"]
 layout_mode = 0

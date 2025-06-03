@@ -2,7 +2,7 @@ extends Node2D
 
 @export var _dimensions : Vector2i = Vector2i(10,3) #max number of dungeon rooms
 @export var _start : Vector2i = Vector2i(0,0) #Starting room is always at (0,0)
-@export var _critical_path_length : int = 5 #number of rooms to get to final room
+@export var _critical_path_length : int = 5 #number of rooms to get to final room (will be overridden by pattern)
 @export var _branches : int = 2 #number of extra rooms 
 @export var _branch_length : Vector2i = Vector2i(1,1) 
 @export var floor_theme : int = 1
@@ -11,13 +11,72 @@ extends Node2D
 @onready var l_room = preload("res://Level/rooms/lroom.tscn")
 @onready var box_room = preload("res://Level/rooms/boxroom.tscn" )
 @onready var start_room = preload("res://Level/rooms/startroom.tscn")
+@onready var boss_room = preload("res://Level/rooms/bossroom.tscn")
 
 var _branch_candidates : Array[Vector2i] #list of rooms that can have branches
 var dungeon : Array #the array should be a dictionary of the level data
 
 var room_pos_data: Dictionary = {} #Position (Vector2) => Array[Vector2] of non-floor tiles
 
+# Door puzzle system
+var selected_pattern: Dictionary = {} # The randomly chosen pattern for this dungeon
+var door_character_assignments: Dictionary = {} # Maps door positions to characters
+var current_hint: String = "" # The hint to display
+
+# Door puzzle patterns - accessible by dungeon rooms
+var door_patterns: Dictionary = {
+	"ababc": {
+		"pattern": "ababc",
+		"hint": "has aba as substring"
+	},
+	"ccbab": {
+		"pattern": "ccbab", 
+		"hint": "has cc as substring"
+	},
+	"aacbb": {
+		"pattern": "aacbb",
+		"hint": "has aa as substring"
+	},
+	"bcbac": {
+		"pattern": "bcbac",
+		"hint": "has bc as substring"
+	},
+	"cabca": {
+		"pattern": "cabca",
+		"hint": "even ca's"
+	},
+	"abcab": {
+		"pattern": "abcab", 
+		"hint": "even ab's"
+	},
+	"bbbbc": {
+		"pattern": "bbbbc",
+		"hint": "has bbb as substring"
+	},
+	"acaca": {
+		"pattern": "acaca",
+		"hint": "has ac as substring"
+	},
+	"cbbac": {
+		"pattern": "cbbac",
+		"hint": "has cb as substring and ends with c"
+	},
+	"aaabb": {
+		"pattern": "aaabb",
+		"hint": "has two consecutive b's and starts with a"
+	}
+}
+
 func _ready() -> void:
+	# Select random pattern and adjust critical path length
+	selected_pattern = get_random_door_pattern()
+	_critical_path_length = selected_pattern.pattern.length()
+	current_hint = selected_pattern.hint
+	
+	print("Selected pattern: ", selected_pattern.pattern)
+	print("Critical path length: ", _critical_path_length)
+	print("Hint: ", current_hint)
+	
 	#initialize random floor theme
 	floor_theme = randi_range(1,3)
 	
@@ -25,6 +84,7 @@ func _ready() -> void:
 	_place_entrance()
 	_generate_critical_path(_start, _critical_path_length, "C", Vector2i.ZERO)
 	_generate_branches()
+	_assign_door_characters()
 	_print_dungeon()
 	_spawn_rooms()
 	
@@ -118,14 +178,14 @@ func _spawn_rooms() -> void:
 		for y in _dimensions.y:
 			var marker = dungeon[x][y]
 			if marker:
-				var variants = [t_room, box_room]
+				var variants = [t_room, box_room, l_room]
 				var scene: PackedScene
 				var room_type = marker["type"] if typeof(marker) == TYPE_DICTIONARY else marker
 				match room_type:
 					"S":
 						scene = start_room
 					"L":
-						scene = l_room
+						scene = boss_room
 					_:
 						scene = variants.pick_random()
 						
@@ -186,7 +246,187 @@ func _spawn_rooms() -> void:
 					if y < _dimensions.y - 1 and typeof(dungeon[x][y+1]) == TYPE_DICTIONARY:
 						if Vector2i.UP in dungeon[x][y+1]["connections"]:
 							if room.has_node("south_door"):
-								room.get_node("south_door").visible = true
+								room.get_node("south_door").visible = true	
 								
 func get_room_pos_data() -> Dictionary:
 	return room_pos_data
+
+# Helper functions for door patterns - can be called by rooms
+func get_door_patterns() -> Dictionary:
+	return door_patterns
+
+func get_random_door_pattern() -> Dictionary:
+	var pattern_keys = door_patterns.keys()
+	var random_key = pattern_keys[randi() % pattern_keys.size()]
+	return door_patterns[random_key]
+
+func get_door_pattern_by_key(key: String) -> Dictionary:
+	if door_patterns.has(key):
+		return door_patterns[key]
+	return {}
+
+func validate_door_input(input: String, required_pattern: String) -> bool:
+	# This function can be expanded to validate if the input matches the pattern requirements
+	return input == required_pattern
+
+func _assign_door_characters() -> void:
+	var pattern = selected_pattern.pattern
+	
+	# Build the critical path sequence starting from the start room
+	var critical_path_sequence = build_critical_path_sequence()
+	
+	print("Critical path sequence: ", critical_path_sequence)
+	print("Pattern: ", pattern)
+	
+	# Assign characters to each room in the sequence
+	# The first room (start) doesn't get a character, as it has no entrance door
+	# Starting from the second room, assign characters from the pattern
+	for i in range(1, min(critical_path_sequence.size(), pattern.length() + 1)):
+		var room_pos = critical_path_sequence[i]
+		var character_index = i - 1  # Offset by 1 since we skip the start room
+		var character = pattern[character_index]
+		
+		# Store the character assignment for this room's entrance
+		door_character_assignments[room_pos] = character
+		print("Assigned character '", character, "' to room at ", room_pos, " (sequence index ", i, ")")
+	
+	# Now assign random characters to non-critical path doors
+	assign_random_characters_to_non_critical_doors(pattern, critical_path_sequence)
+	
+	# Debug: Print final assignments dictionary
+	print("Final door_character_assignments: ", door_character_assignments)
+
+func assign_random_characters_to_non_critical_doors(pattern: String, critical_path_sequence: Array[Vector2i]):
+	# Always use a, b, c for non-critical doors to maintain consistency
+	var available_letters = ["a", "b", "c"]
+	
+	# Find all rooms that exist but are not in the critical path
+	var critical_path_set = {}
+	for pos in critical_path_sequence:
+		critical_path_set[pos] = true
+	
+	# Scan all rooms and assign random characters to non-critical ones
+	for x in _dimensions.x:
+		for y in _dimensions.y:
+			var room_pos = Vector2i(x, y)
+			var marker = dungeon[x][y]
+			
+			# Skip if no room exists here
+			if not marker:
+				continue
+			
+			# All rooms should be dictionaries at this point
+			if typeof(marker) != TYPE_DICTIONARY:
+				continue
+			
+			# Skip if this is the start room (no entrance door)
+			if room_pos == _start:
+				continue
+			
+			# Skip if this room is already assigned (critical path)
+			if critical_path_set.has(room_pos):
+				continue
+			
+			# Assign a random character to this non-critical room
+			var random_char = available_letters[randi() % available_letters.size()]
+			door_character_assignments[room_pos] = random_char
+			print("Assigned '", random_char, "' to non-critical room at ", room_pos)
+
+func build_critical_path_sequence() -> Array[Vector2i]:
+	var sequence: Array[Vector2i] = []
+	var current_pos = _start
+	
+	# Start with the starting room
+	sequence.append(current_pos)
+	
+	# Follow the connections to build the sequence
+	var visited = {}
+	visited[current_pos] = true
+	
+	while sequence.size() <= _critical_path_length:
+		var next_pos = find_next_critical_room(current_pos, visited)
+		if next_pos == Vector2i(-1, -1):
+			break
+		
+		sequence.append(next_pos)
+		visited[next_pos] = true
+		current_pos = next_pos
+	
+	return sequence
+
+func find_next_critical_room(from_pos: Vector2i, visited: Dictionary) -> Vector2i:
+	# Check all four directions from the current position
+	var directions = [Vector2i.UP, Vector2i.RIGHT, Vector2i.DOWN, Vector2i.LEFT]
+	
+	for direction in directions:
+		var next_pos = from_pos + direction
+		
+		# Check bounds
+		if next_pos.x < 0 or next_pos.x >= _dimensions.x or next_pos.y < 0 or next_pos.y >= _dimensions.y:
+			continue
+			
+		# Skip if already visited
+		if visited.has(next_pos):
+			continue
+			
+		# Check if there's a room at this position
+		var room_data = dungeon[next_pos.x][next_pos.y]
+		if room_data and typeof(room_data) == TYPE_DICTIONARY:
+			var room_type = room_data["type"]
+			
+			# Check if this is a critical path room (C) or the final room (L)
+			if room_type == "C" or room_type == "L":
+				# Verify there's a connection between current and next room
+				if has_connection_between_rooms(from_pos, next_pos):
+					return next_pos
+	
+	return Vector2i(-1, -1)
+
+func has_connection_between_rooms(pos1: Vector2i, pos2: Vector2i) -> bool:
+	var direction = pos2 - pos1
+	var room1_data = dungeon[pos1.x][pos1.y]
+	var room2_data = dungeon[pos2.x][pos2.y]
+	
+	if not room1_data or not room2_data:
+		return false
+	
+	if typeof(room1_data) != TYPE_DICTIONARY or typeof(room2_data) != TYPE_DICTIONARY:
+		return false
+	
+	# Check if room2 has a connection coming from the direction of room1
+	var reverse_direction = -direction
+	return reverse_direction in room2_data["connections"]
+
+# Get the character assigned to a specific room's door
+func get_door_character_for_room(room_pos) -> String:
+	# Convert to Vector2i if needed (handles both Vector2 and Vector2i input)
+	var lookup_pos: Vector2i
+	if room_pos is Vector2i:
+		lookup_pos = room_pos
+	else:
+		lookup_pos = Vector2i(int(room_pos.x), int(room_pos.y))
+	
+	if door_character_assignments.has(lookup_pos):
+		var character = door_character_assignments[lookup_pos]
+		return character
+	else:
+		return ""
+
+# Get the current hint for this dungeon
+func get_current_hint() -> String:
+	return current_hint
+
+# Get the selected pattern information
+func get_selected_pattern() -> Dictionary:
+	return selected_pattern
+
+# Check if a room is part of the critical path
+func is_critical_path_room(room_pos) -> bool:
+	# Convert to Vector2i if needed
+	var lookup_pos: Vector2i
+	if room_pos is Vector2i:
+		lookup_pos = room_pos
+	else:
+		lookup_pos = Vector2i(int(room_pos.x), int(room_pos.y))
+	
+	return door_character_assignments.has(lookup_pos)

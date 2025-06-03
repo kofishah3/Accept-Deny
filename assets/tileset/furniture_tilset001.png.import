@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1s2m47s3iqg3"
-path="res://.godot/imported/green-triangle.png-0c416482bc6642e4b8aca62cacc7c2ae.ctex"
+uid="uid://d4lmsde211hw2"
+path="res://.godot/imported/furniture_tilset001.png-70802e3b0b8f388f03c7e9c71e245247.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui_elements/regex-shapes/green-triangle.png"
-dest_files=["res://.godot/imported/green-triangle.png-0c416482bc6642e4b8aca62cacc7c2ae.ctex"]
+source_file="res://assets/tileset/furniture_tilset001.png"
+dest_files=["res://.godot/imported/furniture_tilset001.png-70802e3b0b8f388f03c7e9c71e245247.ctex"]
 
 [params]
 
