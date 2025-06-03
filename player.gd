@@ -64,7 +64,7 @@ var weapons = {
 		"color": Color(1, 0, 0, 0.3),
 		"ap_cost": 2,
 		"attack_type": "aoe",
-		"aoe_size": Vector2(0, 3),  # Default vertical AOE
+		"aoe_size": Vector2(0, 3),
 		"diagonal_allowed": false
 	},
 	"sniper": {
@@ -391,11 +391,32 @@ func update_attack_range():
 				if has_line_of_sight_to(pos):
 					valid_attacks.append(pos)
 		"aoe":
-			var aoe_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, weapon.aoe_size, weapon.diagonal_allowed)
-			# Filter for line of sight
-			for pos in aoe_attacks:
-				if has_line_of_sight_to(pos):
-					valid_attacks.append(pos)
+			if current_weapon == "shotgun":
+				# For shotgun, we need to check all four directions
+				var directions = [
+					Vector2(1, 0),  # Right
+					Vector2(-1, 0), # Left
+					Vector2(0, 1),  # Down
+					Vector2(0, -1)  # Up
+				]
+				
+				for dir in directions:
+					var aoe_size = Vector2(3, 0) if abs(dir.x) > 0 else Vector2(0, 3)
+					if dir.y < 0:  # If shooting up, invert the y component
+						aoe_size.y = -3
+					
+					var aoe_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, aoe_size, weapon.diagonal_allowed)
+					# Filter for line of sight
+					for pos in aoe_attacks:
+						if has_line_of_sight_to(pos):
+							valid_attacks.append(pos)
+			else:
+				# For other AOE weapons (like EMP grenade)
+				var aoe_attacks = grid_manager.update_aoe_attack_range(grid_position, weapon.range, weapon.aoe_size, weapon.diagonal_allowed)
+				# Filter for line of sight
+				for pos in aoe_attacks:
+					if has_line_of_sight_to(pos):
+						valid_attacks.append(pos)
 		"piercing":
 			var piercing_attacks = grid_manager.update_piercing_attack_range(grid_position, weapon.diagonal_allowed)
 			# Filter for line of sight
@@ -437,21 +458,6 @@ func has_line_of_sight_to(target_pos: Vector2) -> bool:
 	
 	return true
 
-func play_attack_animation(target_pos: Vector2):
-	var direction = target_pos - grid_position
-	if abs(direction.x) > abs(direction.y):
-		# Horizontal shot
-		if direction.x > 0:
-			anim.play("walk_right")
-		else:
-			anim.play("walk_left")
-	else:
-		# Vertical shot
-		if direction.y > 0:
-			anim.play("walk_down")
-		else:
-			anim.play("walk_up")
-
 func attack(target):
 	var weapon = weapons[current_weapon]
 	if weapon.loaded_string == "":
@@ -460,9 +466,6 @@ func attack(target):
 	
 	# Handle both unit targets and position targets
 	var target_pos = target.grid_position if target is Node2D else target
-	
-	# Play attack animation based on direction
-	play_attack_animation(target_pos)
 	
 	match weapon.attack_type:
 		"single":
@@ -477,12 +480,18 @@ func attack(target):
 			# For shotgun, calculate direction and rotate AOE accordingly
 			if current_weapon == "shotgun":
 				var direction = (target_pos - grid_position).normalized()
-				var rotated_aoe_size = Vector2(0, 3)  # Default vertical AOE
+				var rotated_aoe_size = Vector2(0, 3)
 				
-				# Rotate AOE based on direction
-				if abs(direction.x) < abs(direction.y):
-					# Horizontal shot for up/down
+				# Determine the direction and rotate AOE accordingly
+				if abs(direction.x) > abs(direction.y):
+					# Horizontal shot
 					rotated_aoe_size = Vector2(3, 0)
+				elif direction.y < 0:
+					# Shooting up
+					rotated_aoe_size = Vector2(0, -3)
+				else:
+					# Shooting down (default)
+					rotated_aoe_size = Vector2(0, 3)
 				
 				# Attack all units in AOE
 				var aoe_targets = grid_manager.get_units_in_aoe(target_pos, rotated_aoe_size)

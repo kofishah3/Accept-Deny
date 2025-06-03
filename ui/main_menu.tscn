@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://b0wyjtaoe5bix"]
+[gd_scene load_steps=15 format=3 uid="uid://logicqr578aj"]
 
 [ext_resource type="Shader" uid="uid://bye70dy2vgg10" path="res://ui/main-menu screen/bg-scroll.gdshader" id="1_ur3co"]
 [ext_resource type="Texture2D" uid="uid://hdagme0ys34l" path="res://ui_elements/main-menu/background-starry.png" id="2_pjqei"]
