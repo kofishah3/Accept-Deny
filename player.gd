@@ -517,8 +517,15 @@ func take_damage(amount):
 	current_health -= amount
 	update_ui()
 	if current_health <= 0:
-		queue_free()
+		await get_tree().create_timer(1.0).timeout	
+		die()
+		
+func die():
+	call_deferred("go_to_game_over")
 
+func go_to_game_over():
+	get_tree().change_scene_to_file("res://ui/game-over screen/game-over.tscn")
+	
 func end_turn():
 	has_attacked = true
 	grid_manager.selected_unit = null
