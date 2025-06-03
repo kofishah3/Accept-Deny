@@ -86,7 +86,6 @@ func _ready():
 	# Make sure the UI is on top
 	show_behind_parent = false
 	top_level = true
-	
 	call_deferred("create_ui")
 
 func create_ui():
@@ -123,7 +122,7 @@ func create_ui():
 	#connect existing button signals
 	var attack_move_button = attack_move_button_node.get_node("TextureButton")
 	var end_turn_button = end_turn_button_node.get_node("TextureButton")
-	
+
 	# Set buttons to block input
 	if attack_move_button and attack_move_button is Control:
 		attack_move_button.mouse_filter = Control.MOUSE_FILTER_STOP
