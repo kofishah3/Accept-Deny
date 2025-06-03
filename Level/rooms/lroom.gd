@@ -88,3 +88,67 @@ func _get_rotated_room(rotation: int):
 				return floor_sprite_180
 		_:
 			return floor_sprite_0 if floor_sprite_0 else null
+
+func is_valid_spawn_position(x: int, y: int, floor_sprite: TileMapLayer, grid_manager: Node) -> bool:
+	# First check if the position is valid according to base room rules
+	if not super.is_valid_spawn_position(x, y, floor_sprite, grid_manager):
+		return false
+	
+	# Get the current room rotation by checking which floor sprite is visible
+	var is_rotated = floor_sprite_180 and floor_sprite_180.visible
+	
+	# Get the atlas coordinates at this position
+	var cell_coords = Vector2i(x, y)
+	var atlas_coords = floor_sprite.get_cell_atlas_coords(cell_coords)
+	
+	# Strictly check if this is a floor tile
+	if not _is_floor_tile(atlas_coords):
+		return false
+	
+	# Check surrounding tiles (3x3 area) to ensure we're not near any non-floor tiles
+	for dx in range(-1, 2):
+		for dy in range(-1, 2):
+			var check_coords = Vector2i(x + dx, y + dy)
+			var check_atlas = floor_sprite.get_cell_atlas_coords(check_coords)
+			if not _is_floor_tile(check_atlas):
+				return false
+	
+	# Define the valid spawn areas for each rotation
+	# These areas are now smaller and more strictly defined
+	var valid_areas = []
+	if is_rotated:
+		# For 180° rotation
+		valid_areas = [
+			Rect2(4, 4, 2, 2),  # Top-left area (2 tiles away from walls)
+			Rect2(4, 10, 2, 2)  # Bottom-left area (2 tiles away from walls)
+		]
+	else:
+		# For 0° rotation
+		valid_areas = [
+			Rect2(4, 4, 2, 2),  # Top-left area (2 tiles away from walls)
+			Rect2(10, 4, 2, 2)  # Top-right area (2 tiles away from walls)
+		]
+	
+	# Check if the position is within any valid area
+	var pos = Vector2(x, y)
+	for area in valid_areas:
+		if area.has_point(pos):
+			# Final check - ensure we're not near any doors
+			var door_positions = []
+			if has_node("north_door") and $north_door.visible:
+				door_positions.append(Vector2(8, 1))
+			if has_node("south_door") and $south_door.visible:
+				door_positions.append(Vector2(8, 14))
+			if has_node("west_door") and $west_door.visible:
+				door_positions.append(Vector2(1, 8))
+			if has_node("east_door") and $east_door.visible:
+				door_positions.append(Vector2(14, 8))
+			
+			# Check distance to all doors
+			for door_pos in door_positions:
+				if pos.distance_to(door_pos) < 3:  # Must be at least 3 tiles away from any door
+					return false
+			
+			return true
+	
+	return false
