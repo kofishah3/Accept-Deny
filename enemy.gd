@@ -12,7 +12,7 @@ extends Area2D
 @export var luck = 3
 @export var string_length = 5  # Length of the enemy's string
 @export var max_action_points = 6
-@export var enemy_ui_offset := Vector2(-65, -50)  # Centered horizontally, positioned above enemy
+@export var enemy_ui_offset := Vector2(-45, -50)  # Changed from (-65, -50) to move 20 pixels right
 var current_string = ""
 var current_action_points
 
@@ -461,7 +461,7 @@ func reset_baton_state():
 
 func update_enemy_ui():
 	if string_label:
-		string_label.text = "String: " + current_string
+		string_label.text = current_string
 	
 	# Update UI position relative to enemy
 	update_enemy_ui_position()
@@ -563,7 +563,7 @@ func calculate_damage(target, weapon):
 	return max(1, (attack - defense) * effectiveness)
 
 func generate_new_string():
-	var chars = ["a", "b", "c"]
+	var chars = ["1", "2", "3"]  # Changed from ["a", "b", "c"] to numbers
 	current_string = ""
 	for i in range(string_length):
 		current_string += chars[randi() % chars.size()]

@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://bfd0f54pjr7ox"]
+[gd_scene load_steps=3 format=3 uid="uid://bfd0f54pjr7ox"]
+
+[ext_resource type="FontFile" uid="uid://dtdyl56wg2wkw" path="res://themes/regex.ttf" id="1_76mqm"]
 
 [sub_resource type="GDScript" id="GDScript_t3d3y"]
 
@@ -11,4 +13,4 @@ script = SubResource("GDScript_t3d3y")
 layout_mode = 0
 offset_right = 200.0
 offset_bottom = 20.0
-text = "String: "
+theme_override_fonts/font = ExtResource("1_76mqm")
