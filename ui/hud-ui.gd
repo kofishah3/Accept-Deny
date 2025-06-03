@@ -176,6 +176,11 @@ func create_hint_display():
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	
+	# Set the font
+	var font = load("res://themes/regex.ttf")
+	if font:
+		hint_label.add_theme_font_override("font", font)
+	
 	# Center the hint label on the screen
 	hint_label.anchors_preset = Control.PRESET_CENTER
 	hint_label.position = Vector2(225, 60)  # Move up from center
