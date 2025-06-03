@@ -42,6 +42,16 @@ layout_mode = 2
 
 [node name="Enemy" parent="Enemies" instance=ExtResource("4_lquwl")]
 position = Vector2(159.053, 70.492)
+movement_range = null
+strength = null
+speed = null
+defense = null
+resistance = null
+skill = null
+luck = null
+string_length = null
+max_action_points = null
+enemy_ui_offset = null
 
 [node name="Player" parent="." instance=ExtResource("3_1bvp3")]
 position = Vector2(53, 70)
