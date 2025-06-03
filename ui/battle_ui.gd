@@ -57,6 +57,12 @@ var hack_confuse_button: Button
 var hack_overwrite_button: Button
 
 func _ready():
+	# Set the UI to block input events
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	# Make sure the UI is on top
+	show_behind_parent = false
+	top_level = true
+	
 	call_deferred("create_ui")
 
 func create_ui():
@@ -65,6 +71,7 @@ func create_ui():
 	container.name = "UIContainer"
 	container.position = Vector2(20, 20)  # Fixed position at top-left
 	container.size = Vector2(200, 400)
+	container.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	add_child(container)
 	
 	# Create health bar
@@ -73,12 +80,14 @@ func create_ui():
 	health_bar.size = Vector2(180, 20)
 	health_bar.max_value = 20  # Will be updated when player is set
 	health_bar.value = 20
+	health_bar.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(health_bar)
 	
 	# Create health label
 	health_label = Label.new()
 	health_label.name = "HealthLabel"
 	health_label.text = "HP: 20/20"  # Will be updated when player is set
+	health_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(health_label)
 	
 	# Create action points bar
@@ -87,18 +96,21 @@ func create_ui():
 	ap_bar.size = Vector2(180, 20)
 	ap_bar.max_value = 6  # Updated to match new max AP
 	ap_bar.value = 6
+	ap_bar.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(ap_bar)
 	
 	# Create action points label
 	ap_label = Label.new()
 	ap_label.name = "ActionPointsLabel"
 	ap_label.text = "AP: 6/6"  # Updated to match new max AP
+	ap_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(ap_label)
 	
 	# Create weapon selection buttons
 	weapon_container = VBoxContainer.new()
 	weapon_container.name = "WeaponButtons"
 	weapon_container.size = Vector2(180, 200)  # Increased size for more weapons
+	weapon_container.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(weapon_container)
 	
 	for weapon_id in weapons:
@@ -107,6 +119,7 @@ func create_ui():
 		button.name = weapon_id
 		button.text = weapon.name + " (" + str(weapon.ap_cost) + " AP)"
 		button.size = Vector2(180, 30)
+		button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 		button.pressed.connect(_on_weapon_selected.bind(weapon_id))
 		weapon_container.add_child(button)
 	
@@ -115,10 +128,12 @@ func create_ui():
 	weapon_string_label.name = "WeaponStringLabel"
 	weapon_string_label.size = Vector2(180, 20)
 	weapon_string_label.text = "Weapon String: "
+	weapon_string_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(weapon_string_label)
 	
 	load_string_button = Button.new()
 	load_string_button.name = "LoadStringButton"
+	load_string_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	load_string_button.size = Vector2(180, 30)
 	load_string_button.text = "Load String (1 AP)"
 	load_string_button.pressed.connect(_on_load_string_pressed)
@@ -129,6 +144,7 @@ func create_ui():
 	string_input.size = Vector2(180, 30)
 	string_input.placeholder_text = "Enter string..."
 	string_input.max_length = 6  # Maximum length of any weapon's string
+	string_input.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(string_input)
 	
 	# Create End Turn button
@@ -136,6 +152,7 @@ func create_ui():
 	end_turn_button.name = "EndTurnButton"
 	end_turn_button.text = "End Turn"
 	end_turn_button.size = Vector2(180, 30)
+	end_turn_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	end_turn_button.pressed.connect(_on_end_turn_pressed)
 	container.add_child(end_turn_button)
 	
@@ -144,18 +161,21 @@ func create_ui():
 	mode_button.name = "ModeButton"
 	mode_button.text = "Move Mode"
 	mode_button.size = Vector2(180, 30)
+	mode_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	mode_button.pressed.connect(_on_move_mode_pressed)
 	container.add_child(mode_button)
 	
 	# Create Hacking section
 	var hack_label = Label.new()
 	hack_label.text = "Hacking:"
+	hack_label.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	container.add_child(hack_label)
 
 	hack_stun_button = Button.new()
 	hack_stun_button.name = "HackStunButton"
 	hack_stun_button.text = "Stun Target (5 AP)"
 	hack_stun_button.size = Vector2(180, 30)
+	hack_stun_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	hack_stun_button.pressed.connect(_on_hack_stun_pressed)
 	container.add_child(hack_stun_button)
 
@@ -163,6 +183,7 @@ func create_ui():
 	hack_confuse_button.name = "HackConfuseButton"
 	hack_confuse_button.text = "Confuse Target (2 AP)"
 	hack_confuse_button.size = Vector2(180, 30)
+	hack_confuse_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	hack_confuse_button.pressed.connect(_on_hack_confuse_pressed)
 	container.add_child(hack_confuse_button)
 
@@ -170,6 +191,7 @@ func create_ui():
 	hack_overwrite_button.name = "HackOverwriteButton"
 	hack_overwrite_button.text = "Overwrite Target (4 AP)"
 	hack_overwrite_button.size = Vector2(180, 30)
+	hack_overwrite_button.mouse_filter = Control.MOUSE_FILTER_STOP  # Block input
 	hack_overwrite_button.pressed.connect(_on_hack_overwrite_pressed)
 	container.add_child(hack_overwrite_button)
 	
