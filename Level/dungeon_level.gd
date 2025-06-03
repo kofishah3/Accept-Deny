@@ -25,45 +25,45 @@ var current_hint: String = "" # The hint to display
 
 # Door puzzle patterns - accessible by dungeon rooms
 var door_patterns: Dictionary = {
-	"ababc": {
-		"pattern": "ababc",
-		"hint": "has aba as substring"
+	"12123": {
+		"pattern": "12123",
+		"hint": "has 121 as substring"
 	},
-	"ccbab": {
-		"pattern": "ccbab", 
-		"hint": "has cc as substring"
+	"33212": {
+		"pattern": "33212", 
+		"hint": "has 33 as substring"
 	},
-	"aacbb": {
-		"pattern": "aacbb",
-		"hint": "has aa as substring"
+	"11322": {
+		"pattern": "11322",
+		"hint": "has 11 as substring"
 	},
-	"bcbac": {
-		"pattern": "bcbac",
-		"hint": "has bc as substring"
+	"23213": {
+		"pattern": "23213",
+		"hint": "has 23 as substring"
 	},
-	"cabca": {
-		"pattern": "cabca",
-		"hint": "even ca's"
+	"31231": {
+		"pattern": "31231",
+		"hint": "even 31's"
 	},
-	"abcab": {
-		"pattern": "abcab", 
-		"hint": "even ab's"
+	"12312": {
+		"pattern": "12312", 
+		"hint": "even 12's"
 	},
-	"bbbbc": {
-		"pattern": "bbbbc",
-		"hint": "has bbb as substring"
+	"22223": {
+		"pattern": "22223",
+		"hint": "has 222 as substring"
 	},
-	"acaca": {
-		"pattern": "acaca",
-		"hint": "has ac as substring"
+	"13131": {
+		"pattern": "13131",
+		"hint": "has 13 as substring"
 	},
-	"cbbac": {
-		"pattern": "cbbac",
-		"hint": "has cb as substring and ends with c"
+	"32213": {
+		"pattern": "32213",
+		"hint": "has 32 as substring and ends with 3"
 	},
-	"aaabb": {
-		"pattern": "aaabb",
-		"hint": "has two consecutive b's and starts with a"
+	"11122": {
+		"pattern": "11122",
+		"hint": "has two consecutive 2's and starts with 1"
 	}
 }
 
@@ -297,8 +297,8 @@ func _assign_door_characters() -> void:
 	print("Final door_character_assignments: ", door_character_assignments)
 
 func assign_random_characters_to_non_critical_doors(pattern: String, critical_path_sequence: Array[Vector2i]):
-	# Always use a, b, c for non-critical doors to maintain consistency
-	var available_letters = ["a", "b", "c"]
+	# Always use 1, 2, 3 for non-critical doors to maintain consistency
+	var available_numbers = ["1", "2", "3"]
 	
 	# Find all rooms that exist but are not in the critical path
 	var critical_path_set = {}
@@ -327,10 +327,10 @@ func assign_random_characters_to_non_critical_doors(pattern: String, critical_pa
 			if critical_path_set.has(room_pos):
 				continue
 			
-			# Assign a random character to this non-critical room
-			var random_char = available_letters[randi() % available_letters.size()]
-			door_character_assignments[room_pos] = random_char
-			print("Assigned '", random_char, "' to non-critical room at ", room_pos)
+			# Assign a random number to this non-critical room
+			var random_num = available_numbers[randi() % available_numbers.size()]
+			door_character_assignments[room_pos] = random_num
+			print("Assigned '", random_num, "' to non-critical room at ", room_pos)
 
 func build_critical_path_sequence() -> Array[Vector2i]:
 	var sequence: Array[Vector2i] = []
